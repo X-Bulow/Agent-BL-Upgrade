@@ -201,6 +201,12 @@ export function connectedWalletType() {
   return _session?.walletType ?? null;
 }
 
+/** The connected MetaMask session ({ address, signer, browserProvider }) or null for Cosmos / no wallet. */
+export function evmSession() {
+  if (_session?.kind !== 'evm') return null;
+  return { address: _session.address, signer: _session.signer, browserProvider: _session.browserProvider };
+}
+
 function err(code, message) {
   const e = new Error(message);
   e.code = code;
