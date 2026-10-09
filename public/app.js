@@ -14,6 +14,7 @@ import { $, el, clear, toast, setBusy } from './dom.js';
 import * as f from './format.js';
 import * as api from './api.js';
 import * as web3 from './web3.js';
+import * as protocol from './protocol.js';
 import { t, tData, toggleLang, onLangChange, applyStaticI18n } from './i18n.js';
 import { initVoyage, renderVoyage, startVoyageClock, stopVoyageClock } from './voyage.js';
 import { initPopupAssistant } from './popup-assistant.js';
@@ -672,7 +673,9 @@ function renderMarketDetail() {
         onclick: onMarketSubscribe
       }, paused ? t('market_paused_btn') : t('market_subscribe_btn'))
     ),
+    el('p', { id: 'market-mode-note', class: 'market-mode-note' }),
     el('div', { id: 'market-subscribe-readout', class: 'market-subscribe-readout' }),
+    el('div', { id: 'market-onchain', class: 'market-onchain', hidden: true }),
     el('div', { class: 'market-detail-actions' },
       el('button', { class: 'btn ghost sm', onclick: () => setView('mint') }, t('market_open_pricing')),
       el('button', { class: 'btn ghost sm', onclick: () => openDealDetailModal(state.caseId) }, t('market_open_voyage'))
@@ -680,6 +683,181 @@ function renderMarketDetail() {
   );
 
   renderMarketSubscribeReadout(quote);
+  renderProtocolPanel();
+  if (!state.protocolViews[state.caseId]) loadProtocolView(state.caseId);
+}
+
+// ---- On-chain offering (full protocol) ---------------------------------------
+
+/** 'chain' when the selected case's offering can be bought with the connected MetaMask wallet. */
+function marketSubscribeMode() {
+  const view = state.protocolViews[state.caseId]?.view;
+  if (!view || !web3.evmSession()) return 'sim';
+  return protocol.availableActions(view).subscribe ? 'chain' : 'chain-closed';
+}
+
+/** The on-chain issue price while subscribing on-chain, otherwise the AI quote. */
+function marketEffectivePrice(quote) {
+  return marketSubscribeMode() === 'chain'
+    ? state.protocolViews[state.caseId].view.issuePrice
+    : quote.final_issue_price_usd;
+}
+
+async function loadProtocolView(caseId) {
+  if (!caseId) return;
+  const previous = state.protocolViews[caseId];
+  state.protocolViews[caseId] = { ...previous, loading: true };
+  if (caseId === state.caseId) renderProtocolPanel();
+  try {
+    const offering = await protocol.protocolOfferingFor(caseId);
+    state.protocolViews[caseId] = offering
+      ? { view: await protocol.readProtocolOffering(caseId) }
+      : { none: true };
+  } catch (error) {
+    state.protocolViews[caseId] = { error: error.message || String(error) };
+  }
+  if (caseId === state.caseId) {
+    renderProtocolPanel();
+    renderMarketSubscribeReadout(selectedQuote());
+  }
+}
+
+function refreshMarketSubscribeControls() {
+  const btn = $('#market-subscribe-btn');
+  const note = $('#market-mode-note');
+  const quote = selectedQuote();
+  if (!btn || !quote) return;
+  const mode = marketSubscribeMode();
+  const view = state.protocolViews[state.caseId]?.view;
+  if (mode === 'chain') {
+    btn.disabled = false;
+    btn.textContent = t('market_chain_subscribe_btn');
+  } else if (mode === 'chain-closed') {
+    btn.disabled = true;
+    btn.textContent = t('market_chain_closed_btn', { state: view.state });
+  } else {
+    const paused = PAUSED_ACTIONS.has(quote.pricing_action);
+    btn.disabled = paused;
+    btn.textContent = paused ? t('market_paused_btn') : t('market_subscribe_btn');
+  }
+  if (note) note.textContent = mode === 'sim' ? t('market_mode_sim') : t('market_mode_chain');
+}
+
+function renderProtocolPanel() {
+  const box = $('#market-onchain');
+  refreshMarketSubscribeControls();
+  if (!box) return;
+  clear(box);
+  const entry = state.protocolViews[state.caseId];
+  box.hidden = !entry || entry.none;
+  if (box.hidden) return;
+  if (entry.error) {
+    box.append(
+      el('p', { class: 'sub-foot muted', text: t('market_chain_error', { msg: entry.error }) }),
+      el('button', { class: 'btn ghost sm', onclick: () => loadProtocolView(state.caseId) }, t('market_chain_retry'))
+    );
+    return;
+  }
+  if (!entry.view) {
+    box.append(el('p', { class: 'sub-foot muted', text: t('market_chain_loading') }));
+    return;
+  }
+
+  const view = entry.view;
+  const actions = protocol.availableActions(view);
+  const fill = view.tokenSupply > 0 ? view.subscribed / view.tokenSupply : 0;
+  box.append(
+    el('div', { class: 'market-onchain-head' },
+      el('strong', { text: t('market_chain_h', { id: view.poolId }) }),
+      el('span', { class: `badge sm tone-${f.stateTone(view.state)}`, text: view.state })
+    ),
+    renderMarketFunding({
+      raised: view.subscribed * view.issuePrice,
+      target: view.tokenSupply * view.issuePrice,
+      fill
+    }, false),
+    el('div', { class: 'readout-grid market-readout-grid' },
+      miniKv(t('market_chain_price'), `$${f.price(view.issuePrice)}`),
+      miniKv(t('market_chain_sold'), `${f.int(view.subscribed)} / ${f.int(view.tokenSupply)} RWA`)
+    )
+  );
+
+  if (!view.position) {
+    box.append(el('p', { class: 'sub-foot muted', text: t('market_chain_connect') }));
+    return;
+  }
+  const position = view.position;
+  box.append(
+    el('div', { class: 'readout-grid market-readout-grid' },
+      miniKv(t('market_chain_my_rwa'), f.int(position.tokens), position.tokens > 0 ? 'gain' : undefined),
+      miniKv(t('market_chain_paid'), f.usd(position.paidUsd)),
+      miniKv(t('market_chain_balance'), f.usd(position.usdcBalanceUsd))
+    ),
+    el('div', { class: 'market-onchain-actions' },
+      el('button', { class: 'btn ghost sm', onclick: (event) => runProtocolAction(event, 'faucet') }, t('market_chain_faucet')),
+      actions.redeem
+        ? el('button', { class: 'btn sm', onclick: (event) => runProtocolAction(event, 'redeem') },
+          t('market_chain_redeem', { usd: f.usd(position.estimatedPayoutUsd) }))
+        : null,
+      actions.refund
+        ? el('button', { class: 'btn sm', onclick: (event) => runProtocolAction(event, 'refund') },
+          t('market_chain_refund', { usd: f.usd(position.paidUsd) }))
+        : null,
+      el('button', { class: 'btn ghost sm', onclick: () => loadProtocolView(state.caseId) }, t('market_chain_refresh'))
+    )
+  );
+}
+
+function protocolErrorText(error) {
+  if (error?.code === 'INSUFFICIENT_USDC') return t('market_chain_need_usdc');
+  if (error?.code === 'REJECTED') return t('market_chain_rejected');
+  return t('market_chain_fail', { msg: error?.message || error });
+}
+
+async function runProtocolAction(event, action) {
+  const btn = event?.currentTarget;
+  const caseId = state.caseId;
+  if (btn) btn.disabled = true;
+  try {
+    if (action === 'faucet') {
+      await protocol.claimTestUsdc(100_000);
+      toast(t('market_chain_faucet_done'));
+    } else if (action === 'redeem') {
+      await protocol.redeemOnChain(caseId);
+      toast(t('market_chain_redeemed'));
+    } else if (action === 'refund') {
+      await protocol.refundOnChain(caseId);
+      toast(t('market_chain_refunded'));
+    }
+  } catch (error) {
+    toast(protocolErrorText(error), true);
+  } finally {
+    if (btn) btn.disabled = false;
+    await loadProtocolView(caseId);
+  }
+}
+
+async function subscribeMarketOnChain(amountUsd) {
+  const caseId = state.caseId;
+  const view = state.protocolViews[caseId].view;
+  const remaining = view.tokenSupply - view.subscribed;
+  const tokens = Math.min(protocol.tokensForBudget(amountUsd, view.issuePriceE6), remaining);
+  if (tokens <= 0) { toast(t('market_chain_too_small'), true); return; }
+
+  const btn = $('#market-subscribe-btn');
+  if (btn) { btn.disabled = true; btn.textContent = t('market_chain_approving'); }
+  try {
+    const result = await protocol.subscribeOnChain(caseId, tokens, {
+      onStatus: (status) => {
+        if (btn) btn.textContent = t(status === 'approving' ? 'market_chain_approving' : 'market_chain_subscribing');
+      }
+    });
+    toast(t('market_chain_subscribed', { n: f.int(result.tokens), usd: f.usd(result.costUsd) }));
+  } catch (error) {
+    toast(protocolErrorText(error), true);
+  } finally {
+    await loadProtocolView(caseId);
+  }
 }
 
 function renderMarketSubscribeReadout(quote) {
@@ -687,7 +865,8 @@ function renderMarketSubscribeReadout(quote) {
   if (!box || !quote) return;
   clear(box);
   const amount = Number(state.marketSubscriptionUsd) || 0;
-  const tokens = quote.final_issue_price_usd > 0 ? Math.floor(amount / quote.final_issue_price_usd) : 0;
+  const price = marketEffectivePrice(quote);
+  const tokens = price > 0 ? Math.floor(amount / price) : 0;
   const redemption = tokens;
   box.append(
     el('div', { class: 'market-readout-line' }, t('market_readout_receive') + ' ',
@@ -695,7 +874,7 @@ function renderMarketSubscribeReadout(quote) {
       ` RWA · ${t('market_readout_target')} ${f.usd(redemption)}`
     ),
     el('div', { class: 'readout-grid market-readout-grid' },
-      miniKv(t('mr_price'), `$${f.price(quote.final_issue_price_usd)}`),
+      miniKv(t('mr_price'), `$${f.price(price)}`),
       miniKv(t('mr_invest'), f.usd(amount)),
       miniKv(t('mr_redeem'), f.usd(redemption), 'gain'),
       miniKv(t('mr_upside'), f.usd(Math.max(0, redemption - amount)), 'gain')
@@ -714,9 +893,12 @@ function renderMarketSubscribeReadout(quote) {
 
 async function onMarketSubscribe() {
   const quote = selectedQuote();
-  if (!quote || PAUSED_ACTIONS.has(quote.pricing_action)) return;
+  if (!quote) return;
   const amount = Number(state.marketSubscriptionUsd) || 0;
   if (amount <= 0) { toast(t('market_need_amount'), true); return; }
+  const mode = marketSubscribeMode();
+  if (mode === 'chain') { await subscribeMarketOnChain(amount); return; }
+  if (mode === 'chain-closed' || PAUSED_ACTIONS.has(quote.pricing_action)) return;
 
   const btn = $('#market-subscribe-btn');
   const old = btn?.textContent;
@@ -1427,6 +1609,8 @@ async function onNetworkChange(event) {
   try {
     await web3.selectNetwork(event.target.value);
     _cachedNetworkName = null;
+    state.protocolViews = {};
+    if (state.caseId) loadProtocolView(state.caseId);
     await reflectChainStatus();
     await renderProtocolEvidence();
   } catch (error) {
@@ -2696,6 +2880,9 @@ function wireStaticHandlers() {
   window.addEventListener('agentbl:walletchange', (event) => {
     if (!event.detail?.address) state.wallet = null;
     refreshWalletUi();
+    // Positions belong to the wallet, so reload the selected case's on-chain view.
+    state.protocolViews = {};
+    if (state.caseId) loadProtocolView(state.caseId);
   });
   window.addEventListener('agentbl:portfoliochange', renderPortfolio);
   // Close the wallet menu on an outside click or Escape.

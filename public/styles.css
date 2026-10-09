@@ -460,6 +460,15 @@ strong { color: var(--text); }
   font-size: 12px;
 }
 .market-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.market-mode-note { margin: -4px 0 10px; color: var(--text-3); font-size: 11.5px; }
+.market-onchain {
+  margin-top: 14px; padding: 12px; display: grid; gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 35%, var(--line));
+  border-radius: 12px; background: color-mix(in srgb, var(--accent-2) 6%, var(--bg-deep));
+}
+.market-onchain[hidden] { display: none; }
+.market-onchain-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+.market-onchain-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .market-detail-empty { color: var(--text-3); font-size: 13px; }
 
 /* ====================================================================
