@@ -34,6 +34,7 @@ Solidity 实现中避免浮点数：
 | `issuePrice` | 6 decimals，例如 `0.80 USD` 记为 `800000` |
 | `targetRedemptionValue` | 6 decimals，例如 `1.00 USD` 记为 `1000000` |
 | `tokenSupply` / `amount` | RWA token 最小单位，MVP 可按 whole token 处理 |
+| `paidAmount` / `repaymentAmount` / `proceeds` | 支付代币（USDC，6 decimals）最小单位。认购应付金额 = `amount * issuePrice`，例如 10 RWA × 0.80 USD = `8000000` |
 
 JS mock 可以保留人类可读的 `0.8` / `1`，但 Hardhat 合约测试应使用整数单位。
 
@@ -127,7 +128,7 @@ interface IEBLRegistry {
 
 ### 4.1 目的
 
-`RWAToken` 表示投资者认购某个 RWA offering 后获得的份额凭证。它不是公开交易代币；MVP 中只允许 `RWAOfferingPool` mint，并保留 permissioned transfer 的扩展口。
+`RWAToken` 表示投资者认购某个 RWA offering 后获得的份额凭证。它不是公开交易代币：只有 `RWAOfferingPool` 能 mint / burn；投资者之间只能在 owner 白名单内的账户之间转让，并且只有在该 offering 放款之后才能转让（放款前的退款按付款人计算）。
 
 ### 4.2 Interface
 
@@ -139,12 +140,25 @@ interface IRWAToken {
         uint256 amount
     );
 
+    event RWABurned(uint256 indexed poolId, address indexed investor, uint256 amount);
+
+    event RWATransferred(
+        uint256 indexed poolId,
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
     event TransferPermissionSet(
         address indexed account,
         bool allowed
     );
 
     function mint(uint256 poolId, address investor, uint256 amount) external;
+
+    function burn(uint256 poolId, address investor, uint256 amount) external;
+
+    function transfer(uint256 poolId, address to, uint256 amount) external;
 
     function balanceOf(uint256 poolId, address investor)
         external
@@ -164,13 +178,15 @@ interface IRWAToken {
 | 操作 | 权限 | 约束 |
 |---|---|---|
 | `mint` | only `RWAOfferingPool` | investor 必须是 permissioned，amount > 0 |
-| `setTransferPermission` | owner / compliance operator | MVP 可只记录，不开放二级市场 |
+| `burn` | only `RWAOfferingPool` | 用于退款和兑付，余额必须足够 |
+| `transfer` | 持有人 | 转出方和接收方都在白名单内；该 pool 已放款（`transfersEnabled`） |
+| `setTransferPermission` | owner / compliance operator | 设置转让白名单 |
 
 ## 5. WEB3-3：RWAOfferingPool
 
 ### 5.1 目的
 
-`RWAOfferingPool` 管理 eBL-backed RWA 的发行、认购、改价、暂停和结算状态。它消费 AI 定价结果，但不自己计算风险。
+`RWAOfferingPool` 管理 eBL-backed RWA 的发行、认购、改价、暂停和结算状态，并托管全部资金流：收取认购款、认满后放款给出口商、取消时退款、收取还款或清算款并按比例兑付给 RWA 持有人。它消费 AI 定价结果，但不自己计算风险。
 
 ### 5.2 状态机
 
@@ -239,6 +255,14 @@ interface IRWAOfferingPool {
 
     event OfferingSettled(uint256 indexed poolId, uint256 repaymentAmount);
 
+    event FundsDisbursed(uint256 indexed poolId, address indexed issuer, uint256 amount);
+    event OfferingCancelled(uint256 indexed poolId, bytes32 reasonHash);
+    event Refunded(uint256 indexed poolId, address indexed investor, uint256 amount, uint256 tokensBurned);
+    event LiquidationSettled(uint256 indexed poolId, uint256 proceeds, bytes32 proceedsProof);
+    event Redeemed(uint256 indexed poolId, address indexed investor, uint256 tokensBurned, uint256 payout);
+
+    // constructor(address eblRegistry, address rwaToken, address paymentToken)
+
     function createOffering(
         uint256 eblId,
         uint256 tokenSupply,
@@ -258,7 +282,21 @@ interface IRWAOfferingPool {
         bytes32 quoteHash
     ) external;
 
+    function cancelOffering(uint256 poolId, bytes32 reasonHash) external;
+
+    function refund(uint256 poolId) external;
+
+    function recordImporterPayment(uint256 poolId, bytes32 paymentProof, uint256 repaymentAmount) external;
+
     function settle(uint256 poolId, uint256 repaymentAmount) external;
+
+    function recordLiquidationProceeds(uint256 poolId, uint256 proceeds, bytes32 proceedsProof) external;
+
+    function redeem(uint256 poolId) external;
+
+    function unfreezeOffering(uint256 poolId, bytes32 evidenceHash) external;
+
+    function transfersEnabled(uint256 poolId) external view returns (bool);
 
     function stateOf(uint256 poolId) external view returns (OfferingState);
 }
@@ -269,10 +307,17 @@ interface IRWAOfferingPool {
 | 操作 | 权限 | 约束 |
 |---|---|---|
 | `createOffering` | pool factory / exporter operator | eBL 必须已登记，issuePrice > 0 |
-| `subscribe` | permissioned investor | pool 必须 Open / Repriced，amount > 0 |
+| `subscribe` | permissioned investor | pool 必须 Open / Repriced / Subscribed 且未放款，amount > 0；需先 approve `amount * issuePrice` USDC |
 | `pauseOffering` | owner / oracle / risk operator | pool 不能已结算 |
 | `applyPricingAction` | only `RiskPricingOracle` 或 risk operator | action 必须合法，hash 必须非空 |
-| `settle` | pool operator | pool 必须 Funded / InTransit / Repaid path |
+| `cancelOffering` | owner | 尚未放款；解除 eBL 质押 |
+| `refund` | 投资者 | pool 已 Cancelled；退回本人实际支付金额并销毁其 RWA |
+| `markInTransit` | executor | 已放款 |
+| `recordImporterPayment` | executor | 已放款；还款 ≤ 已售 RWA × targetRedemptionValue；从调用者转入 USDC |
+| `settle` | executor | 付款证明与到港证明齐全；解除 eBL 质押 |
+| `recordLiquidationProceeds` | executor | pool 为 Liquidation 且已放款；只能记录一次（可为 0）；解除 eBL 质押 |
+| `redeem` | RWA 持有人 | Repaid，或 Liquidation 且清算款已记录；全部兑付后进入 Redeemed |
+| `unfreezeOffering` | owner | pool 为 Frozen；恢复到冻结（或之前暂停）前的状态 |
 
 ### 5.5 Action 到状态转换
 
@@ -284,6 +329,26 @@ interface IRWAOfferingPool {
 | PAUSE_OFFERING | Paused |
 | FREEZE_POOL | Frozen |
 | TRIGGER_LIQUIDATION | Liquidation |
+
+### 5.6 资金流
+
+支付代币在构造时传入（测试网使用 `MockUSDC`，6 decimals，任何人可 mint）。
+
+```text
+投资者 subscribe ──USDC──▶ 池子托管（escrow，记录每人 paidOf）
+        │
+        ├─ 认满（Funded）──▶ 一次性放款给创建时的 eBL 持有人（出口商）
+        │                    之后 RWA 才允许在白名单内转让
+        └─ 未放款时 owner cancelOffering ──▶ Cancelled，投资者 refund 取回 paidOf
+
+executor recordImporterPayment ──USDC──▶ 池子 ──settle──▶ Repaid
+executor recordLiquidationProceeds ──USDC──▶ 池子（Liquidation）
+        │
+        └─ RWA 持有人 redeem：按 持有量 / 未兑付总量 领取剩余款项并销毁 RWA
+           （最后一位领取者得到舍入余数；Repaid 全部兑付后进入 Redeemed）
+```
+
+还款不足（部分违约）或清算款低于目标兑付价时，持有人按比例承担损失；还款和清算款都不能超过 `已售 RWA × targetRedemptionValue`。
 
 ## 6. WEB3-4：RiskPricingOracle
 
