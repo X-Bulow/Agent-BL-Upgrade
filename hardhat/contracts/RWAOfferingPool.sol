@@ -462,6 +462,11 @@ contract RWAOfferingPool {
         }
     }
 
+    /// @notice RWA of a pool may change hands only after its escrow was disbursed.
+    function transfersEnabled(uint256 poolId) external view returns (bool) {
+        return funding[poolId].disbursed;
+    }
+
     function stateOf(uint256 poolId) external view returns (OfferingState) {
         return offerings[poolId].state;
     }

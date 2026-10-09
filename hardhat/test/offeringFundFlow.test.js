@@ -250,4 +250,36 @@ describe('RWAOfferingPool fund flow', () => {
     expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.InTransit);
     await expect(ctx.pool.unfreezeOffering(poolId, ethers.id('again'))).to.be.revertedWith('not frozen');
   });
+
+  it('locks RWA transfers until the offering is disbursed', async () => {
+    const ctx = await deployStack();
+    const { poolId } = await openOffering(ctx);
+    await (await ctx.token.setTransferPermission(ctx.alice.address, true)).wait();
+    await (await ctx.token.setTransferPermission(ctx.bob.address, true)).wait();
+    await (await ctx.pool.connect(ctx.alice).subscribe(poolId, 4n)).wait();
+    await expect(ctx.token.connect(ctx.alice).transfer(poolId, ctx.bob.address, 1n)).to.be.revertedWith('transfers locked');
+  });
+
+  it('only moves RWA between whitelisted accounts, and the new holder redeems them', async () => {
+    const ctx = await deployStack();
+    const { poolId } = await openOffering(ctx);
+    await fundOffering(ctx, poolId, 4n, 6n);
+
+    await expect(ctx.token.connect(ctx.alice).transfer(poolId, ctx.bob.address, 2n)).to.be.revertedWith('transfer not allowed');
+    await (await ctx.token.setTransferPermission(ctx.alice.address, true)).wait();
+    await expect(ctx.token.connect(ctx.alice).transfer(poolId, ctx.unfunded.address, 2n))
+      .to.be.revertedWith('transfer not allowed');
+    await (await ctx.token.setTransferPermission(ctx.bob.address, true)).wait();
+    await expect(ctx.token.connect(ctx.alice).transfer(poolId, ctx.bob.address, 2n))
+      .to.emit(ctx.token, 'RWATransferred').withArgs(poolId, ctx.alice.address, ctx.bob.address, 2n);
+    expect(await ctx.token.balanceOf(poolId, ctx.alice.address)).to.equal(2n);
+    expect(await ctx.token.balanceOf(poolId, ctx.bob.address)).to.equal(8n);
+    expect(await ctx.token.totalSupply(poolId)).to.equal(10n);
+
+    await repay(ctx, poolId, 10_000_000n);
+    await expect(ctx.pool.connect(ctx.bob).redeem(poolId))
+      .to.emit(ctx.pool, 'Redeemed').withArgs(poolId, ctx.bob.address, 8n, 8_000_000n);
+    await (await ctx.pool.connect(ctx.alice).redeem(poolId)).wait();
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.Redeemed);
+  });
 });
