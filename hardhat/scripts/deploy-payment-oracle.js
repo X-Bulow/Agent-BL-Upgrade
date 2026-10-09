@@ -17,12 +17,13 @@
  * Run:
  *   cd hardhat && npm run deploy:payment-oracle
  */
-const fs = require('node:fs');
-const path = require('node:path');
-const hre = require('hardhat');
-const chainConfigLib = require('../../scripts/lib/chain-config.cjs');
+import fs from 'node:fs';
+import path from 'node:path';
+import hre from 'hardhat';
+import chainConfigLib from '../../scripts/lib/chain-config.cjs';
 
-const { ethers, network, artifacts } = hre;
+const { artifacts } = hre;
+const { ethers, networkName } = await hre.network.create();
 
 const NETWORK_META = {
   injective_testnet: {
@@ -37,14 +38,14 @@ const NETWORK_META = {
 const SUPPORTED = Object.keys(NETWORK_META);
 
 async function main() {
-  if (!SUPPORTED.includes(network.name)) {
+  if (!SUPPORTED.includes(networkName)) {
     throw new Error(
-      `Refusing to deploy on "${network.name}".\n` +
+      `Refusing to deploy on "${networkName}".\n` +
       `  Use: npm run deploy:payment-oracle  (Injective Testnet)`
     );
   }
 
-  const meta = NETWORK_META[network.name];
+  const meta = NETWORK_META[networkName];
   const [deployer] = await ethers.getSigners();
   const recoveryAddress = process.env.PAYMENT_ORACLE_RECOVERY_ADDRESS?.trim();
   const recoveryTx = process.env.PAYMENT_ORACLE_RECOVERY_TX?.trim();
@@ -99,7 +100,7 @@ async function main() {
   console.log('   Tx:     ', deployTx);
 
   // ── Merge into existing chain-config.json ──
-  const configPath = path.join(__dirname, '..', '..', 'public', 'chain-config.json');
+  const configPath = path.join(import.meta.dirname, '..', '..', 'public', 'chain-config.json');
   const current = chainConfigLib.readRegistry(configPath);
   const chainConfig = chainConfigLib.mergeNetworkConfig(current, 'injective-testnet', {
     network: meta.name,
@@ -117,7 +118,7 @@ async function main() {
   console.log('   Contracts:', Object.keys(chainConfig.networks['injective-testnet'].contracts).join(', '));
 
   // ── Deployment record ──
-  const outDir = path.join(__dirname, '..', 'deployments');
+  const outDir = path.join(import.meta.dirname, '..', 'deployments');
   fs.mkdirSync(outDir, { recursive: true });
   const recordPath = path.join(outDir, `${meta.name}-payment-oracle.json`);
   fs.writeFileSync(recordPath, JSON.stringify({

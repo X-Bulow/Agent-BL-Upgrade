@@ -2,13 +2,14 @@
  * WEB3-17: deploy and wire the complete five-contract AgentBL protocol on
  * Injective inEVM, execute the acceptance smoke, and merge public config.
  */
-const fs = require('node:fs');
-const path = require('node:path');
-const hre = require('hardhat');
-const chainConfig = require('../../scripts/lib/chain-config.cjs');
+import fs from 'node:fs';
+import path from 'node:path';
+import hre from 'hardhat';
+import chainConfig from '../../scripts/lib/chain-config.cjs';
 
-const { ethers, network, artifacts } = hre;
-const ROOT = path.resolve(__dirname, '../..');
+const { artifacts } = hre;
+const { ethers, networkName } = await hre.network.create();
+const ROOT = path.resolve(import.meta.dirname, '../..');
 const EXPLORER = 'https://testnet.blockscout.injective.network';
 const EXPLORER_API = 'https://testnet.blockscout-api.injective.network/api';
 const RPC_URL = process.env.INJECTIVE_RPC_URL || 'https://k8s.testnet.json-rpc.injective.network';
@@ -103,7 +104,7 @@ async function send(label, transactionPromise) {
 }
 
 async function main() {
-  if (network.name !== 'injective_testnet') {
+  if (networkName !== 'injective_testnet') {
     throw new Error('WEB3-17 deployment is pinned to --network injective_testnet');
   }
   const providerNetwork = await ethers.provider.getNetwork();
@@ -264,7 +265,7 @@ async function main() {
     wiring,
     smoke: config.networks['injective-testnet'].protocol.smoke
   };
-  const recordPath = path.join(__dirname, '..', 'deployments', 'injective_testnet-protocol.json');
+  const recordPath = path.join(import.meta.dirname, '..', 'deployments', 'injective_testnet-protocol.json');
   atomicJson(recordPath, record);
   atomicJson(path.join(ROOT, 'docs', 'evidence', 'wave-b-protocol.json'), record);
 

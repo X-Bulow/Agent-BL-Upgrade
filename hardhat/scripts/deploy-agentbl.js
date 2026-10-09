@@ -17,12 +17,13 @@
  * Run:
  *   npm run deploy:injective      (Injective Testnet)
  */
-const fs = require('node:fs');
-const path = require('node:path');
-const hre = require('hardhat');
-const chainConfig = require('../../scripts/lib/chain-config.cjs');
+import fs from 'node:fs';
+import path from 'node:path';
+import hre from 'hardhat';
+import chainConfig from '../../scripts/lib/chain-config.cjs';
 
-const { ethers, network, artifacts } = hre;
+const { artifacts } = hre;
+const { ethers, networkName } = await hre.network.create();
 
 const NETWORK_META = {
   injective_testnet: {
@@ -37,14 +38,14 @@ const NETWORK_META = {
 const SUPPORTED = Object.keys(NETWORK_META);
 
 async function main() {
-  if (!SUPPORTED.includes(network.name)) {
+  if (!SUPPORTED.includes(networkName)) {
     throw new Error(
-      `Refusing to deploy on "${network.name}".\n` +
+      `Refusing to deploy on "${networkName}".\n` +
       `  Use: npm run deploy:injective  (Injective Testnet)`
     );
   }
 
-  const meta = NETWORK_META[network.name];
+  const meta = NETWORK_META[networkName];
   const [deployer] = await ethers.getSigners();
   const balance = await ethers.provider.getBalance(deployer.address);
 
@@ -54,7 +55,7 @@ async function main() {
   console.log(`💰 Balance  : ${ethers.formatEther(balance)} ${meta.gasToken}`);
 
   if (balance === 0n) {
-    if (network.name === 'injective_testnet') {
+    if (networkName === 'injective_testnet') {
       console.log('💧 Get testnet INJ from: https://testnet.faucet.injective.network/');
     }
     throw new Error(`Deployer balance is 0 ${meta.gasToken}. Fund the wallet first.`);
@@ -74,7 +75,7 @@ async function main() {
   console.log('   Tx:     ', deployTx);
 
   // 1) Frontend-readable config (served statically at /chain-config.json).
-  const frontendPath = path.join(__dirname, '..', '..', 'public', 'chain-config.json');
+  const frontendPath = path.join(import.meta.dirname, '..', '..', 'public', 'chain-config.json');
   const current = chainConfig.readRegistry(frontendPath);
   const merged = chainConfig.mergeNetworkConfig(current, 'injective-testnet', {
     network: meta.name,
@@ -90,7 +91,7 @@ async function main() {
   console.log('📄 Frontend config ->', frontendPath);
 
   // 2) Deployment record.
-  const outDir = path.join(__dirname, '..', 'deployments');
+  const outDir = path.join(import.meta.dirname, '..', 'deployments');
   fs.mkdirSync(outDir, { recursive: true });
   const recordFilename = `${meta.name}-agentbl.json`;
   const recordPath = path.join(outDir, recordFilename);
