@@ -3,8 +3,11 @@ import { network } from 'hardhat';
 
 const { ethers } = await network.create();
 
-const ACTION = { REPRICE: 2 };
-const STATE = { Subscribed: 3n, Funded: 4n, InTransit: 5n, Cancelled: 12n };
+const ACTION = { REPRICE: 2, PAUSE: 3, FREEZE: 4, LIQUIDATE: 5, RESUME: 6 };
+const STATE = {
+  Subscribed: 3n, Funded: 4n, InTransit: 5n, Paused: 7n, Frozen: 8n,
+  Repaid: 9n, Redeemed: 10n, Liquidation: 11n, Cancelled: 12n
+};
 const PRICE = 800_000n; // 0.80 USD per RWA, 6 decimals
 
 async function deployStack() {
@@ -19,7 +22,8 @@ async function deployStack() {
   await (await token.setPool(await pool.getAddress())).wait();
   await (await pool.setOracle(await oracle.getAddress())).wait();
   await (await pool.setAgentExecutor(agent.address, true)).wait();
-  for (const investor of [alice, bob]) {
+  // alice and bob invest; the agent deposits repayments and liquidation proceeds.
+  for (const investor of [alice, bob, agent]) {
     await (await usdc.mint(investor.address, 1_000_000_000n)).wait();
     await (await usdc.connect(investor).approve(await pool.getAddress(), ethers.MaxUint256)).wait();
   }
@@ -33,6 +37,22 @@ async function openOffering(ctx, supply = 10n) {
   await (await ctx.registry.connect(ctx.exporter).pledge(eblId, await ctx.pool.getAddress())).wait();
   await (await ctx.pool.createOffering(eblId, supply, PRICE, 1_000_000n)).wait();
   return { poolId: (await ctx.pool.nextPoolId()) - 1n, eblId };
+}
+
+// alice buys `aliceTokens`, bob buys the rest, which funds and disburses the offering.
+async function fundOffering(ctx, poolId, aliceTokens, bobTokens) {
+  await (await ctx.pool.connect(ctx.alice).subscribe(poolId, aliceTokens)).wait();
+  await (await ctx.pool.connect(ctx.bob).subscribe(poolId, bobTokens)).wait();
+}
+
+async function repay(ctx, poolId, amount) {
+  await (await ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('paid'), amount)).wait();
+  await (await ctx.pool.connect(ctx.agent).recordCargoArrival(poolId, ethers.id('arrived'))).wait();
+  await (await ctx.pool.connect(ctx.agent).settle(poolId, amount)).wait();
+}
+
+async function trigger(ctx, poolId, action, tag) {
+  await (await ctx.oracle.updatePricing(poolId, PRICE, 3, action, ethers.id(`${tag}-e`), ethers.id(`${tag}-q`))).wait();
 }
 
 describe('RWAOfferingPool fund flow', () => {
@@ -125,5 +145,109 @@ describe('RWAOfferingPool fund flow', () => {
     const { poolId } = await openOffering(ctx);
     await (await ctx.pool.connect(ctx.alice).subscribe(poolId, 1n)).wait();
     await expect(ctx.token.connect(ctx.alice).burn(poolId, ctx.alice.address, 1n)).to.be.revertedWith('only pool');
+  });
+
+  it('settles a repaid offering, releases the eBL and redeems every RWA at the target value', async () => {
+    const ctx = await deployStack();
+    const { poolId, eblId } = await openOffering(ctx);
+    await fundOffering(ctx, poolId, 4n, 6n);
+    await (await ctx.pool.connect(ctx.agent).markInTransit(poolId, ethers.id('departed'))).wait();
+    const aliceBefore = await ctx.usdc.balanceOf(ctx.alice.address);
+    const bobBefore = await ctx.usdc.balanceOf(ctx.bob.address);
+
+    await expect(ctx.pool.connect(ctx.alice).redeem(poolId)).to.be.revertedWith('not redeemable');
+    await repay(ctx, poolId, 10_000_000n); // 10 RWA x 1.00 USD
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.Repaid);
+    expect(await ctx.registry.pledgedTo(eblId)).to.equal(ethers.ZeroAddress);
+
+    await expect(ctx.pool.connect(ctx.alice).redeem(poolId))
+      .to.emit(ctx.pool, 'Redeemed').withArgs(poolId, ctx.alice.address, 4n, 4_000_000n);
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.Repaid);
+    await (await ctx.pool.connect(ctx.bob).redeem(poolId)).wait();
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.Redeemed);
+
+    // Each investor paid 0.80 per RWA and received 1.00.
+    expect(await ctx.usdc.balanceOf(ctx.alice.address)).to.equal(aliceBefore + 4_000_000n);
+    expect(await ctx.usdc.balanceOf(ctx.bob.address)).to.equal(bobBefore + 6_000_000n);
+    expect(await ctx.token.totalSupply(poolId)).to.equal(0n);
+    expect(await ctx.usdc.balanceOf(await ctx.pool.getAddress())).to.equal(0n);
+    await expect(ctx.pool.connect(ctx.alice).redeem(poolId)).to.be.revertedWith('not redeemable');
+  });
+
+  it('shares a short repayment pro rata and leaves no rounding dust', async () => {
+    const ctx = await deployStack();
+    const { poolId } = await openOffering(ctx, 3n);
+    await fundOffering(ctx, poolId, 2n, 1n);
+    await repay(ctx, poolId, 10n); // deliberately not divisible by 3
+    await expect(ctx.pool.connect(ctx.alice).redeem(poolId))
+      .to.emit(ctx.pool, 'Redeemed').withArgs(poolId, ctx.alice.address, 2n, 6n);
+    await expect(ctx.pool.connect(ctx.bob).redeem(poolId))
+      .to.emit(ctx.pool, 'Redeemed').withArgs(poolId, ctx.bob.address, 1n, 4n);
+    expect(await ctx.usdc.balanceOf(await ctx.pool.getAddress())).to.equal(0n);
+  });
+
+  it('rejects repayments above the target redemption value', async () => {
+    const ctx = await deployStack();
+    const { poolId } = await openOffering(ctx);
+    await fundOffering(ctx, poolId, 4n, 6n);
+    await expect(
+      ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('paid'), 10_000_001n)
+    ).to.be.revertedWith('repayment above target');
+  });
+
+  it('distributes liquidation proceeds pro rata once they are deposited', async () => {
+    const ctx = await deployStack();
+    const { poolId, eblId } = await openOffering(ctx);
+    await fundOffering(ctx, poolId, 4n, 6n);
+    await trigger(ctx, poolId, ACTION.LIQUIDATE, 'liquidate');
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.Liquidation);
+    await expect(ctx.pool.connect(ctx.alice).redeem(poolId)).to.be.revertedWith('not redeemable');
+    await expect(
+      ctx.pool.connect(ctx.alice).recordLiquidationProceeds(poolId, 1n, ethers.id('sale'))
+    ).to.be.revertedWith('not executor');
+
+    await expect(ctx.pool.connect(ctx.agent).recordLiquidationProceeds(poolId, 6_000_000n, ethers.id('sale')))
+      .to.emit(ctx.pool, 'LiquidationSettled').withArgs(poolId, 6_000_000n, ethers.id('sale'));
+    expect(await ctx.registry.pledgedTo(eblId)).to.equal(ethers.ZeroAddress);
+    await expect(
+      ctx.pool.connect(ctx.agent).recordLiquidationProceeds(poolId, 1n, ethers.id('again'))
+    ).to.be.revertedWith('liquidation already settled');
+
+    await expect(ctx.pool.connect(ctx.alice).redeem(poolId))
+      .to.emit(ctx.pool, 'Redeemed').withArgs(poolId, ctx.alice.address, 4n, 2_400_000n);
+    await expect(ctx.pool.connect(ctx.bob).redeem(poolId))
+      .to.emit(ctx.pool, 'Redeemed').withArgs(poolId, ctx.bob.address, 6n, 3_600_000n);
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.Liquidation);
+  });
+
+  it('lets holders burn their RWA after a total-loss liquidation', async () => {
+    const ctx = await deployStack();
+    const { poolId } = await openOffering(ctx);
+    await fundOffering(ctx, poolId, 4n, 6n);
+    await trigger(ctx, poolId, ACTION.LIQUIDATE, 'liquidate');
+    await (await ctx.pool.connect(ctx.agent).recordLiquidationProceeds(poolId, 0n, ethers.id('nothing'))).wait();
+    await expect(ctx.pool.connect(ctx.alice).redeem(poolId))
+      .to.emit(ctx.pool, 'Redeemed').withArgs(poolId, ctx.alice.address, 4n, 0n);
+  });
+
+  it('only lets the owner unfreeze, restoring the state before the freeze', async () => {
+    const ctx = await deployStack();
+    const { poolId } = await openOffering(ctx);
+    await fundOffering(ctx, poolId, 4n, 6n);
+    await (await ctx.pool.connect(ctx.agent).markInTransit(poolId, ethers.id('departed'))).wait();
+
+    await trigger(ctx, poolId, ACTION.FREEZE, 'freeze');
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.Frozen);
+    await expect(trigger(ctx, poolId, ACTION.RESUME, 'resume')).to.be.revertedWith('not paused');
+    await expect(ctx.pool.connect(ctx.agent).unfreezeOffering(poolId, ethers.id('x'))).to.be.revertedWith('not owner');
+    await (await ctx.pool.unfreezeOffering(poolId, ethers.id('cleared'))).wait();
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.InTransit);
+
+    // Pause first, then freeze: unfreezing returns to the pre-pause state.
+    await trigger(ctx, poolId, ACTION.PAUSE, 'pause');
+    await trigger(ctx, poolId, ACTION.FREEZE, 'freeze-2');
+    await (await ctx.pool.unfreezeOffering(poolId, ethers.id('cleared-2'))).wait();
+    expect(await ctx.pool.stateOf(poolId)).to.equal(STATE.InTransit);
+    await expect(ctx.pool.unfreezeOffering(poolId, ethers.id('again'))).to.be.revertedWith('not frozen');
   });
 });

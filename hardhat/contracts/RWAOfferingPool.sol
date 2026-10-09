@@ -29,7 +29,9 @@ interface IInvestorComplianceGate {
 ///      USD * 1e6 per RWA, so `amount * issuePrice` is the USDC owed). Payments are
 ///      escrowed in this contract until the offering is fully subscribed, then
 ///      disbursed to the eBL holder (the exporter) in one transfer. A cancelled
-///      offering refunds each investor exactly what they paid.
+///      offering refunds each investor exactly what they paid. The importer's
+///      repayment (or liquidation proceeds) is deposited into the pool and RWA
+///      holders redeem it pro rata.
 contract RWAOfferingPool {
     enum OfferingState {
         Created,
@@ -62,6 +64,8 @@ contract RWAOfferingPool {
     uint8 public constant SETTLE_OFFERING = 7;
     uint8 public constant EMERGENCY_PAUSE = 8;
     uint8 public constant CANCEL_OFFERING = 9;
+    uint8 public constant REDEEM_OFFERING = 10;
+    uint8 public constant UNFREEZE_OFFERING = 11;
 
     address public owner;
     address public oracle;
@@ -91,6 +95,9 @@ contract RWAOfferingPool {
         address issuer;          // eBL holder at creation; receives the disbursement
         uint256 escrowed;        // paymentToken held for subscriptions not yet disbursed
         bool disbursed;
+        uint256 proceeds;        // repayment / liquidation proceeds still owed to RWA holders
+        uint256 redeemedTokens;  // RWA already redeemed against proceeds
+        bool liquidationSettled;
     }
 
     mapping(uint256 => Offering) public offerings;
@@ -127,6 +134,8 @@ contract RWAOfferingPool {
     event FundsDisbursed(uint256 indexed poolId, address indexed issuer, uint256 amount);
     event OfferingCancelled(uint256 indexed poolId, bytes32 reasonHash);
     event Refunded(uint256 indexed poolId, address indexed investor, uint256 amount, uint256 tokensBurned);
+    event LiquidationSettled(uint256 indexed poolId, uint256 proceeds, bytes32 proceedsProof);
+    event Redeemed(uint256 indexed poolId, address indexed investor, uint256 tokensBurned, uint256 payout);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "not owner");
@@ -307,18 +316,23 @@ contract RWAOfferingPool {
         _resume(poolId, evidenceHash);
     }
 
+    /// @notice Deposit the importer's repayment into the pool. The caller must have
+    ///         approved this pool for `repaymentAmount` of the payment token.
     function recordImporterPayment(
         uint256 poolId,
         bytes32 paymentProof,
         uint256 repaymentAmount
-    ) external onlyExecutor whenOperational {
+    ) external onlyExecutor whenOperational nonReentrant {
         Offering storage o = offerings[poolId];
         require(_canSettleFrom(o.state), "bad settlement state");
+        require(funding[poolId].disbursed, "not funded");
         require(paymentProof != bytes32(0), "paymentProof=0");
         require(repaymentAmount > 0, "repayment=0");
+        require(repaymentAmount <= _maxPayout(o), "repayment above target");
         require(o.paymentProof == bytes32(0), "payment already recorded");
         o.paymentProof = paymentProof;
         o.repaymentAmount = repaymentAmount;
+        _pullPayment(msg.sender, repaymentAmount);
         emit SettlementProofRecorded(poolId, o.paymentProof, o.arrivalProof);
     }
 
@@ -337,7 +351,68 @@ contract RWAOfferingPool {
         require(o.paymentProof != bytes32(0) && o.arrivalProof != bytes32(0), "settlement proof missing");
         require(repaymentAmount > 0 && repaymentAmount == o.repaymentAmount, "repayment mismatch");
         _changeState(poolId, OfferingState.Repaid, SETTLE_OFFERING);
+        funding[poolId].proceeds = repaymentAmount;
+        eblRegistry.releasePledge(o.eblId);
         emit OfferingSettled(poolId, repaymentAmount, o.paymentProof, o.arrivalProof);
+    }
+
+    /// @notice Deposit what was recovered from liquidating the cargo so RWA holders
+    ///         can redeem it. Proceeds may be zero (total loss).
+    function recordLiquidationProceeds(
+        uint256 poolId,
+        uint256 proceeds,
+        bytes32 proceedsProof
+    ) external onlyExecutor whenOperational nonReentrant {
+        Offering storage o = offerings[poolId];
+        Funding storage f = funding[poolId];
+        require(o.state == OfferingState.Liquidation, "not in liquidation");
+        require(f.disbursed, "not funded");
+        require(!f.liquidationSettled, "liquidation already settled");
+        require(proceedsProof != bytes32(0), "proceedsProof=0");
+        require(proceeds <= _maxPayout(o), "proceeds above target");
+        f.liquidationSettled = true;
+        f.proceeds = proceeds;
+        if (proceeds > 0) _pullPayment(msg.sender, proceeds);
+        eblRegistry.releasePledge(o.eblId);
+        emit LiquidationSettled(poolId, proceeds, proceedsProof);
+    }
+
+    /// @notice Burn all of the caller's RWA for their pro-rata share of the
+    ///         remaining proceeds (after repayment or a settled liquidation).
+    function redeem(uint256 poolId) external whenOperational nonReentrant {
+        Offering storage o = offerings[poolId];
+        Funding storage f = funding[poolId];
+        require(
+            o.state == OfferingState.Repaid || (o.state == OfferingState.Liquidation && f.liquidationSettled),
+            "not redeemable"
+        );
+        uint256 tokens = rwaToken.balanceOf(poolId, msg.sender);
+        require(tokens > 0, "nothing to redeem");
+
+        // Pro rata over the RWA still outstanding, so the last holder receives
+        // any rounding remainder and no dust is stranded in the pool.
+        uint256 outstanding = o.subscribed - f.redeemedTokens;
+        uint256 payout = (f.proceeds * tokens) / outstanding;
+        f.proceeds -= payout;
+        f.redeemedTokens += tokens;
+        rwaToken.burn(poolId, msg.sender, tokens);
+        if (payout > 0) _sendPayment(msg.sender, payout);
+        emit Redeemed(poolId, msg.sender, tokens, payout);
+
+        if (o.state == OfferingState.Repaid && f.redeemedTokens == o.subscribed) {
+            _changeState(poolId, OfferingState.Redeemed, REDEEM_OFFERING);
+        }
+    }
+
+    /// @notice Human-only release of a frozen offering back to its prior state.
+    function unfreezeOffering(uint256 poolId, bytes32 evidenceHash) external onlyOwner whenOperational {
+        Offering storage o = offerings[poolId];
+        require(o.exists, "pool missing");
+        require(o.state == OfferingState.Frozen, "not frozen");
+        OfferingState restored = _stateBeforePause[poolId];
+        require(_isActive(restored), "resume state invalid");
+        _changeState(poolId, restored, UNFREEZE_OFFERING);
+        emit OfferingResumed(poolId, restored, evidenceHash);
     }
 
     /// @notice Apply an AI pricing action coming from RiskPricingOracle.
@@ -363,6 +438,8 @@ contract RWAOfferingPool {
         }
         if (action == FREEZE_POOL) {
             require(_isActive(o.state) || o.state == OfferingState.Paused, "illegal transition");
+            // A paused pool already remembers its pre-pause state.
+            if (o.state != OfferingState.Paused) _stateBeforePause[poolId] = o.state;
             _changeState(poolId, OfferingState.Frozen, action);
             emit OfferingPaused(poolId, evidenceHash);
             return;
@@ -397,6 +474,11 @@ contract RWAOfferingPool {
         Offering storage o = offerings[poolId];
         require(o.exists, "pool missing");
         return (o.paymentProof, o.arrivalProof);
+    }
+
+    /// @dev Investors can never be owed more than target redemption value per RWA sold.
+    function _maxPayout(Offering storage o) private view returns (uint256) {
+        return o.subscribed * o.targetRedemptionValue;
     }
 
     function _disburse(uint256 poolId) internal {

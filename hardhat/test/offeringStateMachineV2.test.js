@@ -110,6 +110,7 @@ describe('RWAOfferingPool autonomous state machine (WEB3-15/16)', () => {
   it('requires payment and arrival proofs before settlement and rejects duplicates', async () => {
     const ctx = await deployStack();
     const poolId = await createOffering(ctx);
+    await (await ctx.pool.connect(ctx.investor).subscribe(poolId, 100n)).wait();
     await expectRevert(ctx.pool.connect(ctx.agent).settle(poolId, 100n), /settlement proof missing/u);
     await (await ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('payment'), 100n)).wait();
     await expectRevert(
@@ -156,6 +157,11 @@ describe('RWAOfferingPool autonomous state machine (WEB3-15/16)', () => {
     const poolId = await createOffering(ctx);
     await expectRevert(ctx.pool.connect(ctx.outsider).recordCargoArrival(poolId, ethers.id('arrival')), /not executor/u);
     await expectRevert(ctx.pool.connect(ctx.agent).markInTransit(poolId, ethers.id('departure')), /not funded/u);
+    await expectRevert(
+      ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('payment'), 100n),
+      /not funded/u
+    );
+    await (await ctx.pool.connect(ctx.investor).subscribe(poolId, 100n)).wait();
     await (await ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('payment'), 100n)).wait();
     await (await ctx.pool.connect(ctx.agent).recordCargoArrival(poolId, ethers.id('arrival'))).wait();
     await expectRevert(ctx.pool.connect(ctx.agent).settle(poolId, 99n), /repayment mismatch/u);
