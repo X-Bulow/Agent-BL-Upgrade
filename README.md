@@ -844,6 +844,10 @@ Demo Mode 下，Live Network 检查可能被跳过或显示 WARN。
 
 ### Solidity Contract Tests | Solidity 合约测试
 
+The contracts use Hardhat 3, which requires **Node.js 22.13+**.
+
+合约工程基于 Hardhat 3，需要 **Node.js 22.13+**。
+
 ```bash
 cd hardhat
 npm install
@@ -1016,7 +1020,7 @@ These scenarios demonstrate why **Dynamic Context** matters for trade-asset reco
 
 - Injective EVM-compatible testnet
 - Solidity
-- Hardhat
+- Hardhat 3 (ESM config, Mocha + ethers tests)
 - ethers.js 6.x
 
 ### Payment & Settlement
