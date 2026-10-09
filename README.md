@@ -953,6 +953,7 @@ npm run price
 npm run intel
 npm run smoke:x402
 npm run mcp:stdio
+npm run protocol:op -- status   # on-chain offerings (see docs/DEPLOYMENT.md)
 ```
 
 Contract tests / 合约测试：

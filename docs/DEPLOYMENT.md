@@ -96,6 +96,31 @@ HTTPS：`sudo certbot --nginx -d your-domain.com`
 
 ---
 
+## ⛓️ 上链发行：让市场页可以真实认购
+
+市场页的认购默认是模拟的。要让投资者用 MetaMask 在 Injective 测试网上真实认购，平台运营者需要先部署完整协议，再为案例创建链上发行。只有协议 owner 能登记提单、创建发行，所以这一步由运营者在本机执行，私钥不经过网站后端。
+
+前提：根目录 `.env` 中配置了 `DEPLOYER_PRIVATE_KEY`，并且该地址有测试 INJ（[水龙头](https://testnet.faucet.injective.network/)）。
+
+```bash
+npm --prefix hardhat install
+npm run deploy:protocol                 # 部署 EBLRegistry / RWAToken / MockUSDC / RWAOfferingPool / RiskPricingOracle
+npm run protocol:op -- seed             # 为 data/cases 的每个案例登记提单、按 AI 推荐报价创建发行
+npm run protocol:op -- status           # 查看各发行的链上状态
+```
+
+`seed` 会把"案例 → 池子编号"的对应关系写入 `public/chain-config.json` 的 `offerings` 字段（每个案例 4 笔交易，可用 `--cases ID1,ID2` 只处理部分案例，重复执行会跳过已创建的）。提交并重新部署网站后，市场页就会显示"链上发行"面板：投资者连接 MetaMask，领取测试 mUSDC，即可链上认购。重新部署合约后旧的对应关系自动失效，需要重新 `seed`。
+
+演示时可以用运营命令推进生命周期：
+
+| 命令 | 作用 |
+|---|---|
+| `npm run protocol:op -- fill <caseId>` | 运营者买下剩余份额，认满并放款给出口商 |
+| `npm run protocol:op -- transit <caseId>` | 标记货物出港 |
+| `npm run protocol:op -- settle <caseId> [--ratio 1]` | 存入还款（按目标兑付价的比例）、记录到港并结算，投资者随后可兑付 |
+| `npm run protocol:op -- cancel <caseId>` | 取消尚未放款的发行，投资者可退款 |
+| `npm run protocol:op -- liquidate <caseId> [--ratio 0.6]` | AI 触发清算并存入清算款，投资者按比例兑付 |
+
 ## ✅ 部署后验证
 
 ```bash
