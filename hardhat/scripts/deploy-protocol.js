@@ -1,6 +1,7 @@
 /**
- * WEB3-17: deploy and wire the complete five-contract AgentBL protocol on
- * Injective inEVM, execute the acceptance smoke, and merge public config.
+ * WEB3-17: deploy and wire the complete AgentBL protocol (five protocol
+ * contracts plus the MockUSDC settlement token) on Injective inEVM, execute
+ * the funded acceptance smoke, and merge public config.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,10 +35,26 @@ async function rpc(method, params) {
   }
 }
 
+// Ask the JSON-RPC node first; it answers immediately on a healthy or local
+// node. Returns null when the receipt is not available there yet.
+async function receiptFromRpc(txHash) {
+  let receipt;
+  try {
+    receipt = await rpc('eth_getTransactionReceipt', [txHash]);
+  } catch {
+    return null;
+  }
+  if (!receipt) return null;
+  if (receipt.status !== '0x1') throw new Error(`Transaction reverted: ${txHash}`);
+  return { status: '0x1', blockNumber: receipt.blockNumber, transactionHash: txHash };
+}
+
 async function waitForReceipt(txHash, timeoutMs = 120_000) {
   const deadline = Date.now() + timeoutMs;
   let lastError;
   while (Date.now() < deadline) {
+    const fromRpc = await receiptFromRpc(txHash);
+    if (fromRpc) return fromRpc;
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 20_000);
@@ -122,9 +139,10 @@ async function main() {
   const agent = await deploy('AgentBLRWA');
   const registry = await deploy('EBLRegistry');
   const token = await deploy('RWAToken');
-  const pool = await deploy('RWAOfferingPool', [registry.address, token.address]);
+  const usdc = await deploy('MockUSDC');
+  const pool = await deploy('RWAOfferingPool', [registry.address, token.address, usdc.address]);
   const oracle = await deploy('RiskPricingOracle', [pool.address]);
-  const deployments = [agent, registry, token, pool, oracle];
+  const deployments = [agent, registry, token, usdc, pool, oracle];
 
   const wiring = [];
   wiring.push(await send('RWAToken.setPool', token.contract.setPool(pool.address, CALL_OVERRIDES)));
@@ -158,12 +176,23 @@ async function main() {
   ));
   const eblId = Number((await registry.contract.nextEblId()) - 1n);
   smoke.push(await send('create:pledge', registry.contract.pledge(eblId, pool.address, CALL_OVERRIDES)));
+  const supply = 10_000n;
+  const issuePrice = 900_000n;
   smoke.push(await send(
     'create:createOffering',
-    pool.contract.createOffering(eblId, 1_000_000n, 900_000n, 1_000_000n, CALL_OVERRIDES)
+    pool.contract.createOffering(eblId, supply, issuePrice, 1_000_000n, CALL_OVERRIDES)
   ));
   const poolId = Number((await pool.contract.nextPoolId()) - 1n);
-  smoke.push(await send('subscribe', pool.contract.subscribe(poolId, 10_000n, CALL_OVERRIDES)));
+  // The deployer plays investor and settlement agent: fund it with mUSDC for
+  // the full subscription plus the repayment, and approve the pool.
+  const repaymentAmount = supply * 1_000_000n;
+  smoke.push(await send(
+    'fund:mint-mUSDC',
+    usdc.contract.mint(deployer.address, supply * issuePrice + repaymentAmount, CALL_OVERRIDES)
+  ));
+  smoke.push(await send('fund:approve-pool', usdc.contract.approve(pool.address, ethers.MaxUint256, CALL_OVERRIDES)));
+  // Subscribing the whole supply funds the offering and disburses it to the eBL holder.
+  smoke.push(await send('subscribe', pool.contract.subscribe(poolId, supply, CALL_OVERRIDES)));
   smoke.push(await send(
     'reprice',
     oracle.contract.updatePricing(poolId, 850_000n, 2, 2, ethers.id('wave-b:reprice:evidence'), ethers.id('wave-b:reprice:quote'), CALL_OVERRIDES)
@@ -176,7 +205,7 @@ async function main() {
     'resume',
     oracle.contract.updatePricing(poolId, 850_000n, 1, 6, ethers.id('wave-b:resume:evidence'), ethers.id('wave-b:resume:quote'), CALL_OVERRIDES)
   ));
-  const repaymentAmount = 10_000n * 1_000_000n;
+  smoke.push(await send('in-transit', pool.contract.markInTransit(poolId, ethers.id('wave-b:departure'), CALL_OVERRIDES)));
   smoke.push(await send(
     'settlement:payment-proof',
     pool.contract.recordImporterPayment(poolId, ethers.id('wave-b:importer-payment'), repaymentAmount, CALL_OVERRIDES)
@@ -186,12 +215,17 @@ async function main() {
     pool.contract.recordCargoArrival(poolId, ethers.id('wave-b:cargo-arrival'), CALL_OVERRIDES)
   ));
   smoke.push(await send('settle', pool.contract.settle(poolId, repaymentAmount, CALL_OVERRIDES)));
+  smoke.push(await send('redeem', pool.contract.redeem(poolId, CALL_OVERRIDES)));
 
   const finalState = Number(await pool.contract.stateOf(poolId));
   const finalPrice = (await pool.contract.issuePriceOf(poolId)).toString();
   const subscribedBalance = (await token.contract.balanceOf(poolId, deployer.address)).toString();
-  if (finalState !== 9 || finalPrice !== '850000' || subscribedBalance !== '10000') {
-    throw new Error(`Protocol smoke invariant failed: state=${finalState}, price=${finalPrice}, balance=${subscribedBalance}`);
+  const poolUsdcBalance = (await usdc.contract.balanceOf(pool.address)).toString();
+  if (finalState !== 10 || finalPrice !== '850000' || subscribedBalance !== '0' || poolUsdcBalance !== '0') {
+    throw new Error(
+      `Protocol smoke invariant failed: state=${finalState}, price=${finalPrice}, ` +
+      `balance=${subscribedBalance}, poolUsdc=${poolUsdcBalance}`
+    );
   }
 
   const deployedAt = new Date().toISOString();
@@ -240,7 +274,7 @@ async function main() {
         eblId,
         poolId,
         transactions: smoke,
-        finalState: 'Repaid',
+        finalState: 'Redeemed',
         finalStateCode: finalState,
         finalIssuePriceE6: finalPrice,
         subscriberBalance: subscribedBalance
@@ -269,9 +303,9 @@ async function main() {
   atomicJson(recordPath, record);
   atomicJson(path.join(ROOT, 'docs', 'evidence', 'wave-b-protocol.json'), record);
 
-  console.log('Five-contract protocol deployed and wired:');
+  console.log('AgentBL protocol deployed and wired:');
   for (const item of deployments) console.log(`  ${item.name}: ${item.address} (${item.txHash})`);
-  console.log(`Smoke pool ${poolId}: create -> subscribe -> reprice -> pause -> resume -> settle`);
+  console.log(`Smoke pool ${poolId}: create -> fund -> reprice -> pause -> resume -> in-transit -> settle -> redeem`);
   console.log(`Evidence: ${recordPath}`);
 }
 
