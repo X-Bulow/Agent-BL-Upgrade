@@ -1,6 +1,5 @@
 
 # Secrets — real keys live in .env (untracked). Copy .env.example and fill in.
-main
 .env
 .env.local
 .env.*.local
@@ -16,6 +15,8 @@ hardhat/node_modules/
 hardhat/cache/
 hardhat/artifacts/
 hardhat/deployments/*.json
+# Keep the record of the live Injective testnet deployment
+!hardhat/deployments/injective_testnet-agentbl.json
 
 # OS / editor
 .DS_Store
@@ -36,3 +37,6 @@ Thumbs.db
 
 # Claude Code local-machine settings (keep .claude/settings.json shareable)
 .claude/settings.local.json
+
+# My own
+.Assign/

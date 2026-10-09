@@ -13,6 +13,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/app/data:ro
+      # Runtime state (x402 receipts, decision logs, mystery reveals) must stay writable
+      - ./data/runtime:/app/data/runtime
     networks:
       - agentbl-network
     healthcheck:

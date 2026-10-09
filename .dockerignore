@@ -6,9 +6,6 @@ npm-debug.log
 .env.*.local
 tests
 *.test.js
-test-*.js
-test-*.mjs
-debug-*.js
 .agents
 docs
 *.md
