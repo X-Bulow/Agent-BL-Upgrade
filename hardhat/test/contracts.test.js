@@ -30,6 +30,14 @@ const STATE = {
   Cancelled: 12
 };
 
+// Give every test signer a large mUSDC balance and an unlimited allowance to the pool.
+async function fundSigners(usdc, pool, signers) {
+  for (const signer of signers) {
+    await (await usdc.mint(signer.address, 1_000_000_000_000_000n)).wait();
+    await (await usdc.connect(signer).approve(await pool.getAddress(), ethers.MaxUint256)).wait();
+  }
+}
+
 async function deployStack() {
   const [owner, investor, outsider, aiAgent] = await ethers.getSigners();
 
@@ -41,8 +49,10 @@ async function deployStack() {
   const token = await Token.deploy();
   await token.waitForDeployment();
 
+  const usdc = await ethers.deployContract('MockUSDC');
+
   const Pool = await ethers.getContractFactory('RWAOfferingPool');
-  const pool = await Pool.deploy(await registry.getAddress(), await token.getAddress());
+  const pool = await Pool.deploy(await registry.getAddress(), await token.getAddress(), await usdc.getAddress());
   await pool.waitForDeployment();
 
   const Oracle = await ethers.getContractFactory('RiskPricingOracle');
@@ -52,7 +62,8 @@ async function deployStack() {
   // wiring
   await (await token.setPool(await pool.getAddress())).wait();
   await (await pool.setOracle(await oracle.getAddress())).wait();
-  return { owner, investor, outsider, aiAgent, registry, token, pool, oracle };
+  await fundSigners(usdc, pool, [owner, investor, outsider, aiAgent]);
+  return { owner, investor, outsider, aiAgent, registry, token, pool, oracle, usdc };
 }
 
 async function createDemoOffering(ctx) {

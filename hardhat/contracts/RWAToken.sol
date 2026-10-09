@@ -13,6 +13,7 @@ contract RWAToken {
     mapping(address => bool) private _transferAllowed;
 
     event RWAMinted(uint256 indexed poolId, address indexed investor, uint256 amount);
+    event RWABurned(uint256 indexed poolId, address indexed investor, uint256 amount);
     event TransferPermissionSet(address indexed account, bool allowed);
 
     modifier onlyOwner() {
@@ -36,6 +37,17 @@ contract RWAToken {
         _balances[poolId][investor] += amount;
         _totalSupply[poolId] += amount;
         emit RWAMinted(poolId, investor, amount);
+    }
+
+    /// @notice Destroy `amount` RWA held by `investor` (refunds and redemptions).
+    function burn(uint256 poolId, address investor, uint256 amount) external {
+        require(msg.sender == pool, "only pool");
+        require(amount > 0, "amount=0");
+        uint256 balance = _balances[poolId][investor];
+        require(balance >= amount, "balance");
+        _balances[poolId][investor] = balance - amount;
+        _totalSupply[poolId] -= amount;
+        emit RWABurned(poolId, investor, amount);
     }
 
     function balanceOf(uint256 poolId, address investor) external view returns (uint256) {

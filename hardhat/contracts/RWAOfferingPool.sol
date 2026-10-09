@@ -4,10 +4,18 @@ pragma solidity 0.8.24;
 interface IEBLRegistry {
     function holderOf(uint256 eblId) external view returns (address);
     function pledgedTo(uint256 eblId) external view returns (address);
+    function releasePledge(uint256 eblId) external;
 }
 
 interface IRWATokenMintable {
     function mint(uint256 poolId, address investor, uint256 amount) external;
+    function burn(uint256 poolId, address investor, uint256 amount) external;
+    function balanceOf(uint256 poolId, address investor) external view returns (uint256);
+}
+
+interface IPaymentToken {
+    function transfer(address to, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
 interface IInvestorComplianceGate {
@@ -17,6 +25,11 @@ interface IInvestorComplianceGate {
 /// @title RWAOfferingPool (WEB3-3/8/15/16)
 /// @notice eBL-backed RWA offering state machine with autonomous executors,
 ///         emergency human stop and a testnet/production investor access switch.
+/// @dev Subscriptions are paid in `paymentToken` (6-decimal USDC; issue prices are
+///      USD * 1e6 per RWA, so `amount * issuePrice` is the USDC owed). Payments are
+///      escrowed in this contract until the offering is fully subscribed, then
+///      disbursed to the eBL holder (the exporter) in one transfer. A cancelled
+///      offering refunds each investor exactly what they paid.
 contract RWAOfferingPool {
     enum OfferingState {
         Created,
@@ -48,11 +61,13 @@ contract RWAOfferingPool {
     uint8 public constant RESUME_OFFERING = 6;
     uint8 public constant SETTLE_OFFERING = 7;
     uint8 public constant EMERGENCY_PAUSE = 8;
+    uint8 public constant CANCEL_OFFERING = 9;
 
     address public owner;
     address public oracle;
     IEBLRegistry public eblRegistry;
     IRWATokenMintable public rwaToken;
+    IPaymentToken public immutable paymentToken;
     IInvestorComplianceGate public complianceGate;
     AccessMode public accessMode = AccessMode.Permissionless;
     bool public emergencyStopped;
@@ -71,9 +86,19 @@ contract RWAOfferingPool {
         bool exists;
     }
 
+    /// @dev Kept apart from Offering so the existing offerings() getter ABI is unchanged.
+    struct Funding {
+        address issuer;          // eBL holder at creation; receives the disbursement
+        uint256 escrowed;        // paymentToken held for subscriptions not yet disbursed
+        bool disbursed;
+    }
+
     mapping(uint256 => Offering) public offerings;
+    mapping(uint256 => Funding) public funding;
+    mapping(uint256 => mapping(address => uint256)) public paidOf;
     mapping(uint256 => OfferingState) private _stateBeforePause;
     mapping(address => bool) public agentExecutor;
+    uint256 private _locked = 1;
 
     event OfferingCreated(
         uint256 indexed poolId,
@@ -99,6 +124,9 @@ contract RWAOfferingPool {
     event EmergencyStopSet(bool stopped, address indexed operator, bytes32 reasonHash);
     event AccessModeSet(AccessMode mode);
     event ComplianceGateSet(address indexed gate);
+    event FundsDisbursed(uint256 indexed poolId, address indexed issuer, uint256 amount);
+    event OfferingCancelled(uint256 indexed poolId, bytes32 reasonHash);
+    event Refunded(uint256 indexed poolId, address indexed investor, uint256 amount, uint256 tokensBurned);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "not owner");
@@ -115,11 +143,22 @@ contract RWAOfferingPool {
         _;
     }
 
-    constructor(address eblRegistry_, address rwaToken_) {
-        require(eblRegistry_ != address(0) && rwaToken_ != address(0), "dependency=0");
+    modifier nonReentrant() {
+        require(_locked == 1, "reentrant");
+        _locked = 2;
+        _;
+        _locked = 1;
+    }
+
+    constructor(address eblRegistry_, address rwaToken_, address paymentToken_) {
+        require(
+            eblRegistry_ != address(0) && rwaToken_ != address(0) && paymentToken_ != address(0),
+            "dependency=0"
+        );
         owner = msg.sender;
         eblRegistry = IEBLRegistry(eblRegistry_);
         rwaToken = IRWATokenMintable(rwaToken_);
+        paymentToken = IPaymentToken(paymentToken_);
     }
 
     function setOracle(address oracle_) external onlyOwner {
@@ -170,7 +209,8 @@ contract RWAOfferingPool {
         require(issuePrice > 0, "issuePrice=0");
         require(tokenSupply > 0, "supply=0");
         require(targetRedemptionValue >= issuePrice, "redemption<price");
-        require(eblRegistry.holderOf(eblId) != address(0), "ebl missing");
+        address issuer = eblRegistry.holderOf(eblId);
+        require(issuer != address(0), "ebl missing");
         require(eblRegistry.pledgedTo(eblId) == address(this), "ebl not pledged to pool");
 
         poolId = nextPoolId++;
@@ -186,35 +226,75 @@ contract RWAOfferingPool {
             state: OfferingState.Open,
             exists: true
         });
+        funding[poolId].issuer = issuer;
 
         emit OfferingCreated(poolId, eblId, tokenSupply, issuePrice, targetRedemptionValue);
         emit OfferingStateChanged(poolId, OfferingState.Created, OfferingState.Open, OPEN_OFFERING);
     }
 
-    function subscribe(uint256 poolId, uint256 amount) external whenOperational {
+    /// @notice Buy `amount` RWA at the current issue price. The caller must have
+    ///         approved this pool for `amount * issuePrice` of the payment token.
+    function subscribe(uint256 poolId, uint256 amount) external whenOperational nonReentrant {
         Offering storage o = offerings[poolId];
+        Funding storage f = funding[poolId];
         require(o.exists, "pool missing");
         require(
             o.state == OfferingState.Open || o.state == OfferingState.Repriced || o.state == OfferingState.Subscribed,
             "not open"
         );
+        require(!f.disbursed, "already funded");
         require(isInvestorEligible(msg.sender, poolId), "not eligible");
         require(amount > 0, "amount=0");
         require(o.subscribed + amount <= o.tokenSupply, "exceeds supply");
 
-        o.subscribed += amount;
         uint256 paidAmount = amount * o.issuePrice;
+        o.subscribed += amount;
+        f.escrowed += paidAmount;
+        paidOf[poolId][msg.sender] += paidAmount;
+
+        _pullPayment(msg.sender, paidAmount);
         rwaToken.mint(poolId, msg.sender, amount);
         emit Subscribed(poolId, msg.sender, amount, paidAmount);
 
         OfferingState next = o.subscribed == o.tokenSupply ? OfferingState.Funded : OfferingState.Subscribed;
         if (o.state != next) _changeState(poolId, next, OPEN_OFFERING);
+        if (next == OfferingState.Funded) _disburse(poolId);
+    }
+
+    /// @notice Human-only cancellation of an offering whose funds were never
+    ///         disbursed. Releases the eBL pledge and opens refunds.
+    function cancelOffering(uint256 poolId, bytes32 reasonHash) external onlyOwner {
+        Offering storage o = offerings[poolId];
+        require(o.exists, "pool missing");
+        require(!funding[poolId].disbursed, "already disbursed");
+        require(o.state != OfferingState.Cancelled, "already cancelled");
+        _changeState(poolId, OfferingState.Cancelled, CANCEL_OFFERING);
+        eblRegistry.releasePledge(o.eblId);
+        emit OfferingCancelled(poolId, reasonHash);
+    }
+
+    /// @notice Return the caller's escrowed payment for a cancelled offering and
+    ///         burn their RWA (tokens cannot move before disbursement).
+    function refund(uint256 poolId) external whenOperational nonReentrant {
+        require(offerings[poolId].state == OfferingState.Cancelled, "not cancelled");
+        uint256 amount = paidOf[poolId][msg.sender];
+        require(amount > 0, "nothing to refund");
+        uint256 tokens = rwaToken.balanceOf(poolId, msg.sender);
+
+        paidOf[poolId][msg.sender] = 0;
+        funding[poolId].escrowed -= amount;
+        if (tokens > 0) rwaToken.burn(poolId, msg.sender, tokens);
+        _sendPayment(msg.sender, amount);
+        emit Refunded(poolId, msg.sender, amount, tokens);
     }
 
     function markInTransit(uint256 poolId, bytes32 departureProof) external onlyExecutor whenOperational {
         require(departureProof != bytes32(0), "departureProof=0");
         Offering storage o = offerings[poolId];
-        require(o.state == OfferingState.Funded || o.state == OfferingState.Subscribed, "not funded");
+        require(
+            funding[poolId].disbursed && _isActive(o.state) && o.state != OfferingState.InTransit,
+            "not funded"
+        );
         _changeState(poolId, OfferingState.InTransit, OPEN_OFFERING);
     }
 
@@ -317,6 +397,29 @@ contract RWAOfferingPool {
         Offering storage o = offerings[poolId];
         require(o.exists, "pool missing");
         return (o.paymentProof, o.arrivalProof);
+    }
+
+    function _disburse(uint256 poolId) internal {
+        Funding storage f = funding[poolId];
+        uint256 amount = f.escrowed;
+        f.escrowed = 0;
+        f.disbursed = true;
+        _sendPayment(f.issuer, amount);
+        emit FundsDisbursed(poolId, f.issuer, amount);
+    }
+
+    function _pullPayment(address from, uint256 amount) internal {
+        _callPaymentToken(abi.encodeCall(IPaymentToken.transferFrom, (from, address(this), amount)));
+    }
+
+    function _sendPayment(address to, uint256 amount) internal {
+        _callPaymentToken(abi.encodeCall(IPaymentToken.transfer, (to, amount)));
+    }
+
+    /// @dev Accepts tokens that return true as well as ones that return nothing.
+    function _callPaymentToken(bytes memory data) private {
+        (bool ok, bytes memory result) = address(paymentToken).call(data);
+        require(ok && (result.length == 0 || abi.decode(result, (bool))), "payment failed");
     }
 
     function _pause(uint256 poolId, bytes32 evidenceHash, uint8 action) internal {

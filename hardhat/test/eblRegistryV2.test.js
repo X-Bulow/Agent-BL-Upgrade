@@ -101,8 +101,9 @@ describe('EBLRegistry V2', () => {
     const Token = await ethers.getContractFactory('RWAToken');
     const token = await Token.deploy();
     await token.waitForDeployment();
+    const usdc = await ethers.deployContract('MockUSDC');
     const Pool = await ethers.getContractFactory('RWAOfferingPool');
-    const pool = await Pool.deploy(await ctx.registry.getAddress(), await token.getAddress());
+    const pool = await Pool.deploy(await ctx.registry.getAddress(), await token.getAddress(), await usdc.getAddress());
     await pool.waitForDeployment();
     await expectRevert(
       pool.createOffering(1, 1_000_000n, 800_000n, 1_000_000n),

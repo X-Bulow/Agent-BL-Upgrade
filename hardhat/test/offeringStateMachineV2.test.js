@@ -31,14 +31,23 @@ async function expectRevert(promise, pattern) {
   expect(message).to.match(pattern);
 }
 
+// Give every test signer a large mUSDC balance and an unlimited allowance to the pool.
+async function fundSigners(usdc, pool, signers) {
+  for (const signer of signers) {
+    await (await usdc.mint(signer.address, 1_000_000_000_000_000n)).wait();
+    await (await usdc.connect(signer).approve(await pool.getAddress(), ethers.MaxUint256)).wait();
+  }
+}
+
 async function deployStack() {
   const [owner, investor, outsider, agent] = await ethers.getSigners();
   const Registry = await ethers.getContractFactory('EBLRegistry');
   const registry = await Registry.deploy();
   const Token = await ethers.getContractFactory('RWAToken');
   const token = await Token.deploy();
+  const usdc = await ethers.deployContract('MockUSDC');
   const Pool = await ethers.getContractFactory('RWAOfferingPool');
-  const pool = await Pool.deploy(await registry.getAddress(), await token.getAddress());
+  const pool = await Pool.deploy(await registry.getAddress(), await token.getAddress(), await usdc.getAddress());
   const Oracle = await ethers.getContractFactory('RiskPricingOracle');
   const oracle = await Oracle.deploy(await pool.getAddress());
   const Gate = await ethers.getContractFactory('InvestorComplianceGate');
@@ -50,7 +59,8 @@ async function deployStack() {
   await (await token.setPool(await pool.getAddress())).wait();
   await (await pool.setOracle(await oracle.getAddress())).wait();
   await (await pool.setAgentExecutor(agent.address, true)).wait();
-  return { owner, investor, outsider, agent, registry, token, pool, oracle, gate };
+  await fundSigners(usdc, pool, [owner, investor, outsider, agent]);
+  return { owner, investor, outsider, agent, registry, token, pool, oracle, gate, usdc };
 }
 
 async function createOffering(ctx, suffix = '1', supply = 100n) {
