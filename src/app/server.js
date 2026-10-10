@@ -20,6 +20,7 @@ import { X402_SERVICES } from '../x402/config.js';
 import { demoModeController, LiveModeUnavailableError } from '../demo/mode.js';
 import { DEFAULT_MYSTERY_QUOTE_MAX_AGE_SECONDS } from '../mystery/policy.js';
 import { storeState, createPool, subscribeToPool } from './store.js';
+import { SUBSCRIBABLE_OFFERING_STATES } from '../core/pricingSchema.js';
 import { recommend } from '../agent/investmentAdvisor.js';
 import {
   loadSpotPurchase,
@@ -518,7 +519,7 @@ export async function handleRequest(request, response) {
       if (request.method === 'GET' && url.pathname === '/api/market/listings') {
         await ensureMockPools();
         const activePools = Array.from(storeState.pools.values())
-          .filter((pool) => ['Open', 'Repriced'].includes(pool.status));
+          .filter((pool) => SUBSCRIBABLE_OFFERING_STATES.includes(pool.status));
         sendJson(response, 200, { ok: true, count: activePools.length, pools: activePools });
         return;
       }
@@ -530,7 +531,7 @@ export async function handleRequest(request, response) {
         
         // Format pools to match investmentAdvisor expects
         const availableCases = Array.from(storeState.pools.values())
-          .filter((pool) => ['Open', 'Repriced'].includes(pool.status))
+          .filter((pool) => SUBSCRIBABLE_OFFERING_STATES.includes(pool.status))
           .map(p => ({
             id: p.poolId,
             caseEntry: { 

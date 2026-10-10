@@ -1,4 +1,5 @@
 import { hashCanonical } from './fairness.js';
+import { SUBSCRIBABLE_OFFERING_STATES } from '../core/pricingSchema.js';
 
 export const DEFAULT_MYSTERY_QUOTE_MAX_AGE_SECONDS = 3600;
 
@@ -20,7 +21,7 @@ export const RISK_PASSPORT_TIERS = Object.freeze({
   })
 });
 
-const ACTIVE_STATES = new Set(['Open', 'Repriced']);
+const ACTIVE_STATES = new Set(SUBSCRIBABLE_OFFERING_STATES);
 
 export function normalizeRiskPassport(input = {}) {
   const tier = String(input.tier ?? 'BALANCED').toUpperCase();

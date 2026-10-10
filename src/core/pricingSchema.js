@@ -45,6 +45,9 @@ export const RWA_OFFERING_STATES = [
   'Cancelled'
 ];
 
+// States in which RWAOfferingPool.subscribe accepts new subscriptions.
+export const SUBSCRIBABLE_OFFERING_STATES = ['Open', 'Subscribed', 'Repriced'];
+
 // pricing_action -> the offering state it drives.
 export const STATE_BY_PRICING_ACTION = {
   OPEN_OFFERING: 'Open',
