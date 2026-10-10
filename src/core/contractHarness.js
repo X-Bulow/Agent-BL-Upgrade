@@ -107,7 +107,12 @@ export function simulateContractHarness(caseData, options = {}) {
   const poolId = 1;
   const subscribedAmount = options.subscribed_amount ?? pricingQuote.recommended_token_supply;
   const subscribedPaidAmount = Math.round(subscribedAmount * pricingQuote.final_issue_price_usd);
-  const finalState = OFFERING_STATE_BY_CONTRACT_ACTION[riskReport.contract_action];
+  // RWAOfferingPool escrows subscriptions and disburses them to the eBL holder
+  // only when the offering is fully subscribed; a pool cannot go InTransit before.
+  const funded = subscribedAmount >= pricingQuote.recommended_token_supply;
+  const stateBeforeAction = funded ? 'Funded' : 'Subscribed';
+  const actionState = OFFERING_STATE_BY_CONTRACT_ACTION[riskReport.contract_action];
+  const finalState = !funded && actionState === 'InTransit' ? 'Subscribed' : actionState;
   const riskLevelCode = RISK_LEVEL_TO_UINT8[pricingQuote.risk_level];
   const actionCode = PRICING_ACTION_TO_UINT8[pricingQuote.pricing_action];
 
@@ -160,6 +165,15 @@ export function simulateContractHarness(caseData, options = {}) {
         amount: subscribedAmount
       }
     },
+    ...(funded ? [{
+      contract: 'RWAOfferingPool',
+      event: 'FundsDisbursed',
+      args: {
+        poolId,
+        issuer: caseData.bill_of_lading.shipper,
+        amount: subscribedPaidAmount
+      }
+    }] : []),
     {
       contract: 'RiskPricingOracle',
       event: 'PricingUpdated',
@@ -175,17 +189,17 @@ export function simulateContractHarness(caseData, options = {}) {
         updater: oracleUpdater
       }
     },
-    {
+    ...(finalState !== stateBeforeAction ? [{
       contract: 'RWAOfferingPool',
       event: 'OfferingStateChanged',
       args: {
         poolId,
-        oldState: 'Funded',
+        oldState: stateBeforeAction,
         newState: finalState,
         action: pricingQuote.pricing_action,
         actionCode
       }
-    }
+    }] : [])
   ];
 
   return {
@@ -202,6 +216,8 @@ export function simulateContractHarness(caseData, options = {}) {
       token_supply: pricingQuote.recommended_token_supply,
       subscribed_amount: subscribedAmount,
       subscribed_paid_amount: subscribedPaidAmount,
+      escrowed_paid_amount: funded ? 0 : subscribedPaidAmount,
+      disbursed: funded,
       issue_price_usd: pricingQuote.final_issue_price_usd,
       target_redemption_value_usd: pricingQuote.target_redemption_value_usd
     },
