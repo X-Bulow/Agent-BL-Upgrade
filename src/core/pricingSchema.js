@@ -27,7 +27,7 @@ export const PRICING_ACTIONS = [
 //   PRICE_CLAMP     - the absolute MIN/MAX price clamp bound it (edge case)
 export const BINDING_CONSTRAINTS = ['EXPORTER_PROFIT', 'COLLATERAL', 'PRICE_CLAMP'];
 
-// RWA offering lifecycle states (PRD §8.5).
+// RWA offering lifecycle states, in RWAOfferingPool.OfferingState order.
 export const RWA_OFFERING_STATES = [
   'Created',
   'Priced',
@@ -41,7 +41,6 @@ export const RWA_OFFERING_STATES = [
   'Repaid',
   'Redeemed',
   'Liquidation',
-  'Defaulted',
   'Cancelled'
 ];
 

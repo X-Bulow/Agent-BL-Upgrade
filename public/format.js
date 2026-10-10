@@ -91,7 +91,7 @@ export const LIFECYCLE = [
 const STATE_TONE = {
   Created: 'muted', Priced: 'info', Open: 'ok', Subscribed: 'ok', Funded: 'ok',
   InTransit: 'info', Repriced: 'warn', Paused: 'crit', Frozen: 'crit',
-  Liquidation: 'crit', Repaid: 'ok', Redeemed: 'ok', Defaulted: 'crit', Cancelled: 'muted'
+  Liquidation: 'crit', Repaid: 'ok', Redeemed: 'ok', Cancelled: 'muted'
 };
 export function stateTone(state) {
   return STATE_TONE[state] ?? 'muted';

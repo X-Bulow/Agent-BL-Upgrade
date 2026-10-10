@@ -650,6 +650,7 @@ export async function handleRequest(request, response) {
         const offering = simulateOffering(caseData, {
           ...quoteOptions(options),
           subscription_usd: options.subscription_usd,
+          book: body?.book,
           events: options.events
         });
         assertPricingQuote(offering.initial_quote, caseData);
