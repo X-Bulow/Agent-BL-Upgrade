@@ -51,6 +51,36 @@ async function parseChallenge(response) {
   return { body, amount, network, payTo };
 }
 
+/**
+ * x402 V2 challenge (Live gateway): { x402Version: 2, accepts: [{ amount (atomic USDC), network, payTo, ... }] }.
+ * Returns null for the AgentBL personal-sign (Demo) challenge.
+ */
+async function readV2Challenge(response) {
+  let body;
+  try {
+    body = await response.clone().json();
+  } catch {
+    return null;
+  }
+  if (body?.x402Version !== 2 || !Array.isArray(body.accepts) || body.accepts.length === 0) return null;
+  const offer = body.accepts[0];
+  const amount = Number(offer.amount) / 1_000_000; // Injective USDC has 6 decimals
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new X402ClientError('X402_PRICE_INVALID', 'The 402 response contains an invalid price', { recoverable: false });
+  }
+  return { body, amount, network: offer.network, payTo: offer.payTo ?? null };
+}
+
+/** RPC for the paying wallet. Derived from the challenge's network, never from server-side config. */
+function clientRpcUrl(options, network) {
+  return options.rpcUrl
+    ?? process.env.X402_RPC_URL
+    ?? process.env.INJECTIVE_RPC_URL
+    ?? (network === 'eip155:1776'
+      ? 'https://sentry.evm-rpc.injective.network'
+      : 'https://k8s.testnet.json-rpc.injective.network');
+}
+
 async function resolveSigner(options) {
   if (options.signer) {
     const address = options.signerAddress
@@ -145,6 +175,53 @@ export function createPaidFetch(options = {}) {
   return async function paidFetch(url, init = {}) {
     const unpaid = await fetchWithTimeout(fetchImpl, url, init, timeoutMs);
     if (unpaid.status !== 402) return unpaid;
+
+    // Live endpoints speak x402 V2 (EIP-3009 authorization settled by a facilitator).
+    // The budget and network allow-list are enforced BEFORE anything is signed.
+    const v2 = await readV2Challenge(unpaid);
+    if (v2) {
+      options.onChallenge?.(v2, unpaid);
+      if (v2.amount > budgetUSDC) {
+        throw new X402ClientError('X402_BUDGET_EXCEEDED', `Payment ${v2.amount} USDC exceeds budget ${budgetUSDC} USDC`);
+      }
+      if (!allowedNetworks.has(v2.network)) {
+        throw new X402ClientError('X402_WRONG_NETWORK', `Refusing x402 payment on ${v2.network}`);
+      }
+      const privateKey = options.privateKey?.trim();
+      if (!privateKey) {
+        throw new X402ClientError(
+          'X402_SIGNER_REQUIRED',
+          'Paying a Live (x402 V2) endpoint requires WHITE_AGENT_PRIVATE_KEY: it signs an EIP-3009 transfer authorization',
+          { recoverable: false }
+        );
+      }
+      const [{ createInjectiveClient }, { ethers }] = await Promise.all([import('@injectivelabs/x402/client'), import('ethers')]);
+      let signerAddress;
+      try {
+        signerAddress = new ethers.Wallet(privateKey).address;
+      } catch (error) {
+        throw new X402ClientError('X402_PRIVATE_KEY_INVALID', 'Configured x402 signer key is invalid', { recoverable: false, cause: error });
+      }
+      const client = createInjectiveClient({
+        privateKey,
+        rpcUrl: clientRpcUrl(options, v2.network),
+        preferredNetworks: [v2.network]
+      });
+      // Settlement goes through a facilitator and can take a few seconds.
+      const headers = new Headers(init.headers ?? {});
+      headers.set('Accept', 'application/json');
+      headers.set('Content-Type', 'application/json');
+      const paid = await client.fetch(url, {
+        ...init,
+        method: options.retryMethod ?? 'POST',
+        headers,
+        body: mergePaidBody(init, { body: {} }, options.payload), // a V2 request carries no AgentBL nonce
+        signal: init.signal ?? AbortSignal.timeout(Math.max(timeoutMs, 30_000))
+      });
+      options.onPayment?.({ challenge: v2, signer: signerAddress, ephemeral: false, response: paid });
+      return paid;
+    }
+
     const challenge = await parseChallenge(unpaid);
     options.onChallenge?.(challenge, unpaid);
 
@@ -240,7 +317,13 @@ export async function fetchPaidIntel(baseUrl, endpoint, options = {}) {
     }
   });
   const url = `${baseUrl.replace(/\/$/u, '')}${endpoint}`;
-  const response = await paidFetch(url, { headers: { Accept: 'application/json' } });
+  // Probe with the real method (POST): Live endpoints only protect POST, and the Demo
+  // transport answers any method.
+  const response = await paidFetch(url, {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(options.caseData ? { case: options.caseData } : (options.payload ?? {}))
+  });
   const body = await response.json().catch(() => ({}));
   if (!capturedChallenge) {
     return { unpaid: body, paid: body, paymentTxHash: null, payment: null, x402_required: false };
