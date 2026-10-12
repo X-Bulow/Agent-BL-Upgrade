@@ -150,6 +150,8 @@ const DICT = {
     demo_reset: '重置演示',
     demo_reset_done: '演示状态已重置',
     live_config_required: '请先配置 X402_MODE=live、X402_FACILITATOR_URL 与 X402_PAY_TO',
+    admin_token_prompt: '切换运行模式需要管理员令牌（服务器上配置的 AGENTBL_ADMIN_TOKEN）：',
+    admin_token_cancelled: '已取消：未提供管理员令牌',
 
 	    // category filter
 	    cat_all: '全部',
@@ -504,7 +506,9 @@ const DICT = {
     mystery_signing_subscription: '等待第二次独立签名…',
     mystery_subscription_success: '认购已完成 · {tx}', mystery_subscription_complete: '认购交易已记录',
     mystery_evm_wallet_required: 'Live 模式需要连接 EVM 钱包（MetaMask / OKX）',
-    mystery_live_v2_required: 'Live 模式需要已部署的 x402 V2 结算网关，当前演示不接受 personal-sign。',
+    mystery_live_v2_required: 'Live 付款网关暂不可用（未返回有效的 x402 V2 挑战），请稍后重试。',
+    x402_live_wallet_required: 'Live 模式需要连接浏览器钱包（MetaMask / OKX）来签署 EIP-3009 转账授权',
+    x402_live_sign_prompt: '请在钱包中签署 USDC 转账授权（EIP-3009）…',
 
     // ── Voyage Passport collection ──
     passport_eyebrow: 'Voyage Passport 收藏册',
@@ -578,8 +582,10 @@ const DICT = {
     x402_challenge_log: '请求 AI 风控报告 → HTTP 402 Payment Required 已返回',
     x402_signing_log: 'EIP-3009 —— 投资方签署转账授权',
     x402_settlement_log: 'PaymentOracle —— 链上结算进行中',
+    x402_demo_signing_log: '演示 —— 模拟投资方的 EIP-3009 授权（无真实签名）',
+    x402_demo_settlement_log: '演示 —— 模拟 PaymentOracle 结算（不产生链上交易）',
     x402_unlocked_log: '✓ 报告已解锁 —— {events} 项风险指标, {intel} 条深度分析，已注入定价引擎',
-    x402_tx_log: '✓ 链上支付存证: {tx}',
+    x402_tx_log: '✓ 支付存证: {tx}',
     x402_fail_log: '✗ 购买流程失败: {msg}',
     x402_price_drop: '↓ 折价加深（AI 报告检出更多风险）',
     x402_price_rise: '↑ 折价收窄（AI 报告确认风险可控）',
@@ -624,6 +630,8 @@ const DICT = {
     demo_reset: 'Reset demo',
     demo_reset_done: 'Demo state reset',
     live_config_required: 'Configure X402_MODE=live, X402_FACILITATOR_URL and X402_PAY_TO first',
+    admin_token_prompt: 'Switching runtime mode needs the admin token (AGENTBL_ADMIN_TOKEN configured on the server):',
+    admin_token_cancelled: 'Cancelled: no admin token provided',
 
 	    // category filter
 	    cat_all: 'All',
@@ -978,7 +986,9 @@ const DICT = {
     mystery_signing_subscription: 'Waiting for the second independent signature…',
     mystery_subscription_success: 'Subscription complete · {tx}', mystery_subscription_complete: 'Subscription recorded',
     mystery_evm_wallet_required: 'Live mode requires an EVM wallet (MetaMask / OKX)',
-    mystery_live_v2_required: 'Live mode requires a deployed x402 V2 settlement gateway; personal-sign is not accepted here.',
+    mystery_live_v2_required: 'The Live payment gateway is unavailable (no valid x402 V2 challenge was returned); please retry shortly.',
+    x402_live_wallet_required: 'Live mode needs a browser wallet (MetaMask / OKX) to sign the EIP-3009 transfer authorization',
+    x402_live_sign_prompt: 'Sign the USDC transfer authorization (EIP-3009) in your wallet…',
 
     // ── Voyage Passport collection ──
     passport_eyebrow: 'Voyage Passport collection',
@@ -1052,8 +1062,10 @@ const DICT = {
     x402_challenge_log: 'Request AI risk report → HTTP 402 Payment Required returned',
     x402_signing_log: 'EIP-3009 — Investor signing TransferWithAuthorization',
     x402_settlement_log: 'PaymentOracle — On-chain settlement in progress',
+    x402_demo_signing_log: 'Demo — simulating the investor\'s EIP-3009 authorization (no real signature)',
+    x402_demo_settlement_log: 'Demo — simulating PaymentOracle settlement (no on-chain transaction)',
     x402_unlocked_log: '✓ Report unlocked — {events} risk indicators, {intel} deep analysis entries, fed into pricing engine',
-    x402_tx_log: '✓ Payment evidence on-chain: {tx}',
+    x402_tx_log: '✓ Payment evidence: {tx}',
     x402_fail_log: '✗ Purchase flow failed: {msg}',
     x402_price_drop: '↓ deeper discount (AI report found more risk)',
     x402_price_rise: '↑ narrower discount (AI report confirms risk is contained)',

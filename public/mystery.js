@@ -2,6 +2,7 @@ import { state } from './store.js';
 import { $, el, clear, toast } from './dom.js';
 import { t, tData } from './i18n.js';
 import * as web3 from './web3.js';
+import { payV2WithWallet } from './x402-v2.js';
 import { isIndependentSubscriptionAuthorized, verifyMysteryProof } from './mystery-proof.js';
 import {
   assertSafePassportShareCard,
@@ -66,12 +67,12 @@ function randomHex32() {
 
 function cargoImage(category) {
   const cargo = String(category ?? '').toLowerCase();
-  if (/copper|铜/u.test(cargo)) return '/img/cargo/copper.jpg';
-  if (/oil|petroleum|原油|成品油/u.test(cargo)) return '/img/cargo/oil.jpg';
-  if (/iron|ore|矿/u.test(cargo)) return '/img/cargo/ore.jpg';
-  if (/rubber|橡胶/u.test(cargo)) return '/img/cargo/rubber.jpg';
-  if (/soy|大豆/u.test(cargo)) return '/img/cargo/soybean.jpg';
-  return '/img/cargo/alu.jpg';
+  if (/copper|铜/u.test(cargo)) return '/img/cargo/copper.webp';
+  if (/oil|petroleum|原油|成品油/u.test(cargo)) return '/img/cargo/oil.webp';
+  if (/iron|ore|矿/u.test(cargo)) return '/img/cargo/ore.webp';
+  if (/rubber|橡胶/u.test(cargo)) return '/img/cargo/rubber.webp';
+  if (/soy|大豆/u.test(cargo)) return '/img/cargo/soybean.webp';
+  return '/img/cargo/alu.webp';
 }
 
 async function fetchJson(url, options) {
@@ -427,6 +428,43 @@ function setPaymentNote(message, tone = '') {
   note.className = `muted ${tone}`.trim();
 }
 
+/** The price the server itself lists for a paid service, in atomic USDC (6 decimals). */
+async function listedPriceAtomic(serviceId) {
+  const response = await fetch('/api/x402/config');
+  const config = await response.json().catch(() => ({}));
+  const service = (config.services ?? []).find((entry) => entry.serviceId === serviceId);
+  return service ? Math.round(Number(service.priceUSDC) * 1_000_000) : undefined;
+}
+
+/**
+ * Live mode: pay with the connected wallet through the x402 V2 gateway (EIP-3009
+ * authorization settled by the facilitator). Demo mode keeps the personal-sign path.
+ */
+async function payMysteryVoyageLive(endpoint, body) {
+  const provider = web3.getEthereumProvider();
+  const from = mysteryState.signer?.address;
+  if (!provider || !from || mysteryState.signer?.demo) throw new Error(t('mystery_evm_wallet_required'));
+  const expectedAmountAtomic = await listedPriceAtomic('mystery-voyage');
+  const { response, challenge } = await payV2WithWallet({
+    endpoint,
+    body,
+    provider,
+    from,
+    expectedAmountAtomic,
+    onStage: (stage) => {
+      if (stage === 'sign') {
+        setStep('challenge', 'done', 'HTTP 402');
+        setStep('settlement', 'active', t('mystery_signing_payment'));
+        setPaymentNote(t('x402_live_sign_prompt'));
+      }
+    }
+  });
+  const report = await response.json().catch(() => ({}));
+  if (!challenge && response.status === 402) throw new Error(t('mystery_live_v2_required'));
+  if (!response.ok) throw new Error(report.error || t('mystery_payment_failed'));
+  return report;
+}
+
 async function openMysteryVoyage() {
   if (!mysteryState.preview || !mysteryState.signer) return;
   const button = $('#mystery-open-btn');
@@ -438,38 +476,45 @@ async function openMysteryVoyage() {
     setStep('challenge', 'active', t('mystery_requesting_402'));
     setPaymentNote(t('mystery_requesting_402'));
     const endpoint = '/api/x402/mystery/voyage';
-    const unpaid = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ reveal_id: mysteryState.preview.reveal_id, user_nonce: userNonce })
-    });
-    const challenge = await unpaid.json().catch(() => ({}));
-    if (unpaid.status !== 402 || !challenge.challenge || !challenge.nonce) {
-      throw new Error(challenge.error || t('mystery_live_v2_required'));
-    }
-    setStep('challenge', 'done', 'HTTP 402');
-    setStep('settlement', 'active', t('mystery_signing_payment'));
-    setPaymentNote(t('mystery_signing_payment'));
+    let report;
+    if (state.demoMode) {
+      const unpaid = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ reveal_id: mysteryState.preview.reveal_id, user_nonce: userNonce })
+      });
+      const challenge = await unpaid.json().catch(() => ({}));
+      if (unpaid.status !== 402 || !challenge.challenge || !challenge.nonce) {
+        throw new Error(challenge.error || t('mystery_live_v2_required'));
+      }
+      setStep('challenge', 'done', 'HTTP 402');
+      setStep('settlement', 'active', t('mystery_signing_payment'));
+      setPaymentNote(t('mystery_signing_payment'));
 
-    const signature = await mysteryState.signer.signMessage(challenge.challenge);
-    const paid = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        'X402-Signature': signature,
-        'X402-Signer': mysteryState.signer.address
-      },
-      body: JSON.stringify({
-        reveal_id: mysteryState.preview.reveal_id,
-        user_nonce: userNonce,
-        nonce: challenge.nonce
-      })
-    });
-    const report = await paid.json().catch(() => ({}));
-    if (!paid.ok) throw new Error(report.error || t('mystery_payment_failed'));
+      const signature = await mysteryState.signer.signMessage(challenge.challenge);
+      const paid = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X402-Signature': signature,
+          'X402-Signer': mysteryState.signer.address
+        },
+        body: JSON.stringify({
+          reveal_id: mysteryState.preview.reveal_id,
+          user_nonce: userNonce,
+          nonce: challenge.nonce
+        })
+      });
+      report = await paid.json().catch(() => ({}));
+      if (!paid.ok) throw new Error(report.error || t('mystery_payment_failed'));
+    } else {
+      setStep('challenge', 'active', t('mystery_requesting_402'));
+      report = await payMysteryVoyageLive(endpoint, { reveal_id: mysteryState.preview.reveal_id, user_nonce: userNonce });
+    }
     mysteryState.report = report;
     setStep('settlement', 'done', report.payment?.live ? t('mystery_onchain') : t('mystery_demo_receipt'));
+    setPaymentNote(report.payment?.live ? t('mystery_live_settlement_note') : t('mystery_demo_receipt_note'));
     setStep('reveal', 'active', t('mystery_opening'));
     setMysteryBoxMotion('bursting');
     await new Promise((resolve) => setTimeout(resolve, reduceMotion ? 0 : 520));

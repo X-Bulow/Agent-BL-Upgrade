@@ -1,0 +1,26 @@
+# Line endings: text files are normalised to LF inside the repository. The working tree
+# keeps the platform default (CRLF on Windows with core.autocrlf), so nobody has to
+# change a git setting.
+* text=auto
+
+# Always LF, on every platform: shells, containers, make and CI parse these literally.
+*.sh text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+Makefile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+.nvmrc text eol=lf
+
+# Vendored browser bundles are integrity-checked byte for byte (public/vendor/manifest.json
+# holds their SHA-256) and must never be converted.
+public/vendor/** -text
+
+# Binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff2 binary
+*.wasm binary

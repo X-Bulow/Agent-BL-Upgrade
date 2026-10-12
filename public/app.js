@@ -10,14 +10,15 @@
 // UI chrome is bilingual via i18n.js; the engine's own prose stays as returned.
 
 import { state, selectedQuote } from './store.js';
-import { $, el, clear, toast, setBusy } from './dom.js';
+import { $, el, clear, toast, setBusy, escapeHtml } from './dom.js';
 import * as f from './format.js';
 import * as api from './api.js';
 import * as web3 from './web3.js';
 import { t, tData, toggleLang, onLangChange, applyStaticI18n } from './i18n.js';
 import { initVoyage, renderVoyage, startVoyageClock, stopVoyageClock } from './voyage.js';
 import { initPopupAssistant } from './popup-assistant.js';
-import { getDeepSeekClient } from './llm-client.js';
+import { getLlmClient, getLlmStatus } from './llm-client.js';
+import { payV2WithWallet } from './x402-v2.js';
 import { initMysteryExperience, renderMysteryExperience, resetMysteryExperience } from './mystery.js';
 
 const PAUSED_ACTIONS = new Set(['PAUSE_OFFERING', 'FREEZE_POOL', 'TRIGGER_LIQUIDATION']);
@@ -186,15 +187,39 @@ function refreshDemoModeUi() {
   renderMysteryExperience();
 }
 
+// Switching Demo <-> Live is an admin operation: the server asks for AGENTBL_ADMIN_TOKEN.
+// The token is kept for this tab session only (sessionStorage), never in localStorage.
+const ADMIN_TOKEN_KEY = 'agentbl.adminToken';
+
+function storedAdminToken() {
+  try { return sessionStorage.getItem(ADMIN_TOKEN_KEY) || ''; } catch { return ''; }
+}
+
+function rememberAdminToken(token) {
+  try {
+    if (token) sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+    else sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+  } catch { /* storage unavailable: the prompt simply reappears next time */ }
+}
+
+async function postRuntimeMode(target, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch('/api/demo/mode', { method: 'POST', headers, body: JSON.stringify({ mode: target }) });
+  return { response, data: await response.json() };
+}
+
 async function onModeToggle() {
   const target = state.demoMode ? 'live' : 'demo';
   try {
-    const response = await fetch('/api/demo/mode', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: target })
-    });
-    const data = await response.json();
+    let { response, data } = await postRuntimeMode(target, storedAdminToken());
+    if (response.status === 401) {
+      // No token yet (or a stale one): ask once, retry, and remember it only if it worked.
+      const entered = (window.prompt(t('admin_token_prompt')) || '').trim();
+      if (!entered) throw new Error(t('admin_token_cancelled'));
+      ({ response, data } = await postRuntimeMode(target, entered));
+      rememberAdminToken(response.ok ? entered : '');
+    }
     if (!response.ok) throw new Error(data.error || `Could not switch to ${target}`);
     state.demoMode = data.demoMode;
     state.liveAvailable = data.liveAvailable;
@@ -537,7 +562,7 @@ function renderMarketCard(entry, comparison) {
   else if (match('soybean') || match('-soy-') || match('大豆')) cargoType = 'soybean';
   else if (match('alu') || match('铝')) cargoType = 'alu';
 
-  const imgSrc = `/img/cargo/${cargoType}.jpg`;
+  const imgSrc = `/img/cargo/${cargoType}.webp`;
   return el('article', {
     class: `market-card tone-${tone}${active ? ' active' : ''}${paused ? ' paused' : ''}`,
     'data-case': entry.case_id,
@@ -919,6 +944,10 @@ async function onAiSearch() {
   const query = ($('#search-input')?.value || '').trim();
   if (!query) { toast(t('ai_empty_query'), true); return; }
 
+  // A pending keystroke debounce would fire after the AI answer arrives and wipe
+  // the AI filter (typing then pressing Enter quickly used to show 0 results).
+  clearTimeout(searchDebounce);
+
   const btn = $('#ai-search-btn');
   const origText = btn.textContent;
   btn.disabled = true;
@@ -953,7 +982,12 @@ async function onAiSearch() {
       }
     }];
 
-    const client = getDeepSeekClient();
+    // No provider configured on the server: skip the request that can only fail and go
+    // straight to the keyword fallback in the catch block below.
+    const llmStatus = await getLlmStatus();
+    if (llmStatus.reachable && !llmStatus.configured) throw new Error('LLM relay is not configured');
+
+    const client = getLlmClient();
     const messages = [
       { role: 'system', content: `You are an eBL investment-filter assistant. Select the best matching cases from the list below based on the user's natural-language preference.
 
@@ -1662,14 +1696,9 @@ let x402Network = 'eip155:1439';
 let selectedX402ServiceId = 'premium-risk';
 let x402HandlersWired = false;
 
+// Short alias used throughout the HTML-string renderers below.
 function html(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[ch]));
+  return escapeHtml(value);
 }
 
 function selectedCaseEntry() {
@@ -1750,7 +1779,7 @@ async function loadX402Config() {
 const X402_PURCHASES_KEY = 'agentbl.x402.purchases';
 
 function loadX402Purchases() {
-  let entries = [];
+  let entries;
   try {
     entries = JSON.parse(localStorage.getItem(X402_PURCHASES_KEY) || '[]');
   } catch { entries = []; }
@@ -1804,8 +1833,8 @@ async function restoreX402Purchases() {
     const when = new Date(entry.expires_at).toLocaleTimeString();
     return [
       `<div class="x402-purchased-item" data-idx="${i}" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">`,
-      `<div><strong style="font-size:13px;">${entry.kind}</strong>`,
-      `<div class="muted" style="font-size:11px;">${entry.case_id || ''} · ${t('x402_purchased_expires', { time: when })}</div></div>`,
+      `<div><strong style="font-size:13px;">${html(entry.kind)}</strong>`,
+      `<div class="muted" style="font-size:11px;">${html(entry.case_id || '')} · ${t('x402_purchased_expires', { time: when })}</div></div>`,
       `<button class="btn ghost x402-reread-btn" data-idx="${i}" style="font-size:12px;">${t('x402_purchased_reread')}</button>`,
       `</div>`
     ].join('');
@@ -1833,7 +1862,7 @@ function reopenX402Report(data) {
   updateX402PricingImpact(data);
   renderX402ReportDetail(data, { source: 'cache' });
   const log = $('#x402-log');
-  if (log) log.innerHTML = `<p>• <span style="color:#2EA043;">${t('x402_purchased_reread')} — ${data.report_envelope?.report_id?.slice(0, 18) || ''}…</span></p>`;
+  if (log) log.innerHTML = `<p>• <span style="color:#2EA043;">${t('x402_purchased_reread')} — ${html(data.report_envelope?.report_id?.slice(0, 18) || '')}…</span></p>`;
 }
 
 function renderIntelMarket() {
@@ -2274,10 +2303,10 @@ async function runX402Smoke() {
     log.innerHTML += `<p>• <span style="color:#D6336C;">${t('x402_challenge_log')}</span></p>`;
 
     setTimeout(() => setX402Step('pay', 'active', t('x402_signing_status')), 500);
-    log.innerHTML += `<p>• <span style="color:#D6336C;">${t('x402_signing_log')}</span></p>`;
+    log.innerHTML += `<p>• <span style="color:#D6336C;">${t('x402_demo_signing_log')}</span></p>`;
 
     setTimeout(() => setX402Step('settle', 'active', t('x402_settling_status')), 1000);
-    log.innerHTML += `<p>• <span style="color:#1F6FEB;">${t('x402_settlement_log')}</span></p>`;
+    log.innerHTML += `<p>• <span style="color:#1F6FEB;">${t('x402_demo_settlement_log')}</span></p>`;
 
     const res = await fetch('/api/x402/smoke', {
       method: 'POST',
@@ -2300,23 +2329,110 @@ async function runX402Smoke() {
         const isLive = data.payment.live;
         const liveLabel = isLive ? '⛓️ On-chain' : '🔬 Mock hash (not on chain)';
         const liveColor = isLive ? '#2EA043' : '#D29922';
-        log.innerHTML += `<p>• <span style="color:${liveColor};">${t('x402_tx_log', { tx: data.payment.txHash.slice(0, 42) + '…' })}</span> <span style="font-size:0.8em;color:${liveColor};">[${liveLabel}]</span></p>`;
+        log.innerHTML += `<p>• <span style="color:${liveColor};">${t('x402_tx_log', { tx: html(data.payment.txHash.slice(0, 42)) + '…' })}</span> <span style="font-size:0.8em;color:${liveColor};">[${liveLabel}]</span></p>`;
       }
       log.innerHTML += `<p style="margin-top:8px;color:#2EA043;"><strong>${t('x402_pass')}</strong></p>`;
     } else {
       setX402Step('unlock', 'error', t('x402_failed'));
-      log.innerHTML += `<p>• <span style="color:#D6336C;">${t('x402_fail_log', { msg: data.error || t('x402_error') })}</span></p>`;
+      log.innerHTML += `<p>• <span style="color:#D6336C;">${t('x402_fail_log', { msg: html(data.error || t('x402_error')) })}</span></p>`;
     }
   } catch (e) {
     setX402Step('settle', 'error', t('x402_failed'));
-    log.innerHTML += `<p>• <span style="color:#D6336C;">${t('x402_fail_log', { msg: e.message })}</span></p>`;
+    log.innerHTML += `<p>• <span style="color:#D6336C;">${t('x402_fail_log', { msg: html(e.message) })}</span></p>`;
   } finally {
     setX402FlowActive(false);
   }
 }
 
 /**
- * Real x402 wallet flow — user's wallet directly calls PaymentOracle on-chain:
+ * Live mode: pay through the x402 V2 gateway. The connected wallet signs an EIP-3009
+ * USDC transfer authorization (eth_signTypedData_v4); the facilitator settles it on
+ * chain and the server attests the report. The price the server asks must equal the
+ * price shown here, otherwise nothing is signed.
+ */
+async function purchaseWithWalletLive(serviceId, priceUSDC, endpoint) {
+  const log = $('#x402-log');
+  if (!log) return;
+  log.innerHTML = `<p class="muted">${t('x402_initiating')}</p>`;
+  renderX402FlowReset();
+
+  const eth = web3.getEthereumProvider();
+  if (!eth) {
+    log.innerHTML += `<p>• <span style="color:#D6336C;">❌ ${html(t('x402_live_wallet_required'))}</span></p>`;
+    setX402Step('pay', 'error', 'No wallet');
+    return;
+  }
+
+  try {
+    setX402FlowActive(true);
+    if (!web3.isWalletConnected()) {
+      const { address } = await web3.connectWallet();
+      state.wallet = { address };
+    }
+    const accounts = await eth.request({ method: 'eth_requestAccounts' });
+    const from = accounts[0];
+
+    const { response } = await payV2WithWallet({
+      endpoint,
+      body: { case: state.caseData, case_id: state.caseId },
+      provider: eth,
+      from,
+      expectedAmountAtomic: Math.round(Number(priceUSDC) * 1_000_000),
+      onStage: (stage) => {
+        if (stage === 'challenge') {
+          setX402Step('challenge', 'active', t('x402_challenge_status'));
+          log.innerHTML += `<p>• <span style="color:#D6336C;">${html(t('x402_challenge_log'))}</span></p>`;
+        } else if (stage === 'sign') {
+          setX402Step('challenge', 'done', t('x402_challenge_status'));
+          setX402Step('pay', 'active', t('x402_signing_status'));
+          log.innerHTML += `<p>• <span style="color:#D6336C;">${html(t('x402_live_sign_prompt'))}</span></p>`;
+        } else if (stage === 'settle') {
+          setX402Step('pay', 'done', t('x402_signed'));
+          setX402Step('settle', 'active', t('x402_settling_status'));
+          log.innerHTML += `<p>• <span style="color:#1F6FEB;">${html(t('x402_settlement_log'))}</span></p>`;
+        }
+      }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Server returned ${response.status}`);
+
+    setX402Step('settle', 'done', t('x402_settled'));
+    setX402Step('unlock', 'done', t('x402_unlocked'));
+    updateX402PaymentCard(data);
+    updateX402PricingImpact(data);
+    if (data.service) selectedX402ServiceId = data.service;
+    highlightX402ServiceSelection();
+    renderX402ReportDetail(data);
+    if (data.report_envelope) {
+      persistX402Purchase(data.report_envelope);
+      restoreX402Purchases();
+    }
+
+    log.innerHTML += '<p>• <span style="color:#2EA043;">Report unlocked — ' + html(reportCountSummary(data)) + '</span></p>';
+    const links = [
+      ['Payment', data.payment?.explorerUrl],
+      ['Attestation', data.payment?.attestationExplorerUrl]
+    ];
+    for (const [label, url] of links) {
+      // Only ever link to an https explorer page.
+      if (typeof url === 'string' && /^https:\/\//iu.test(url)) {
+        log.innerHTML += `<p>• <span style="color:#2EA043;">⛓️ <a href="${html(url)}" target="_blank" rel="noopener noreferrer" style="color:#1F6FEB;">${label} on Injective Explorer ↗</a></span></p>`;
+      }
+    }
+    log.innerHTML += `<p style="margin-top:8px;color:#2EA043;"><strong>${html(t('x402_pass'))}</strong></p>`;
+  } catch (e) {
+    setX402Step('settle', 'error', t('x402_failed'));
+    log.innerHTML += `<p>• <span style="color:#D6336C;">✗ ${t('x402_fail_log', { msg: html(e.message) })}</span></p>`;
+    if (e.code === 4001 || e.code === 'ACTION_REJECTED' || e.code === 'REJECTED') {
+      log.innerHTML += `<p>• <span style="color:#D29922;">⚠ User rejected in wallet</span></p>`;
+    }
+  } finally {
+    setX402FlowActive(false);
+  }
+}
+
+/**
+ * Demo x402 wallet flow (Live mode delegates to purchaseWithWalletLive) — user's wallet directly calls PaymentOracle on-chain:
  *   1. GET endpoint → HTTP 402 + challenge
  *   2. User signs challenge via personal_sign
  *   3. User's wallet calls PaymentOracle.logPaymentEvidence() (user pays gas)
@@ -2325,6 +2441,7 @@ async function runX402Smoke() {
 async function purchaseWithWallet(serviceId, priceUSDC, endpoint) {
   const log = $('#x402-log');
   if (!log) return;
+  if (!state.demoMode) return purchaseWithWalletLive(serviceId, priceUSDC, endpoint);
   log.innerHTML = `<p class="muted">${t('x402_initiating')}</p>`;
   renderX402FlowReset();
 
@@ -2351,7 +2468,7 @@ async function purchaseWithWallet(serviceId, priceUSDC, endpoint) {
     const nonce = unpaidBody.nonce;
     if (!challenge) throw new Error('No challenge message in 402 response');
 
-    log.innerHTML += `<p>• <span style="color:#D6336C;">📝 Challenge received: "${challenge.slice(0, 60)}…"</span></p>`;
+    log.innerHTML += `<p>• <span style="color:#D6336C;">📝 Challenge received: "${html(String(challenge).slice(0, 60))}…"</span></p>`;
 
     // ── Step 2: Wallet personal_sign ──
     setX402Step('pay', 'active', t('x402_signing_status'));
@@ -2376,7 +2493,7 @@ async function purchaseWithWallet(serviceId, priceUSDC, endpoint) {
       params: [challenge, signerAddr]
     });
 
-    log.innerHTML += `<p>• <span style="color:#2EA043;">✓ Signed by ${signerAddr.slice(0, 8)}…${signerAddr.slice(-4)}</span></p>`;
+    log.innerHTML += `<p>• <span style="color:#2EA043;">✓ Signed by ${html(signerAddr.slice(0, 8))}…${html(signerAddr.slice(-4))}</span></p>`;
 
     // ── Step 3: User's wallet calls PaymentOracle.logPaymentEvidence() on-chain ──
     setX402Step('settle', 'active', t('x402_settling_status'));
@@ -2404,11 +2521,11 @@ async function purchaseWithWallet(serviceId, priceUSDC, endpoint) {
         pricingAction: 'OPEN'
       });
       useDirectChain = true;
-      log.innerHTML += `<p>• <span style="color:#2EA043;">⛓️ On-chain tx sent from your wallet: ${paymentResult.txHash.slice(0, 18)}…</span></p>`;
+      log.innerHTML += `<p>• <span style="color:#2EA043;">⛓️ On-chain tx sent from your wallet: ${html(paymentResult.txHash.slice(0, 18))}…</span></p>`;
     } catch (chainErr) {
       // Fallback: server relay if PaymentOracle not deployed or user rejected
       if (chainErr.code === 'REJECTED') throw chainErr;
-      log.innerHTML += `<p>• <span style="color:#D29922;">⚠ Direct on-chain call unavailable (${chainErr.message}) — using server relay fallback.</span></p>`;
+      log.innerHTML += `<p>• <span style="color:#D29922;">⚠ Direct on-chain call unavailable (${html(chainErr.message)}) — using server relay fallback.</span></p>`;
     }
 
     // ── Step 4: POST to server to get the unlocked intel report ──
@@ -2460,16 +2577,18 @@ async function purchaseWithWallet(serviceId, priceUSDC, endpoint) {
     // Show the ACTUAL on-chain tx hash from user's wallet
     const displayTx = useDirectChain ? paymentResult : data.payment;
     if (displayTx?.txHash) {
-      const explorerUrl = displayTx.explorerUrl
+      // Only ever link to an https explorer page; never echo a server-supplied scheme verbatim.
+      const candidateUrl = displayTx.explorerUrl
         || `https://testnet.blockscout.injective.network/tx/${displayTx.txHash}`;
-      log.innerHTML += `<p>• <span style="color:#2EA043;">⛓️ <a href="${explorerUrl}" target="_blank" style="color:#1F6FEB;">View on Injective Explorer ↗</a></span></p>`;
-      log.innerHTML += `<p>• <span style="color:#2EA043;">💳 Payer (tx from YOUR wallet): ${signerAddr.slice(0, 10)}…${signerAddr.slice(-6)}</span></p>`;
+      const explorerUrl = /^https:\/\//iu.test(candidateUrl) ? candidateUrl : '#';
+      log.innerHTML += `<p>• <span style="color:#2EA043;">⛓️ <a href="${html(explorerUrl)}" target="_blank" rel="noopener noreferrer" style="color:#1F6FEB;">View on Injective Explorer ↗</a></span></p>`;
+      log.innerHTML += `<p>• <span style="color:#2EA043;">💳 Payer (tx from YOUR wallet): ${html(signerAddr.slice(0, 10))}…${html(signerAddr.slice(-6))}</span></p>`;
     }
 
     log.innerHTML += `<p style="margin-top:8px;color:#2EA043;"><strong>💰 x402 Payment Complete ✓ — Report Unlocked</strong></p>`;
   } catch (e) {
     setX402Step('settle', 'error', t('x402_failed'));
-    log.innerHTML += `<p>• <span style="color:#D6336C;">✗ ${t('x402_fail_log', { msg: e.message })}</span></p>`;
+    log.innerHTML += `<p>• <span style="color:#D6336C;">✗ ${t('x402_fail_log', { msg: html(e.message) })}</span></p>`;
     if (e.code === 4001 || e.code === 'REJECTED') {
       log.innerHTML += `<p>• <span style="color:#D29922;">⚠ User rejected in wallet</span></p>`;
     }
@@ -2502,7 +2621,7 @@ async function renderPortfolio() {
   const list = $('#portfolio-list');
   if (!list) return;
   try {
-    const res = await fetch('/api/investors/portfolio?wallet_address=' + (state.walletAddress || '0xDemoWallet'));
+    const res = await fetch('/api/investors/portfolio?wallet_address=' + encodeURIComponent(state.walletAddress || '0xDemoWallet'));
     const data = await res.json();
     if (!data.ok) return;
 
@@ -2517,12 +2636,12 @@ async function renderPortfolio() {
     list.innerHTML = data.investments.map(inv => `
       <div style="border-bottom: 1px solid var(--line-soft); padding: 8px 0; font-size: 13px;">
         <div style="display:flex; justify-content:space-between;">
-          <strong>${inv.label}</strong>
-          <span style="color:var(--ok)">+$${inv.amountUsd.toLocaleString()}</span>
+          <strong>${html(inv.label)}</strong>
+          <span style="color:var(--ok)">+$${Number(inv.amountUsd).toLocaleString()}</span>
         </div>
         <div style="display:flex; justify-content:space-between; color:var(--text-2); font-size:12px;">
-          <span>${t('portfolio_metrics', { yield: `${(inv.yieldBps/100).toFixed(2)}%`, risk: f.riskLabel(inv.riskLevel) })}</span>
-          <span style="font-family:var(--mono)">${inv.txHash.slice(0,10)}...</span>
+          <span>${t('portfolio_metrics', { yield: `${(inv.yieldBps/100).toFixed(2)}%`, risk: html(f.riskLabel(inv.riskLevel)) })}</span>
+          <span style="font-family:var(--mono)">${html(String(inv.txHash).slice(0,10))}...</span>
         </div>
       </div>
     `).join('');
@@ -2534,14 +2653,16 @@ async function renderPortfolio() {
 // ===========================================================================
 // FE-13: Agent Activity Console
 // ===========================================================================
+// `msg` is plain text and is inserted as a text node: log lines carry values that
+// originate on the server (SSE events), in wallets and in error messages.
 function agentLog(msg, color = 'var(--text-2)') {
   const container = $('#agent-logs-container');
   if (!container) return;
-  const entry = document.createElement('div');
-  entry.className = 'log-entry';
-  entry.style.color = color;
   const time = new Date().toISOString().split('T')[1].slice(0,8);
-  entry.innerHTML = `<span style="color:var(--muted)">[${time}]</span> ${msg}`;
+  const entry = el('div', { class: 'log-entry' },
+    el('span', { style: 'color:var(--muted)' }, `[${time}]`),
+    ` ${msg}`);
+  entry.style.color = color;
   container.appendChild(entry);
   container.scrollTop = container.scrollHeight;
 }
@@ -2578,8 +2699,15 @@ function logAgentActivityUI(activity) {
 
 // BE-15: Subscribe to real-time agent activity stream (SSE)
 let agentActivityStream = null;
+let agentActivityRetryTimer = null;
+let agentActivityRetries = 0;
 
-function subscribeToAgentActivity(caseId) {
+function subscribeToAgentActivity(caseId, { retry = false } = {}) {
+  // A pending reconnect belongs to the previous subscription: drop it, otherwise
+  // switching case would later be overridden by the old case's retry.
+  clearTimeout(agentActivityRetryTimer);
+  if (!retry) agentActivityRetries = 0;
+
   // Close existing stream
   if (agentActivityStream) {
     agentActivityStream.close();
@@ -2589,12 +2717,14 @@ function subscribeToAgentActivity(caseId) {
   if (!caseId) return;
 
   try {
-    agentActivityStream = new EventSource(`/api/agent/activity/stream?case_id=${caseId}`);
+    agentActivityStream = new EventSource(`/api/agent/activity/stream?case_id=${encodeURIComponent(caseId)}`);
 
     agentActivityStream.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      let data;
+      try { data = JSON.parse(event.data); } catch { return; }
 
       if (data.type === 'connected') {
+        agentActivityRetries = 0;
         agentLog('🔗 Connected to Agent activity stream', 'var(--ok)');
       } else if (data.type === 'activity') {
         const emoji = getActivityEmoji(data.action);
@@ -2611,7 +2741,11 @@ function subscribeToAgentActivity(caseId) {
     agentActivityStream.onerror = () => {
       agentLog('⚠️ SSE disconnected, reconnecting...', 'var(--warn)');
       if (agentActivityStream) agentActivityStream.close();
-      setTimeout(() => subscribeToAgentActivity(caseId), 3000);
+      agentActivityStream = null;
+      // Back off (3s, 6s, ... up to 30s) so a full or restarting server is not hammered.
+      const delay = Math.min(30_000, 3_000 * 2 ** agentActivityRetries);
+      agentActivityRetries += 1;
+      agentActivityRetryTimer = setTimeout(() => subscribeToAgentActivity(caseId, { retry: true }), delay);
     };
   } catch (error) {
     console.error('Failed to subscribe to agent activity:', error);
@@ -2648,9 +2782,10 @@ function renderAgentTimeline() {
   timelineHtml += '<div style="border-top: 1px solid var(--line-soft); margin: 4px 0;"></div>';
 
   recentActivities.forEach(activity => {
+    // Activity entries arrive over SSE from the server: escape every field.
     const time = new Date(activity.timestamp).toLocaleTimeString('en-US', { hour12: false });
     const emoji = getActivityEmoji(activity.action);
-    const actionLabel = activity.action.replace(/_/g, ' ');
+    const actionLabel = String(activity.action ?? '').replace(/_/g, ' ');
 
     let detailStr = '';
     if (activity.details) {
@@ -2661,9 +2796,9 @@ function renderAgentTimeline() {
     }
 
     timelineHtml += `<div style="color: var(--text-2); margin: 3px 0; display: flex; gap: 4px; align-items: baseline;">
-      <span style="color: var(--text-3); min-width: 50px;">${time}</span>
-      <span>${emoji}</span> <span style="color: var(--text);">${actionLabel}</span>
-      <span style="color: var(--accent);">${detailStr}</span>
+      <span style="color: var(--text-3); min-width: 50px;">${html(time)}</span>
+      <span>${emoji}</span> <span style="color: var(--text);">${html(actionLabel)}</span>
+      <span style="color: var(--accent);">${html(detailStr)}</span>
     </div>`;
   });
 
@@ -2842,11 +2977,11 @@ function wireStaticHandlers() {
     results.forEach(r => {
       if (r.success) {
         statusHtml += `<div style="color: var(--text-muted); margin: 4px 0;">
-          📄 ${r.name} → <code style="font-size: 11px;">${r.documentHash.slice(0, 16)}...</code>
-          <span style="color: var(--text-accent); font-size: 10px;">[${r.eniMode.toUpperCase()}]</span>
+          📄 ${html(r.name)} → <code style="font-size: 11px;">${html(String(r.documentHash).slice(0, 16))}...</code>
+          <span style="color: var(--text-accent); font-size: 10px;">[${html(String(r.eniMode).toUpperCase())}]</span>
         </div>`;
       } else {
-        statusHtml += `<div style="color: var(--text-error); margin: 4px 0;">📄 ${r.name} → ${r.error}</div>`;
+        statusHtml += `<div style="color: var(--text-error); margin: 4px 0;">📄 ${html(r.name)} → ${html(r.error)}</div>`;
       }
     });
     statusHtml += '</div>';
@@ -2858,130 +2993,6 @@ function wireStaticHandlers() {
     }
   }
 
-  // BE-15: Local agent activity logger (complements SSE stream)
-  function logAgentActivityUI(activity) {
-    if (!state.agentActivities) state.agentActivities = [];
-
-    const record = {
-      id: `ui-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-      timestamp: new Date().toISOString(),
-      ...activity
-    };
-
-    state.agentActivities.unshift(record);
-
-    // Keep only last 100 activities in UI state
-    if (state.agentActivities.length > 100) {
-      state.agentActivities = state.agentActivities.slice(0, 100);
-    }
-
-    // Update timeline visualization
-    renderAgentTimeline();
-
-    return record;
-  }
-
-  // BE-15: Subscribe to real-time agent activity stream (SSE)
-  let agentActivityStream = null;
-
-  function subscribeToAgentActivity(caseId) {
-    // Close existing stream
-    if (agentActivityStream) {
-      agentActivityStream.close();
-      agentActivityStream = null;
-    }
-
-    if (!caseId) return;
-
-    try {
-      agentActivityStream = new EventSource(`/api/agent/activity/stream?case_id=${caseId}`);
-
-      agentActivityStream.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-
-        if (data.type === 'connected') {
-          agentLog('🔗 Connected to Agent activity stream', 'var(--ok)');
-        } else if (data.type === 'activity') {
-          const emoji = getActivityEmoji(data.action);
-          agentLog(`${emoji} Agent: ${data.action}${data.details?.price ? ` → $${data.details.price}` : ''}`, 'var(--accent)');
-
-          logAgentActivityUI(data);
-
-          if (data.action === 'REPRICE_DECISION' || data.action === 'PAUSE_OFFERING') {
-            toast(`🤖 Agent: ${data.action}`);
-          }
-        }
-      };
-
-      agentActivityStream.onerror = () => {
-        agentLog('⚠️ SSE disconnected, reconnecting...', 'var(--warn)');
-        if (agentActivityStream) agentActivityStream.close();
-        setTimeout(() => subscribeToAgentActivity(caseId), 3000);
-      };
-    } catch (error) {
-      console.error('Failed to subscribe to agent activity:', error);
-    }
-  }
-
-  function getActivityEmoji(action) {
-    const emojiMap = {
-      'eBL_UPLOADED': '📄',
-      'COMPLIANCE_CHECK': '⚖️',
-      'VALUATION_COMPLETE': '💰',
-      'PRICING_QUOTE': '📊',
-      'RISK_ESCALATION': '⚠️',
-      'REPRICE_DECISION': '📉',
-      'PAUSE_OFFERING': '⏸️',
-      'RESUME_OFFERING': '▶️',
-      'ON_CHAIN_UPDATE': '⛓️',
-      'SUBSCRIPTION': '💵',
-      'SETTLE': '✅'
-    };
-    return emojiMap[action] || '🤖';
-  }
-
-  // BE-15: Render agent activity timeline
-  function renderAgentTimeline() {
-    const container = $('#agent-logs-container');
-    if (!container || !state.agentActivities || state.agentActivities.length === 0) return;
-
-    // Only show last 10 activities in timeline
-    const recentActivities = state.agentActivities.slice(0, 10);
-
-    let timelineHtml = '<div style="font-family: var(--mono); line-height: 1.5;">';
-    timelineHtml += '<div style="color: var(--accent); margin-bottom: 4px; font-weight: 600; font-size: 10px;">🤖 Agent Decision Timeline</div>';
-    timelineHtml += '<div style="border-top: 1px solid var(--line-soft); margin: 4px 0;"></div>';
-
-    recentActivities.forEach(activity => {
-      const time = new Date(activity.timestamp).toLocaleTimeString('en-US', { hour12: false });
-      const emoji = getActivityEmoji(activity.action);
-      const actionLabel = activity.action.replace(/_/g, ' ');
-
-      let detailStr = '';
-      if (activity.details) {
-        if (activity.details.fileName) detailStr = `→ ${activity.details.fileName}`;
-        else if (activity.details.price) detailStr = `→ $${activity.details.price}`;
-        else if (activity.details.status) detailStr = `→ ${activity.details.status}`;
-        else if (activity.details.newPrice) detailStr = `→ $${activity.details.newPrice}`;
-      }
-
-      timelineHtml += `<div style="color: var(--text-2); margin: 3px 0; display: flex; gap: 4px; align-items: baseline;">
-        <span style="color: var(--text-3); min-width: 50px;">${time}</span>
-        <span>${emoji}</span> <span style="color: var(--text);">${actionLabel}</span>
-        <span style="color: var(--accent);">${detailStr}</span>
-      </div>`;
-    });
-
-    timelineHtml += '</div>';
-
-    // Only update if we have a dedicated timeline container
-    const timelineContainer = $('#agent-timeline');
-    if (timelineContainer) {
-      timelineContainer.innerHTML = timelineHtml;
-    }
-  }
-
-  // FE-13: Agent Console Toggle
   // FE-13: Agent Console Toggle
   if (window.matchMedia?.('(max-width: 760px)').matches) {
     $('#agent-activity-console')?.classList.add('collapsed');

@@ -1,0 +1,19 @@
+{
+  "schema": "agentbl-vendor-manifest-v1",
+  "files": {
+    "ethers-6.17.0.min.js": {
+      "package": "ethers",
+      "version": "6.17.0",
+      "license": "MIT",
+      "source": "node_modules/ethers/dist/ethers.min.js",
+      "sha256": "b016b0c3898c78fd8156466eb1ff1f42c9df951c2f0d64c9bdf799fe745b0a6c"
+    },
+    "cosmjs-stargate-0.33.1.js": {
+      "package": "@cosmjs/stargate",
+      "version": "0.33.1",
+      "license": "Apache-2.0",
+      "source": "scripts/vendor (esbuild 0.28.2, lockfile-pinned)",
+      "sha256": "72bfc3bf8f76b82356f3f3c2586f41b5a6bd13aa90261ebea649c586d4895adb"
+    }
+  }
+}

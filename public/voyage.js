@@ -9,8 +9,8 @@
 // endpoints. The event buttons are a pure pricing demo (no wallet interaction).
 // UI chrome is bilingual via i18n.js.
 
-import { state, selectedQuote, liveQuote } from './store.js';
-import { $, el, clear, toast } from './dom.js';
+import { state, liveQuote } from './store.js';
+import { $, el, clear, toast, escapeHtml } from './dom.js';
 import * as f from './format.js';
 import * as api from './api.js';
 import { t, tData } from './i18n.js';
@@ -341,7 +341,7 @@ async function refreshLifecycle() {
   const lifecycleBox = $('#lifecycle');
   let offering;
   try { offering = await getOffering(); }
-  catch (e) { tl.innerHTML = `<li class="error">${t('lc_fail', { msg: e.message })}</li>`; return; }
+  catch (e) { tl.innerHTML = `<li class="error">${t('lc_fail', { msg: escapeHtml(e.message) })}</li>`; return; }
 
   const reached = new Set(offering.steps.map((s) => s.state));
   const endState = offering.final_state;
@@ -452,7 +452,7 @@ async function runRagSearch() {
   try {
     const data = await api.ragSearch(query);
     clear(box);
-    if (!data.matches?.length) { box.innerHTML = `<p class="muted">${t('rag_none', { q: query })}</p>`; return; }
+    if (!data.matches?.length) { box.innerHTML = `<p class="muted">${t('rag_none', { q: escapeHtml(query) })}</p>`; return; }
     box.append(el('p', { class: 'results-count', text: t('rag_hits', { n: data.match_count }) }));
     for (const m of data.matches) {
       box.append(el('div', { class: `rag-entry tone-${sevTone(m.severity)}` },
@@ -467,7 +467,7 @@ async function runRagSearch() {
       ));
     }
   } catch (e) {
-    box.innerHTML = `<p class="error">${e.message}</p>`;
+    box.innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`;
   }
 }
 
@@ -484,7 +484,7 @@ async function fetchWorldRisk(force = false) {
     worldRiskCache.set(id, res);
     if (state.caseId === id) renderWorldRisk(res);
   } catch (e) {
-    $('#wr-body').innerHTML = `<p class="error">${t('wr_fetch_fail', { msg: e.message })}</p>`;
+    $('#wr-body').innerHTML = `<p class="error">${t('wr_fetch_fail', { msg: escapeHtml(e.message) })}</p>`;
   }
 }
 

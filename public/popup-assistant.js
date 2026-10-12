@@ -1,6 +1,6 @@
 // AgentBL AI 悬浮助手 — 原生 JS 实现
 // 1) 右侧悬浮图标（可拖拽、hover 展开、点击打开弹窗）
-// 2) AI 对话弹窗（DeepSeek 流式 API + Function Calling 工作流）
+// 2) AI 对话弹窗（经服务器转发的 LLM 流式 API + Function Calling 工作流）
 //
 // Web3 原生贸易融资协议：
 // - 出口商 tokenize 电子提单，AI 定价航线风险，全球投资者直接投资
@@ -11,16 +11,16 @@
 // 出口商视角 — 上传 eBL → AI 估值 → 自动定价 → 开盘
 // 投资者视角 — 浏览 eBL 市场 → AI 推荐 → 对比 → 认购 → 持仓
 
-import { $, el, clear } from './dom.js';
-import { DeepSeekClient } from './llm-client.js';
+import { el, clear } from './dom.js';
+import { LlmClient, getLlmStatus } from './llm-client.js';
 import * as api from './api.js';
 import * as web3 from './web3.js';
 import { state, selectedQuote } from './store.js';
 
 // ===========================================================================
-// DeepSeek 客户端
+// LLM 客户端（经服务器 /api/llm/chat 转发，浏览器不持有密钥）
 // ===========================================================================
-const ds = new DeepSeekClient();
+const ds = new LlmClient();
 
 // ===========================================================================
 // System Prompt
@@ -994,7 +994,7 @@ class FloatingButton {
       self._applyPos();
       if (!self.moved && Math.hypot(e.clientX - self._startX, e.clientY - self._startY) > 4) self.moved = true;
     });
-    const up = (e) => {
+    const up = () => {
       if (!self.dragging) return;
       if (self._ptrId !== null) { try { self._el.releasePointerCapture(self._ptrId); } catch (_) {} }
       self._ptrId = null; self.dragging = false;
@@ -1040,8 +1040,25 @@ class FloatingButton {
 }
 
 // ===========================================================================
-// PopupAssistant —— AI 对话弹窗（DeepSeek + Function Calling）
+// PopupAssistant —— AI 对话弹窗（LLM + Function Calling）
 // ===========================================================================
+/** 把中继返回的错误码翻译成给访客看的话（服务器消息面向运维，里面有环境变量名）。 */
+function friendlyLlmError(error) {
+  switch (error?.code) {
+    case 'llm_not_configured':
+    case 'llm_proxy_disabled':
+      return '这台服务器没有启用 AI 对话（未配置 LLM 服务商）。你仍然可以使用页面上方的「AI 筛选」做关键词搜索，或查看每个标的的定价与风险详情。';
+    case 'llm_rate_limited':
+    case 'llm_busy':
+      return '请求有点频繁，请稍等几秒再试。';
+    case 'llm_upstream_error':
+    case 'llm_upstream_unreachable':
+      return 'AI 服务暂时不可用，请稍后再试。';
+    default:
+      return `抱歉，处理请求时出错：${error?.message ?? '未知错误'}`;
+  }
+}
+
 class PopupAssistant {
   constructor() {
     this.isOpen = false;
@@ -1111,7 +1128,7 @@ class PopupAssistant {
         el('span', { class: 'pa-info-text', text: 'TRADESHIELD PROTOCOL · AI POWERED' })
       ),
       el('div', { class: 'pa-info-sub' },
-        el('span', { class: 'pa-version', text: 'Powered by DeepSeek · Workflow' }),
+        el('span', { class: 'pa-version', text: 'Powered by AgentBL Agent · Workflow' }),
         el('span', { class: 'pa-status-dot' })
       )
     ));
@@ -1241,9 +1258,14 @@ class PopupAssistant {
     this._renderMsgs?.();
 
     try {
+      // Ask once whether the server can chat at all instead of sending a request that can only fail.
+      const llmStatus = await getLlmStatus();
+      if (llmStatus.reachable && !(llmStatus.enabled && llmStatus.configured)) {
+        throw Object.assign(new Error('LLM relay unavailable'), { code: llmStatus.enabled ? 'llm_not_configured' : 'llm_proxy_disabled' });
+      }
       await this._conversationLoop(asstMsg);
     } catch (e) {
-      asstMsg.text = `抱歉，处理请求时出错：${e.message}`;
+      asstMsg.text = friendlyLlmError(e);
     } finally {
       this.isLoading = false; this._asstId = null;
       this._renderMsgs?.();
@@ -1255,7 +1277,7 @@ class PopupAssistant {
   /**
    * Function Calling 对话循环
    * 最多循环 MAX_ROUNDS 次，每次：
-   *   1. 调用 DeepSeek 流式获取回复
+   *   1. 调用 LLM 流式获取回复（经服务器转发）
    *   2. 如果 AI 返回 tool_calls → 执行 → 结果追加到 history → 继续循环
    *   3. 如果 AI 返回纯文本 → 结束
    */
@@ -1265,9 +1287,8 @@ class PopupAssistant {
     while (this._toolRound < MAX_ROUNDS) {
       this._toolRound++;
 
-      // 调用 DeepSeek（流式）
+      // 调用 LLM（流式，经服务器转发）
       let content = '';
-      let toolCalls = [];
 
       const result = await ds.streamChat(this._chatHistory, TOOLS, {
         onChunk: (chunk) => {
@@ -1279,7 +1300,7 @@ class PopupAssistant {
       });
 
       content = result.content || '';
-      toolCalls = result.tool_calls || [];
+      const toolCalls = result.tool_calls || [];
 
       // 如果 AI 返回了 tool_calls
       if (toolCalls && toolCalls.length > 0) {

@@ -4,6 +4,18 @@
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+/**
+ * Escape a value for safe interpolation into an HTML string (element content and
+ * quoted attribute values). Use it for every dynamic value placed in innerHTML:
+ * server responses, error messages and user input are all untrusted. Prefer
+ * el()/textContent where building DOM is practical.
+ */
+export function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/gu, (ch) => HTML_ESCAPES[ch]);
+}
+
 /**
  * Create an element. attrs supports: class, html, text, on<Event> handlers,
  * and any other attribute (true => boolean attribute). Children are flattened;

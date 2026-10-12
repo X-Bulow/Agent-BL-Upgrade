@@ -5,19 +5,17 @@
 // Reads /chain-config.json at runtime to determine the target network.
 // Wallet connection auto-detects the chain and prompts the user to switch.
 //
-// ethers v6 is loaded lazily from a CDN (only when the user connects a wallet).
+// ethers v6 (and, for Keplr/Leap, @cosmjs/stargate) are loaded lazily, only when the
+// user connects a wallet. Both are self-hosted under /vendor (see
+// public/vendor/manifest.json and `npm run vendor:check`): a wallet-connected page
+// must not execute third-party scripts fetched from a CDN at runtime, and the CSP
+// only allows same-origin scripts.
 
 import { priceToE6, riskLevelToUint8, actionToUint8 } from './format.js';
 import { pushPricingToOracle } from './api.js';
 
-const ETHERS_CDNS = [
-  'https://esm.sh/ethers@6.13.4',
-  'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm'
-];
-const COSMOS_STARGATE_CDNS = [
-  'https://esm.sh/@cosmjs/stargate@0.33.1?bundle',
-  'https://cdn.jsdelivr.net/npm/@cosmjs/stargate@0.33.1/+esm'
-];
+const ETHERS_MODULE_URL = '/vendor/ethers-6.17.0.min.js';
+const COSMOS_STARGATE_MODULE_URL = '/vendor/cosmjs-stargate-0.33.1.js';
 
 // --- Chain presets ---
 const CHAIN_PRESETS = {
@@ -83,30 +81,26 @@ export function getEthereumProvider() {
   return _cachedProvider;
 }
 
-/** Lazy-load ethers v6 from a CDN (cached). */
+/** Lazy-load the self-hosted ethers v6 build (cached). */
 export async function loadEthers() {
   if (_ethers) return _ethers;
   if (typeof globalThis !== 'undefined' && globalThis._mockEthers) return globalThis._mockEthers;
-  let lastErr;
-  for (const url of ETHERS_CDNS) {
-    try {
-      _ethers = await import(/* @vite-ignore */ url);
-      return _ethers;
-    } catch (err) { lastErr = err; }
+  try {
+    _ethers = await import(/* @vite-ignore */ ETHERS_MODULE_URL);
+    return _ethers;
+  } catch (cause) {
+    throw new Error('Failed to load ethers: ' + (cause?.message ?? 'unknown'), { cause });
   }
-  throw new Error('Failed to load ethers from CDN: ' + (lastErr?.message ?? 'unknown'));
 }
 
 async function loadCosmosStargate() {
   if (_cosmosStargate) return _cosmosStargate;
-  let lastError;
-  for (const url of COSMOS_STARGATE_CDNS) {
-    try {
-      _cosmosStargate = await import(/* @vite-ignore */ url);
-      return _cosmosStargate;
-    } catch (error) { lastError = error; }
+  try {
+    _cosmosStargate = await import(/* @vite-ignore */ COSMOS_STARGATE_MODULE_URL);
+    return _cosmosStargate;
+  } catch (cause) {
+    throw err('SDK_LOAD', `Failed to load Cosmos signing SDK: ${cause?.message ?? 'unknown'}`);
   }
-  throw err('SDK_LOAD', `Failed to load Cosmos signing SDK: ${lastError?.message ?? 'unknown'}`);
 }
 
 export function resolveBrowserChainConfig(registry, requestedNetwork) {

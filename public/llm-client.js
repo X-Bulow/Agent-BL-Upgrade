@@ -1,23 +1,24 @@
-// DeepSeek 流式聊天客户端 —— 浏览器端 OpenAI-compatible API
+// 浏览器端 LLM 客户端 —— 只与同源的 /api/llm/* 通信。
 //
-// 直连 api.deepseek.com，支持：
+// API Key 保存在服务器（.env）里，永远不会下发到浏览器；服务器负责选择模型、
+// 限制输出长度并转发到已配置的提供方（DeepSeek / 通义千问 / OpenAI 兼容端点…）。
+//
+// 支持：
 // - 流式 SSE 响应
 // - Function Calling（工具调用）
 // - 超时与错误处理
 //
 // 依赖：fetch（浏览器原生）、TextDecoder
 
-const DEEPSEEK_CONFIG = {
-  API_KEY: window.ENV?.DEEPSEEK_API_KEY || '',
-  BASE_URL: window.ENV?.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-  MODEL: 'deepseek-chat',
+const LLM_CONFIG = {
+  ENDPOINT: '/api/llm/chat',
+  STATUS_ENDPOINT: '/api/llm/status',
   TIMEOUT_MS: 60000,
-  MAX_TOOL_ROUNDS: 5  // Function calling 最大轮数
+  TEMPERATURE: 0.3,
+  MAX_TOKENS: 2048
 };
 
-/**
- * 生成唯一 ID
- */
+/** 生成唯一 ID */
 function uid() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -38,15 +39,77 @@ function toOpenAITools(tools) {
   }));
 }
 
+/** 服务器返回的错误（如 503 未配置 LLM、429 限流）。message 可直接展示给用户。 */
+export class LlmError extends Error {
+  constructor(message, { status, code } = {}) {
+    super(message);
+    this.name = 'LlmError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function failFromResponse(response) {
+  let payload = null;
+  try { payload = await response.json(); } catch (_) { /* 非 JSON 错误体 */ }
+  throw new LlmError(payload?.error || `LLM relay HTTP ${response.status}`, {
+    status: response.status,
+    code: payload?.code
+  });
+}
+
+/** 询问服务器是否已配置 LLM（不会暴露密钥）。网络失败视为未配置（reachable: false）。 */
+export async function fetchLlmStatus() {
+  try {
+    const response = await fetch(LLM_CONFIG.STATUS_ENDPOINT);
+    if (!response.ok) return { enabled: false, configured: false, reachable: false };
+    return { ...(await response.json()), reachable: true };
+  } catch (_) {
+    return { enabled: false, configured: false, reachable: false };
+  }
+}
+
+let _statusPromise = null;
 /**
- * DeepSeek 流式聊天客户端
+ * 每个页面只询问一次：服务器运行期间 LLM 配置不会变。没有配置时调用方可以直接走
+ * 关键词回退，而不是先发一个注定 503 的请求；网络失败不缓存，下次再试。
  */
-export class DeepSeekClient {
+export function getLlmStatus() {
+  if (!_statusPromise) {
+    _statusPromise = fetchLlmStatus().then((status) => {
+      if (!status.reachable) _statusPromise = null;
+      return status;
+    });
+  }
+  return _statusPromise;
+}
+
+function parseToolArguments(raw) {
+  try {
+    return raw ? JSON.parse(raw) : {};
+  } catch (_) {
+    return { _raw: raw };
+  }
+}
+
+/**
+ * LLM 聊天客户端（经服务器转发）
+ */
+export class LlmClient {
   constructor(config = {}) {
-    this.apiKey = config.apiKey || DEEPSEEK_CONFIG.API_KEY;
-    this.baseUrl = config.baseUrl || DEEPSEEK_CONFIG.BASE_URL;
-    this.model = config.model || DEEPSEEK_CONFIG.MODEL;
-    this.timeout = config.timeout || DEEPSEEK_CONFIG.TIMEOUT_MS;
+    this.endpoint = config.endpoint || LLM_CONFIG.ENDPOINT;
+    this.timeout = config.timeout || LLM_CONFIG.TIMEOUT_MS;
+  }
+
+  _requestBody(messages, tools, stream) {
+    const body = {
+      messages,
+      stream,
+      temperature: LLM_CONFIG.TEMPERATURE,
+      max_tokens: LLM_CONFIG.MAX_TOKENS
+    };
+    if (tools && tools.length > 0) body.tools = toOpenAITools(tools);
+    return body;
   }
 
   /**
@@ -57,49 +120,27 @@ export class DeepSeekClient {
    * @param {object} callbacks
    * @param {function(string):void} callbacks.onChunk - 收到文本增量
    * @param {function({name:string, args:object}):void} callbacks.onToolCall - 收到工具调用
-   * @param {function(string):void} callbacks.onThinking - 收到思考内容（deepseek-reasoner）
+   * @param {function(string):void} callbacks.onThinking - 收到思考内容（推理模型）
    * @returns {Promise<{content:string|null, tool_calls:Array|null}>} 完整响应
    */
   async streamChat(messages, tools, { onChunk, onToolCall, onThinking } = {}) {
-    const body = {
-      model: this.model,
-      messages,
-      stream: true,
-      temperature: 0.3,
-      max_tokens: 2048
-    };
-
-    if (tools && tools.length > 0) {
-      body.tools = toOpenAITools(tools);
-      body.tool_choice = 'auto';
-    }
-
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeout);
 
     try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      const response = await fetch(this.endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
-        },
-        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this._requestBody(messages, tools, true)),
         signal: controller.signal
       });
-
-      if (!response.ok) {
-        const text = await response.text().catch(() => '');
-        throw new Error(`DeepSeek HTTP ${response.status}: ${text.slice(0, 300)}`);
-      }
+      if (!response.ok) await failFromResponse(response);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
       let content = '';
-      let toolCalls = [];
-      let toolCallMap = {};  // index -> { id, name, arguments }
-
+      const toolCallMap = {}; // index -> { id, name, arguments }
       let buf = '';
 
       while (true) {
@@ -118,8 +159,7 @@ export class DeepSeekClient {
           if (dataStr === '[DONE]') continue;
 
           try {
-            const parsed = JSON.parse(dataStr);
-            const delta = parsed.choices?.[0]?.delta;
+            const delta = JSON.parse(dataStr).choices?.[0]?.delta;
             if (!delta) continue;
 
             // 文本内容
@@ -128,7 +168,7 @@ export class DeepSeekClient {
               onChunk?.(delta.content);
             }
 
-            // 思考内容（deepseek-reasoner）
+            // 思考内容（推理模型）
             if (delta.reasoning_content) {
               onThinking?.(delta.reasoning_content);
             }
@@ -137,15 +177,9 @@ export class DeepSeekClient {
             if (delta.tool_calls) {
               for (const tc of delta.tool_calls) {
                 const idx = tc.index ?? 0;
-
                 if (!toolCallMap[idx]) {
-                  toolCallMap[idx] = {
-                    id: tc.id || uid(),
-                    name: tc.function?.name || '',
-                    arguments: ''
-                  };
+                  toolCallMap[idx] = { id: tc.id || uid(), name: tc.function?.name || '', arguments: '' };
                 }
-
                 if (tc.id) toolCallMap[idx].id = tc.id;
                 if (tc.function?.name) toolCallMap[idx].name = tc.function.name;
                 if (tc.function?.arguments) toolCallMap[idx].arguments += tc.function.arguments;
@@ -165,17 +199,13 @@ export class DeepSeekClient {
       }
 
       // 组装完整 tool_calls
-      const indexes = Object.keys(toolCallMap).sort((a, b) => Number(a) - Number(b));
-      toolCalls = indexes.map((i) => {
-        const tc = toolCallMap[i];
-        let args = {};
-        try {
-          args = tc.arguments ? JSON.parse(tc.arguments) : {};
-        } catch (_) {
-          args = { _raw: tc.arguments };
-        }
-        return { id: tc.id, name: tc.name, arguments: args };
-      });
+      const toolCalls = Object.keys(toolCallMap)
+        .sort((a, b) => Number(a) - Number(b))
+        .map((i) => ({
+          id: toolCallMap[i].id,
+          name: toolCallMap[i].name,
+          arguments: parseToolArguments(toolCallMap[i].arguments)
+        }));
 
       return {
         content: content || null,
@@ -190,45 +220,26 @@ export class DeepSeekClient {
    * 非流式聊天（用于简单的单轮 tool 调用）
    */
   async chat(messages, tools) {
-    const body = {
-      model: this.model,
-      messages,
-      temperature: 0.3,
-      max_tokens: 2048
-    };
-
-    if (tools && tools.length > 0) {
-      body.tools = toOpenAITools(tools);
-      body.tool_choice = 'auto';
-    }
-
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeout);
 
     try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      const response = await fetch(this.endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
-        },
-        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this._requestBody(messages, tools, false)),
         signal: controller.signal
       });
-
-      if (!response.ok) {
-        const text = await response.text().catch(() => '');
-        throw new Error(`DeepSeek HTTP ${response.status}: ${text.slice(0, 300)}`);
-      }
+      if (!response.ok) await failFromResponse(response);
 
       const json = await response.json();
       const msg = json.choices?.[0]?.message;
-      if (!msg) throw new Error('DeepSeek returned no message');
+      if (!msg) throw new LlmError('LLM returned no message');
 
       const tool_calls = msg.tool_calls?.map((tc) => ({
         id: tc.id,
         name: tc.function.name,
-        arguments: JSON.parse(tc.function.arguments || '{}')
+        arguments: parseToolArguments(tc.function.arguments)
       }));
 
       return {
@@ -243,9 +254,9 @@ export class DeepSeekClient {
 
 /** 默认单例 */
 let _instance = null;
-export function getDeepSeekClient() {
-  if (!_instance) _instance = new DeepSeekClient();
+export function getLlmClient() {
+  if (!_instance) _instance = new LlmClient();
   return _instance;
 }
 
-export { DEEPSEEK_CONFIG, toOpenAITools };
+export { LLM_CONFIG, toOpenAITools };
