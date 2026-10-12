@@ -5,6 +5,7 @@
  * All tests run offline (no real chain needed).
  */
 
+import { listenOnUsablePort } from '../scripts/lib/listen.mjs';
 import assert from 'node:assert/strict';
 import { test, describe } from 'node:test';
 
@@ -61,7 +62,7 @@ describe('x402 Client', () => {
 
   test('fetchPaidIntel detects free endpoints', async () => {
     const server = createServer();
-    await new Promise((r) => server.listen(0, r));
+    await listenOnUsablePort(server);
     const { port } = server.address();
     const base = `http://127.0.0.1:${port}`;
 
@@ -82,7 +83,7 @@ describe('x402 Client', () => {
     const prevMode = process.env.DEMO_MODE;
     process.env.DEMO_MODE = 'true';
     const server = createServer();
-    await new Promise((r) => server.listen(0, '127.0.0.1', r));
+    await listenOnUsablePort(server, '127.0.0.1');
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
       const { fetchPaidIntel } = await import('../src/x402/client.js');
@@ -151,7 +152,7 @@ describe('x402 Endpoints (integration)', () => {
 
   test('GET /api/x402/config returns services', async () => {
     server = createServer();
-    await new Promise((r) => server.listen(0, r));
+    await listenOnUsablePort(server);
     base = `http://127.0.0.1:${server.address().port}`;
     try {
       const res = await fetch(`${base}/api/x402/config`);
@@ -166,7 +167,7 @@ describe('x402 Endpoints (integration)', () => {
 
   test('GET /api/x402/intel/premium-risk returns 402 without payment', async () => {
     server = createServer();
-    await new Promise((r) => server.listen(0, r));
+    await listenOnUsablePort(server);
     base = `http://127.0.0.1:${server.address().port}`;
     try {
       const res = await fetch(`${base}/api/x402/intel/premium-risk`);
@@ -182,7 +183,7 @@ describe('x402 Endpoints (integration)', () => {
 
   test('POST /api/x402/smoke returns full flow', async () => {
     server = createServer();
-    await new Promise((r) => server.listen(0, r));
+    await listenOnUsablePort(server);
     base = `http://127.0.0.1:${server.address().port}`;
     try {
       const res = await fetch(`${base}/api/x402/smoke`, {

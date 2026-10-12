@@ -2,6 +2,8 @@
  * X402-15: one real Injective Testnet x402 purchase + PaymentOracle attestation.
  * Fail-closed: no Demo fallback, fake tx hash, mainnet, or secret logging.
  */
+import { listenOnUsablePort } from './lib/listen.mjs';
+import http from 'node:http';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -189,10 +191,8 @@ app.post('/api/x402/live/risk-report', async (request, response, next) => {
   }
 });
 
-const server = await new Promise((resolve, reject) => {
-  const listening = app.listen(0, '127.0.0.1', () => resolve(listening));
-  listening.once('error', reject);
-});
+const server = http.createServer(app);
+await listenOnUsablePort(server, '127.0.0.1');
 
 let evidence;
 try {

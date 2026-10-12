@@ -12,6 +12,7 @@
  *        BASE_URL=http://localhost:3000 node scripts/smoke-x402.mjs
  */
 
+import { listenOnUsablePort } from './lib/listen.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from '../src/app/server.js';
 
@@ -25,7 +26,7 @@ async function withServer(fn) {
   }
   // Start an internal server
   const server = createServer();
-  await new Promise((resolve) => server.listen(0, resolve));
+  await listenOnUsablePort(server);
   const { port } = server.address();
   const url = `http://127.0.0.1:${port}`;
   try {

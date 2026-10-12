@@ -1,3 +1,4 @@
+import { listenOnUsablePort } from './lib/listen.mjs';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -46,7 +47,7 @@ async function withServer(run) {
   const configured = process.env.BASE_URL?.replace(/\/$/u, '');
   if (configured) return run(configured);
   const server = createServer();
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await listenOnUsablePort(server, '127.0.0.1');
   try {
     return await run(`http://127.0.0.1:${server.address().port}`);
   } finally {

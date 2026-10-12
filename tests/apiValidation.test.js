@@ -1,3 +1,4 @@
+import { listenOnUsablePort } from '../scripts/lib/listen.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -13,7 +14,7 @@ const copperCase = JSON.parse(
 /** Start a throwaway server and run `fn(baseUrl)`, always closing it after. */
 async function withServer(fn) {
   const server = createServer();
-  await new Promise((resolve) => server.listen(0, resolve));
+  await listenOnUsablePort(server);
   try {
     await fn(`http://127.0.0.1:${server.address().port}`);
   } finally {

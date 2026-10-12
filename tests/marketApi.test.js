@@ -1,3 +1,4 @@
+import { listenOnUsablePort } from '../scripts/lib/listen.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert';
 import http from 'node:http';
@@ -38,7 +39,7 @@ function request(method, path, body = null) {
 test('BE-11: Market API Tests', async (t) => {
   // Start server
   const server = http.createServer(handleRequest);
-  await new Promise(res => server.listen(0, '127.0.0.1', res));
+  await listenOnUsablePort(server, '127.0.0.1');
   port = server.address().port;
 
   try {

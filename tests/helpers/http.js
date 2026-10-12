@@ -3,11 +3,11 @@
 import http from 'node:http';
 import net from 'node:net';
 import zlib from 'node:zlib';
+import { listenOnUsablePort } from '../../scripts/lib/listen.mjs';
 
-/** Start an http.Server on a random loopback port; `close()` also drops keep-alive/SSE sockets. */
+/** Start an http.Server on a random loopback port that fetch accepts; `close()` also drops keep-alive/SSE sockets. */
 export async function listen(server) {
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const { port } = server.address();
+  const port = await listenOnUsablePort(server, '127.0.0.1');
   return {
     server,
     port,

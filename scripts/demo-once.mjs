@@ -10,6 +10,7 @@
  * Usage: npm run demo:once
  */
 
+import { listenOnUsablePort } from './lib/listen.mjs';
 import { createServer } from '../src/app/server.js';
 
 console.log('╔══════════════════════════════════════════════════════════╗');
@@ -18,7 +19,7 @@ console.log('║       一键演示 — 1 分钟完整闭环                    
 console.log('╚══════════════════════════════════════════════════════════╝\n');
 
 const server = createServer();
-await new Promise((r) => server.listen(0, r));
+await listenOnUsablePort(server);
 const { port } = server.address();
 const API = `http://127.0.0.1:${port}`;
 

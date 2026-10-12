@@ -1,3 +1,4 @@
+import { listenOnUsablePort } from './lib/listen.mjs';
 import { execFile } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -157,7 +158,7 @@ await mcpCheck('push_pricing_to_oracle', { case_id: demoCase.case_id, pricing_qu
 // 32-46: HTTP, x402 and paid business output
 console.log('\n[HTTP and x402]');
 const server = createServer();
-await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+await listenOnUsablePort(server, '127.0.0.1');
 const api = `http://127.0.0.1:${server.address().port}`;
 try {
   const health = await getJson(`${api}/api/health`);

@@ -1,3 +1,4 @@
+import { listenOnUsablePort } from '../scripts/lib/listen.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -13,7 +14,7 @@ const warCase = JSON.parse(
 
 test('smoke: mock API supports the main demo flow', async () => {
   const server = createServer();
-  await new Promise((resolve) => server.listen(0, resolve));
+  await listenOnUsablePort(server);
   const { port } = server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
 
@@ -40,7 +41,7 @@ test('smoke: mock API supports the main demo flow', async () => {
 
 test('smoke: invalid case payload is rejected as a client error', async () => {
   const server = createServer();
-  await new Promise((resolve) => server.listen(0, resolve));
+  await listenOnUsablePort(server);
   const { port } = server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
 
@@ -62,7 +63,7 @@ test('smoke: invalid case payload is rejected as a client error', async () => {
 
 test('BE-3/BE-4: pricing quote and offering simulate endpoints work end to end', async () => {
   const server = createServer();
-  await new Promise((resolve) => server.listen(0, resolve));
+  await listenOnUsablePort(server);
   const { port } = server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
 
@@ -121,7 +122,7 @@ test('BE-3/BE-4: pricing quote and offering simulate endpoints work end to end',
 
 test('BE-3: an invalid payout_speed is rejected as a client error', async () => {
   const server = createServer();
-  await new Promise((resolve) => server.listen(0, resolve));
+  await listenOnUsablePort(server);
   const { port } = server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
 

@@ -1,3 +1,4 @@
+import { listenOnUsablePort } from './lib/listen.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { createServer } from '../src/app/server.js';
@@ -7,7 +8,7 @@ const warCase = JSON.parse(await fs.readFile('data/cases/copper-sg-shanghai-warc
 const copperCase = JSON.parse(await fs.readFile('data/cases/copper-sg-shanghai.case.json', 'utf8'));
 
 const server = createServer();
-await new Promise((resolve) => server.listen(0, resolve));
+await listenOnUsablePort(server);
 const { port } = server.address();
 const baseUrl = `http://127.0.0.1:${port}`;
 

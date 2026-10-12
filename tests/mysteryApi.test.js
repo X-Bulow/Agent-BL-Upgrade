@@ -1,3 +1,4 @@
+import { listenOnUsablePort } from '../scripts/lib/listen.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -23,7 +24,7 @@ before(async () => {
   resetStore();
   resetDefaultMysteryRevealStore();
   server = createServer();
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await listenOnUsablePort(server, '127.0.0.1');
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
 

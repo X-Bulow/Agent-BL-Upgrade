@@ -1,3 +1,5 @@
+import { listenOnUsablePort } from '../scripts/lib/listen.mjs';
+import http from 'node:http';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
@@ -14,8 +16,8 @@ async function withApp({ config = loadX402Config({}), settlementService, handler
   app.use(createX402PaymentMiddleware({ config, settlementService: service }));
   app.get('/api/x402/smoke', handler ?? ((req, res) => res.json({ ok: true, payment: req.x402 })));
   app.get('/api/free', (_req, res) => res.json({ free: true }));
-  const server = app.listen(0);
-  await new Promise((resolve) => server.once('listening', resolve));
+  const server = http.createServer(app);
+  await listenOnUsablePort(server, '127.0.0.1');
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
   try {
     await run({ baseUrl, config, service });
