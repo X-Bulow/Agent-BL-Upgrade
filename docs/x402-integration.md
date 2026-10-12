@@ -75,6 +75,42 @@ The x402 integration gives AgentBL:
 | `premium-risk` | `/api/x402/intel/premium-risk` | 0.001 USDC | Live xAPI world-risk signals + RAG deep analysis with full source citations |
 | `premium-valuation` | `/api/x402/valuation/premium` | 0.002 USDC | Real-time commodity prices + historical comparables + volatility forecast |
 | `fraud-review` | `/api/x402/documents/fraud-review` | 0.0015 USDC | Five-dimension eBL / invoice / insurance consistency review, scenario action and pricing impact |
+| `mystery-voyage` | `/api/x402/mystery/voyage` | 0.001 USDC | Commit-reveal voyage discovery with a verifiable AI risk passport |
+
+Prices are fixed in `src/x402/config.js` (`X402_SERVICES`); `GET /api/x402/config` returns the live catalog.
+
+## Two transports: Demo and Live (x402 V2)
+
+The paid services are the same in both modes (`src/app/x402Services.js`); only the way the
+buyer pays differs.
+
+| | **Demo** (default) | **Live** (`DEMO_MODE=false`, `X402_MODE=live`) |
+|---|---|---|
+| Request | `GET` or `POST` the endpoint | `POST` the endpoint (other methods answer a JSON `405`) |
+| Challenge | `402` with `{ challenge, nonce }` | `402` with an x402 V2 payment requirement (`accepts[]`, EIP-3009 `exact` scheme) |
+| Buyer proves payment with | `personal_sign` over the challenge → `X402-Signature` + `X402-Signer` headers | EIP-3009 `transferWithAuthorization` signed with `eth_signTypedData_v4` → `PAYMENT-SIGNATURE` header |
+| Settlement | Simulated locally; the receipt is `demo://receipt/...` and never an explorer link | The facilitator verifies and settles the USDC transfer on-chain |
+| Evidence | None on-chain | The server writes `PaymentOracle.PaymentAttested` (fail-closed: no attestation, no report) |
+| Code | `createX402Route` (`src/x402/server.js`) | `createLiveGateway` (`src/x402/liveGateway.js`: Express sub-app with the official `createX402PaymentMiddleware`) |
+
+Both transports share the delivery pipeline (`src/x402/delivery.js`: report → `PaidReportEnvelope` → attestation →
+re-readable cache). Notes on the Live flow:
+
+1. **Validation happens before payment.** A request the server cannot serve (a malformed case, an unknown Mystery
+   reveal, ...) is rejected with a `4xx` *before* the buyer is charged (`preflight`).
+2. **Settlement is idempotent per signed authorization.** If delivery fails after the payment settled, the response
+   says `payment.status: "settled"` with a retry hint; re-sending the *same* `PAYMENT-SIGNATURE` re-runs delivery and
+   never charges twice.
+3. **The browser pays with the connected wallet** (`public/x402-v2.js`): it reads the token's on-chain `name()` for the
+   EIP-712 domain (never a server hint), refuses any requirement whose network, asset, payee, timeout or amount is not
+   the one the UI displayed, and only then asks the wallet to sign. The official `@injectivelabs/x402` client (CLI,
+   agents) produces the same payload; `tests/x402LiveGateway.test.js` runs both against the real server with a mock
+   facilitator.
+4. **A client-supplied transaction hash is never trusted** (not as proof of payment, and not in the Demo route either).
+5. **Prerequisites:** `X402_MODE=live`, `X402_FACILITATOR_URL` (HTTPS), `X402_PAY_TO`, a funded buyer wallet, and the
+   attestor key authorised on `PaymentOracle` (`PAYMENT_ATTESTOR_PRIVATE_KEY`, see `docs/DEPLOYMENT.md`). If the live
+   gateway cannot start, paid routes answer `503 x402_v2_live_transport_required` instead of falling back to Demo.
+   Switching the runtime mode into or out of Live needs `AGENTBL_ADMIN_TOKEN`.
 
 ## API Reference
 
@@ -211,10 +247,12 @@ missing; private keys never leave the local CLI process.
 
 Deployed on Injective Testnet alongside `AgentBLRWA` and `RiskPricingOracle`.
 
-**Injective Testnet deployment:**
+**Injective Testnet deployment** (`public/chain-config.json` is the source of truth):
 
-- Contract: [`0x36d9Ff1256b3db1EFC1EAcB4c9b5033165D24571`](https://testnet.blockscout.injective.network/address/0x36d9Ff1256b3db1EFC1EAcB4c9b5033165D24571)
-- Deployment tx: [`0xffce87b2…c119fd`](https://testnet.blockscout.injective.network/tx/0xffce87b2095af1e3f58cbb5462bfe26ec4fe5867f863e915271bd91df0c119fd)
+- Contract: [`0x98De9ccF7AaeD8DA2c328114CAC55fAB55F0abEe`](https://testnet.blockscout.injective.network/address/0x98De9ccF7AaeD8DA2c328114CAC55fAB55F0abEe)
+- Deployment tx: [`0x9b633734…a3682d1`](https://testnet.blockscout.injective.network/tx/0x9b633734a19f7f44e85abe537f594684bfa597b9394a0918dc09682fa3b70dd1)
+- This is the v1 build. The source now has two-step ownership that moves the attestor role with the owner
+  (see `docs/contracts.md` §0); `npm run verify:bytecode` shows whether the deployment is current.
 
 **Event:**
 
@@ -224,7 +262,8 @@ Deployed on Injective Testnet alongside `AgentBLRWA` and `RiskPricingOracle`.
 
 - `attestPayment(...)` — only an allowlisted attestor can bind a settlement to a report
 - `getAttestation(receiptId)` / `hasAttestation(receiptId)` — browser/backend readback
-- `setAttestor(address, allowed)` — owner-managed attestor ACL
+- `setAttestor(address, allowed)` — owner-managed attestor ACL. The server signs with a dedicated key
+  (`PAYMENT_ATTESTOR_PRIVATE_KEY`) authorised here, not with the owner key
 - Both `receiptId` and the original `paymentTxHash` are replay protected; zero
   hashes, zero addresses and zero amounts revert.
 
@@ -232,12 +271,20 @@ Deployed on Injective Testnet alongside `AgentBLRWA` and `RiskPricingOracle`.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `X402_NETWORK` | No | `eip155:1439` | CAIP-2 network identifier |
-| `X402_FACILITATOR_URL` | Live only | — | Settlement relay URL |
-| `X402_ASSET` | No | canonical Injective Testnet USDC | USDC token for settlement |
+| `X402_MODE` | No | `demo` | `demo` or `live`; Live also needs the facilitator and payee below |
+| `X402_NETWORK` | No | `eip155:1439` | CAIP-2 network identifier (`eip155:1776` is mainnet) |
+| `X402_FACILITATOR_URL` | Live only | — | Settlement relay URL (HTTPS) |
+| `X402_PUBLIC_BASE_URL` | No | request origin | Public origin used in payment requirements behind a proxy |
+| `X402_ASSET` | No | canonical Injective Testnet USDC | Must equal the canonical USDC of the network |
+| `X402_TTL_SECONDS` | No | `60` | Validity window of a payment authorization (10-300) |
+| `X402_REQUEST_TIMEOUT_MS` / `X402_MAX_ATTEMPTS` | No | `10000` / `3` | Facilitator timeout and bounded retries |
+| `X402_GATEWAY_RETRY_MS` | No | `5000` | Back-off before retrying a failed live-gateway start-up |
+| `X402_RPC_URL` | No | `INJECTIVE_RPC_URL`, then the public node | RPC for balances and settlement checks |
 | `X402_REPORT_TTL_SECONDS` | No | `300` | Paid report envelope/cache TTL |
-| `X402_REPORT_CACHE_PATH` | No | `data/runtime/x402-reports.json` | Re-read cache file for already-paid reports |
-| `WHITE_AGENT_PRIVATE_KEY` | No | — | Wallet that signs EIP-3009 payments |
+| `X402_REPORT_CACHE_PATH` | No | `<AGENTBL_RUNTIME_DIR>/x402-reports.json` | Re-read cache file for already-paid reports |
+| `X402_RECEIPT_STORE_PATH` | No | `<AGENTBL_RUNTIME_DIR>/x402-receipts.json` | Settlement receipts (survive restarts without re-settling) |
+| `PAYMENT_ATTESTOR_PRIVATE_KEY` | Live | — | Server key that writes `PaymentAttested` (authorise with `PaymentOracle.setAttestor`) |
+| `WHITE_AGENT_PRIVATE_KEY` | No | — | Wallet that signs EIP-3009 payments for the CLI/agent client |
 | `X402_PAY_TO` | Live only | demo payee | Address receiving payments |
 | `X402_LIVE_CONFIRM` | Live smoke only | — | Must equal `injective-testnet`; prevents accidental spend |
 | `X402_LIVE_AMOUNT_ATOMIC` | No | `1000` | Live smoke price in atomic USDC (0.001 USDC) |

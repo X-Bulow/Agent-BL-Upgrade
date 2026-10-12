@@ -16,6 +16,38 @@ AgentBL 探索如何将下一代对话式电子商务中的核心智能 Agent �
 
 ---
 
+## ⚡ Quick Start | 快速开始
+
+From the repository root:
+
+```bash
+npm install
+npm run dev        # http://localhost:3000
+```
+
+Demo Mode is the default and needs **no wallet, no API keys and no network access**: AI valuation, market data, world-risk intelligence and x402 payments all run on deterministic local fixtures.
+
+Demo Mode 是默认模式，**不需要钱包、API Key 或外部网络**：AI 估值、行情、世界风险情报和 x402 付款都使用本地的确定性数据。
+
+| I want to… 我想… | Command 命令 |
+|---|---|
+| Run the application tests / 运行应用测试 | `npm test` (Node 20.11+) |
+| Run the contract tests / 运行合约测试 | `npm run test:contracts` (Node **22.13+**; run `npm --prefix hardhat install` once first) |
+| Run every release check / 运行全部发布检查 | `npm run preflight` |
+| Run it in Docker / 用 Docker 运行 | `docker compose up -d --build` → http://localhost:3000 |
+| Compare the testnet deployment with the contract source / 对比链上合约与源码 | `npm run verify:bytecode` |
+
+### Status at a glance | 当前状态
+
+| Area 模块 | State 状态 |
+|---|---|
+| Pricing, risk, RAG, MCP tools, dashboard / 定价、风险、RAG、MCP 工具、前端 | Working. Deterministic fallback keeps the demo running without any key. / 可用，没有任何 Key 也能完整演示 |
+| x402 paid intelligence / x402 付费情报 | **Demo:** simulated locally (no real funds). **Live:** x402 V2 (EIP-3009) through a facilitator, exercised end-to-end with a mock facilitator, the official `@injectivelabs/x402` client and the browser wallet flow; it needs a facilitator, a payee address and a funded wallet. / Demo 为本地模拟；Live 走 x402 V2，需要 Facilitator、收款地址和有余额的钱包 |
+| Smart contracts / 智能合约 | Source hardened (v2, see [`docs/contracts.md`](docs/contracts.md) §0). The Injective testnet deployment is still **v1** until redeployed: run `npm run verify:bytecode`. / 源码已加固为 v2；测试网上仍是 v1，重新部署后才生效 |
+| Investor payments for RWA shares / 投资者认购的真实付款 | **Not implemented.** Subscriptions mint share receipts and record the amount owed; no stablecoin is escrowed. / **未实现**，认购只铸造份额凭证并记录应付金额 |
+
+---
+
 ## 🌐 Project Overview | 项目概述
 
 Modern e-commerce is moving beyond static keyword search.
@@ -786,11 +818,48 @@ The architecture uses Injective's EVM-compatible environment for Web3 execution.
 
 | Contract 合约 | Address 地址 | Purpose 用途 |
 |---|---|---|
-| **AgentBLRWA** | [`0x3C6774d2D1ac6Bf35d08e5C9c84A233F5bc7f5Ce`](https://testnet.blockscout.injective.network/address/0x3C6774d2D1ac6Bf35d08e5C9c84A233F5bc7f5Ce) | Protocol coordinator / 协议协调 |
-| **EBLRegistry V2** | [`0x85bfdcd00E0bBb9dDce3dcD2A58A62380703AdA6`](https://testnet.blockscout.injective.network/address/0x85bfdcd00E0bBb9dDce3dcD2A58A62380703AdA6) | eBL registry / anti-duplication |
-| **RWAOfferingPool** | [`0x1F44D336111dE4e2640bd9a5945991D42e876f65`](https://testnet.blockscout.injective.network/address/0x1F44D336111dE4e2640bd9a5945991D42e876f65) | Offering lifecycle / 生命周期 |
-| **RiskPricingOracle** | [`0x0F9618DDbac86eD51d48ef1361789D7e5eF1FAE1`](https://testnet.blockscout.injective.network/address/0x0F9618DDbac86eD51d48ef1361789D7e5eF1FAE1) | AI → on-chain pricing |
-| **RWAToken** | [`0x7eb44f73368d14DBE4c2E30F8490a60513Fe17B0`](https://testnet.blockscout.injective.network/address/0x7eb44f73368d14DBE4c2E30F8490a60513Fe17B0) | ERC-20 RWA shares |
+| **AgentBLRWA** | [`0x9EdfDacDE8955b927D6a3CEeAAbd15c9A1d186bA`](https://testnet.blockscout.injective.network/address/0x9EdfDacDE8955b927D6a3CEeAAbd15c9A1d186bA) | Browser demo contract: tokenize an eBL in one transaction / 浏览器演示合约，一笔交易 tokenize |
+| **EBLRegistry V2** | [`0x3317010ACb5337145d86b1Ba370A2591037cFf70`](https://testnet.blockscout.injective.network/address/0x3317010ACb5337145d86b1Ba370A2591037cFf70) | eBL registry, cargo uniqueness, pledges / eBL 登记、防重复、质押 |
+| **RWAOfferingPool** | [`0x8966919D0760837dC3fc7aD50492187F0528887f`](https://testnet.blockscout.injective.network/address/0x8966919D0760837dC3fc7aD50492187F0528887f) | Offering lifecycle state machine / 发行生命周期状态机 |
+| **RiskPricingOracle** | [`0xd15212ad15A6f6d926d72d5AF316bD7B2AF3A630`](https://testnet.blockscout.injective.network/address/0xd15212ad15A6f6d926d72d5AF316bD7B2AF3A630) | AI pricing → on-chain pricing action / AI 定价上链 |
+| **RWAToken** | [`0x59edB85ac7499388284Daec7029cC1344D0C17B4`](https://testnet.blockscout.injective.network/address/0x59edB85ac7499388284Daec7029cC1344D0C17B4) | Per-pool, non-transferable share receipts (not an ERC-20) / 每池不可转让的份额凭证（不是 ERC-20） |
+| **PaymentOracle** | [`0x98De9ccF7AaeD8DA2c328114CAC55fAB55F0abEe`](https://testnet.blockscout.injective.network/address/0x98De9ccF7AaeD8DA2c328114CAC55fAB55F0abEe) | Binds an x402 settlement to the paid AI report / 把 x402 付款与付费报告绑定 |
+
+[`public/chain-config.json`](public/chain-config.json) is the single source of truth for these addresses (a test keeps this table in sync with it).
+
+> **Deployment status | 部署状态:** the contracts above are the **v1** build. The source in [`hardhat/contracts`](hardhat/contracts) is v2 (collateral uniqueness, price bounds, settlement and ownership hardening — see [`docs/contracts.md`](docs/contracts.md) §0) and takes effect on-chain after `cd hardhat && npm run deploy:all`. `npm run verify:bytecode` reports whether the testnet code matches the local source. The protocol is a demo: **do not put real funds in it** (there is no payment leg for subscriptions yet).
+> 上表是 **v1** 部署；源码已是 v2，重新部署后才在链上生效；`npm run verify:bytecode` 可对比链上代码与本地源码。协议仅用于演示，**请勿放入真实资金**。
+
+---
+
+## 🔒 Security Model | 安全模型
+
+AgentBL is a prototype, but it is built so that a wallet-connected page and a publicly reachable server do not hand out secrets or money:
+
+- **No third-party code in the browser.** `ethers` and `@cosmjs/stargate` are self-hosted under [`public/vendor`](public/vendor) (pinned versions, SHA-256 manifest verified by `npm run check`), and a strict Content-Security-Policy only allows same-origin scripts. The page no longer loads anything from a CDN.
+- **No secret reaches the browser.** The dashboard's AI assistant talks to a same-origin relay (`/api/llm/chat`); the LLM key stays on the server, the server chooses the model, caps `max_tokens`, bounds the request and rate-limits each client.
+- **Money paths are fail-closed.** Switching the runtime mode into or out of Live requires `AGENTBL_ADMIN_TOKEN`; Live x402 settles through a facilitator and never trusts a client-supplied transaction hash; a payment is bound to the report it unlocked by an on-chain `PaymentOracle` attestation.
+- **Least privilege.** The server signs with dedicated, separately authorised keys (`PAYMENT_ATTESTOR_PRIVATE_KEY`, `PRICING_UPDATER_PRIVATE_KEY`) instead of the contract owner key; `SIGNER_KEYS_STRICT=true` forbids the fallback.
+- **Hardened HTTP surface.** Request-body limits, strict input validation, per-client rate limits, bounded SSE connections, security headers, no internal error details in responses, and a catch-all so one bad request cannot stop the process. `npm test` includes a fuzz sweep asserting that no route answers with a 5xx.
+- **Hardened contracts.** See [`docs/contracts.md`](docs/contracts.md) §0 for the v2 changes and the known limitations.
+
+AgentBL 是原型项目，但已按“连接钱包的网页 + 公网服务器”的标准做了防护：前端不加载任何第三方 CDN 代码（依赖自托管并校验 SHA-256，严格 CSP）；LLM Key 只留在服务器，浏览器通过同源中继调用；Live 模式切换需要 `AGENTBL_ADMIN_TOKEN`，付款失败即关闭、不信任客户端传来的交易哈希；服务器使用按角色拆分的最小权限密钥；HTTP 层有请求体上限、输入校验、限流和 SSE 连接上限。
+
+## ⚙️ Configuration & Live Mode | 配置与 Live 模式
+
+All configuration is optional in Demo Mode. [`.env.example`](.env.example) documents every variable; the ones that matter most:
+
+| Variable | Purpose 用途 |
+|---|---|
+| `AGENTBL_ADMIN_TOKEN` | Authorises switching the runtime mode into/out of Live (≥ 16 chars). Without it, mode switching is disabled whenever Live is configured. |
+| `DEEPSEEK_API_KEY`, `DASHSCOPE_API_KEY`, … | LLM provider for the AI assistant; used only by the server-side relay. Set a spend limit on the key. |
+| `X402_MODE=live`, `X402_FACILITATOR_URL`, `X402_PAY_TO` | The three settings Live x402 needs. Optional: `X402_PUBLIC_BASE_URL` behind a proxy. |
+| `PAYMENT_ATTESTOR_PRIVATE_KEY`, `PRICING_UPDATER_PRIVATE_KEY` | Dedicated signer keys; authorise them on-chain with `PaymentOracle.setAttestor` / `RiskPricingOracle.setUpdater`. |
+| `WHITE_AGENT_PRIVATE_KEY` | Buyer wallet for the CLI/agent x402 client. |
+| `TRUST_PROXY`, `HOST`, `PORT` | Reverse-proxy and bind settings. |
+| `AGENTBL_RUNTIME_DIR` | Writable, persistent folder for receipts, cached reports and decision logs. |
+
+**Going Live (testnet):** start from a Demo deployment, set the three x402 variables and the admin token, make sure the payee and the buyer hold testnet USDC/INJ, then switch the mode from the dashboard (it asks for the admin token) or start with `DEMO_MODE=false`. In Live mode the paid endpoints answer with an x402 V2 `402`; the dashboard pays with the connected wallet (EIP-3009 `transferWithAuthorization`, signed with `eth_signTypedData_v4`), the facilitator settles, and the server attests the report on `PaymentOracle`. Details: [`docs/x402-integration.md`](docs/x402-integration.md) and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ---
 
@@ -798,9 +867,10 @@ The architecture uses Injective's EVM-compatible environment for Web3 execution.
 
 ### Requirements | 环境要求
 
-- Node.js **20+**
-- npm
-- Git
+- Node.js **20.11+** for the application (an `.nvmrc` pins 22; CI runs 22 and 24)
+- Node.js **22.13+** for the Hardhat 3 contract project
+- npm, Git
+- Docker (optional)
 
 ### Install | 安装
 
@@ -857,14 +927,18 @@ npm test
 A locally reproduced run produced:
 
 ```text
-32 passing
+74 passing
 ```
 
 本地复现结果：
 
 ```text
-32 passing
+74 passing
 ```
+
+The suite covers the original unit tests, a regression test for every hardening fix, a randomised model-based test of the offering state machine, and a replay of the testnet deployment smoke sequence. The application test suite (`npm test`, repository root) runs 500+ tests.
+
+合约测试包含原有单元测试、每项加固的回归测试、对 offering 状态机的随机参考模型对照测试，以及部署冒烟序列的本地重放；根目录 `npm test` 另有 500+ 个应用测试。
 
 然后返回项目根目录：
 
@@ -943,22 +1017,31 @@ cp .env.example .env
 Useful commands / 常用命令：
 
 ```bash
-npm run dev
-npm run preflight
-npm test
-npm run check
-npm run demo
-npm run scenarios
-npm run price
-npm run intel
-npm run smoke:x402
-npm run mcp:stdio
+npm run dev               # start the app (http://localhost:3000)
+npm run preflight         # fixed release gate: tests, contracts, API, x402, MCP, UI
+npm test                  # application tests (Node test runner)
+npm run test:coverage     # same, with coverage thresholds
+npm run lint              # ESLint
+npm run check             # repository integrity (files, schemas, vendored assets)
+npm run vendor:check      # verify public/vendor against its SHA-256 manifest
+npm run demo              # one-minute narrated demo
+npm run scenarios         # risk / pricing scenario regression
+npm run price             # price the demo case from the CLI
+npm run intel             # world-risk intelligence (offline fixtures without a key)
+npm run smoke:x402        # Demo x402: 402 -> sign -> settle -> unlock
+npm run x402:intel        # buy a paid report from the CLI (Demo, or Live with WHITE_AGENT_PRIVATE_KEY)
+npm run smoke:x402:live   # explicit-consent testnet smoke (see docs/x402-integration.md)
+npm run verify:wave-b     # link a live payment to its on-chain attestation and pricing evidence
+npm run verify:bytecode   # compare deployed contracts with the local build
+npm run mcp:stdio         # MCP server over stdio
 ```
 
-Contract tests / 合约测试：
+Contract tests and deployment / 合约测试与部署：
 
 ```bash
-npm --prefix hardhat test
+npm run test:contracts           # = npm --prefix hardhat test
+npm run compile:contracts
+npm run deploy:protocol          # five-contract protocol (needs DEPLOYER_PRIVATE_KEY with testnet INJ)
 ```
 
 ---
@@ -1032,10 +1115,10 @@ These scenarios demonstrate why **Dynamic Context** matters for trade-asset reco
 
 ### Backend
 
-- Node.js 20+
-- Express 5.x
-- Native Node.js test runner
-- JSON-based local state
+- Node.js 20.11+ (plain `http` server; Express 5 hosts the x402 V2 middleware)
+- Native Node.js test runner, ESLint
+- JSON-based local state under `AGENTBL_RUNTIME_DIR`
+- Docker image (non-root, read-only root filesystem)
 
 ### Agent Interoperability
 
@@ -1096,6 +1179,9 @@ Important limitations include:
 
 - cargo and settlement scenarios may use simulated or demo data;
 - Demo Mode does not represent real investment execution;
+- the smart contracts have **no payment leg for RWA subscriptions**: `subscribe` mints a share receipt and records the amount owed, but no stablecoin is escrowed and `settle` does not distribute repayments (see [`docs/contracts.md`](docs/contracts.md) §0.6);
+- the Injective testnet deployment is the v1 contract build until the hardened source is redeployed;
+- offering, pool and subscription state lives in server memory and resets on restart (only x402 receipts, cached reports, decision logs and Mystery reveals are persisted);
 - real-world legal ownership requires jurisdiction-specific integration;
 - production eBL infrastructure requires recognized eBL systems and standards;
 - real logistics feeds are not yet fully integrated;
@@ -1110,6 +1196,9 @@ AgentBL 当前仍然是一个 **Hackathon Prototype**。
 
 - 部分货物与结算场景使用模拟 / Demo 数据；
 - Demo Mode 不代表真实投资执行；
+- 合约**没有认购的付款环节**：`subscribe` 只铸造份额凭证并记录应付金额，不托管稳定币，`settle` 也不向投资者分配回款；
+- 测试网上仍是 v1 合约，重新部署后加固后的源码才会生效；
+- 池子、认购等状态保存在服务器内存里，重启后清空（只有 x402 收据、报告缓存、决策日志和 Mystery 记录会持久化）；
 - 现实世界法律所有权需要针对司法辖区进行进一步集成；
 - Production eBL 需要接入被认可的 eBL 系统与行业标准；
 - 真实物流数据尚未完整接入；
