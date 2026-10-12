@@ -446,7 +446,7 @@ QA 目标：任何新增功能都必须回到同一条主链路，不能散。
 | QA-8 | 准备演示失败兜底：CLI demo、mock provider、contract mock | Bowen | Todo | README / docs 更新 | contract mock 已完成（`contractHarness.js`）；CLI demo / README 兜底说明待补 |
 | QA-9 | 最后 6 小时功能冻结协调 | Bowen | Todo | 全员确认 | - |
 | QA-10 | 增加自主 Agent 可靠性测试矩阵：事件乱序、重复事件、进程重启、RPC 超时、xAPI/LLM 不可用、链上交易失败 | Bowen | Todo | `npm run test`，所有失败路径均有幂等恢复或确定性 fallback | - |
-| QA-11 | 增加 eBL V2 安全测试：一货多单、伪造 cargoHash、未授权 transfer/endorse、质押中转让、重放攻击 | Bowen | Todo | `cd hardhat && npm test` + 安全测试报告 | - |
+| QA-11 | 增加 eBL V2 安全测试：一货多单、伪造 cargoHash、未授权 transfer/endorse、质押中转让、重放攻击 | Bowen | Review | `cd hardhat && npm test` + 安全测试报告 | 回归测试：`hardhat/test/contractHardening.test.js`（一张 eBL 只能支撑一个 offering、V1/V2 重复登记、未授权 transfer/endorse、质押中转让）、`paymentOracle.test.js` 与 `eblRegistryV2.test.js`（重放、重复 cargoHash）；随机状态机对照 `offeringModel.test.js`；报告见 `docs/contracts.md` §0.3 / §0.6 |
 | QA-12 | 增加市场与角色 API 集成测试：访问控制、分页、并发认购、持久化恢复、链上/链下状态对账 | Bowen | Todo | `npm run test && npm run smoke`，API、持久化存储与合约事件三方一致 | - |
 | QA-13 | 建立 MetaMask / Keplr / Leap × 桌面/移动端 × 真实链/离线 fallback 的手动验收矩阵 | Bowen | Todo | 完整 checklist、截图与测试 tx hash | - |
 | QA-14 | 按 gap analysis v2 跑通 3 分钟 P0 验收：上传 → 唯一性 → 解析 → 自主定价/开盘 → 市场认购 → 风险暂停/恢复 → 自动兑付 | Bowen | Todo | 录像 + 决策日志 + 全套链上 tx；任何一步不得依赖伪造随机 tx | - |

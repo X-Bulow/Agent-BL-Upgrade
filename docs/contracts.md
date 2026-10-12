@@ -4,6 +4,114 @@
 命名来源：以 `docs/PRD.md` v0.2 和 `docs/tasks.md` 为准  
 范围：先定义可被 JS contract mock、Hardhat 合约和前端共同复用的最小接口，不做公开募资、不做 AMM、不承诺保本收益。
 
+## 0. 当前实现（v2）
+
+> **以源码为准。** 下面 §1–§7 是 WEB3-1 ~ WEB3-4 冻结时的最小接口设计，仍可当作接口说明阅读。合约之后演进到了 v2：数字编码（状态序号、动作码）以 `hardhat/contracts/*.sol` 为唯一事实来源，`tests/contractParity.test.js` 会校验 JS 常量与它一致，`hardhat/test/offeringModel.test.js` 用随机序列对照参考模型来验证状态机。
+
+### 0.1 部署状态
+
+| 项目 | 状态 |
+|---|---|
+| 链上（Injective inEVM 测试网，chainId 1439） | 运行的是 **v1 字节码**：运行时代码与改动前的源码一致，仅编译器 metadata 哈希不同（已用改动前源码的构建对照链上字节码确认） |
+| 本仓库源码 | 已包含 v2 加固（见 0.3），**重新部署后才会在链上生效** |
+| 重新部署 | `cd hardhat && npm run deploy:all`（需要持有测试网 INJ 的 `DEPLOYER_PRIVATE_KEY`），部署脚本会自动更新 `public/chain-config.json` |
+| 对比链上与源码 | `npm run verify:bytecode`（只读，调用 `eth_getCode`）；加 `-- --strict` 可在两者不一致时返回非零退出码 |
+
+重新部署之后需要的运维动作：
+
+1. `PaymentOracle.setAttestor(<后端归证密钥地址>, true)`，并在 `.env` 里设置 `PAYMENT_ATTESTOR_PRIVATE_KEY`；
+2. `RiskPricingOracle.setUpdater(<定价更新密钥地址>, true)`，并设置 `PRICING_UPDATER_PRIVATE_KEY`；
+3. 如需把合约交给多签或新钱包：`transferOwnership(新地址)`，再由新地址 `acceptOwnership()`（两步，写错地址不会锁死合约）。
+
+### 0.2 合约与权限
+
+| 合约 | 作用 | 谁能写 |
+|---|---|---|
+| `EBLRegistry` | eBL 登记（货物唯一性、结构化元数据）、背书/转让历史、质押 | owner：`mintEBL` / `mintEBLV2`；持有人：`transfer` / `endorse`；持有人或 owner：`pledge`；被质押的池或 owner：`releasePledge` |
+| `RWAToken` | 每个池的份额凭证（不可转让） | 仅池可 `mint`；owner：`setPool` / `setTransferPermission` |
+| `RWAOfferingPool` | 发行状态机与审计轨迹 | 见下表 |
+| `RiskPricingOracle` | 记录 AI 定价与风险并转发给池 | updater：`updatePricing`；owner：`setUpdater` |
+| `InvestorComplianceGate` | 可替换的合规准入模块 | owner |
+| `PaymentOracle` | 把 x402 支付与付费报告绑定的链上证明 | attestor：`attestPayment`；owner：`setAttestor` |
+| `AgentBLRWA` | 浏览器演示合约（任何钱包一笔交易即可 tokenize） | 任何钱包可 `tokenize`；**只有 creator** 能 `reprice` |
+
+`RWAOfferingPool` 的调用方：
+
+| 函数 | 调用方 | 备注 |
+|---|---|---|
+| `createOffering`、`cancelOffering`、`correctImporterPayment`、`setOracle`、`setAgentExecutor`、`setEmergencyStop`、`emergencyPause`、`setComplianceGate`、`setAccessMode` | owner | 只有 `cancelOffering` 和 `emergencyPause` 在全局紧急停止期间仍可用 |
+| `markInTransit`、`resumeOffering`、`recordImporterPayment`、`recordCargoArrival`、`settle` | owner 或授权 executor | 紧急停止期间不可用 |
+| `pauseOffering` | owner、oracle 或 executor | 紧急停止期间不可用 |
+| `applyPricingAction` | oracle 或 owner | 由 `RiskPricingOracle.updatePricing` 转发 |
+| `subscribe` | 满足准入条件的任何地址 | 紧急停止期间不可用 |
+
+五个核心合约（`EBLRegistry`、`RWAToken`、`RWAOfferingPool`、`RiskPricingOracle`、`InvestorComplianceGate`）共用 `Owned`：两步所有权转移，`owner()` 和 revert 字符串 `"not owner"` 保持不变。`PaymentOracle` 使用自定义错误，自带同样的两步转移，并且 **attestor 角色随 owner 转移**：旧 owner 的 attestor 权限被撤销，新 owner 自动成为 attestor（`RiskPricingOracle` 的 updater 角色同理）。
+
+### 0.3 v2 相对 v1 的变化
+
+| # | v1 的问题 | v2 的行为 | 回归测试（`hardhat/test/contractHardening.test.js`） |
+|---|---|---|---|
+| 1 | 同一张已质押的 eBL 可以支撑多个在售 offering | `poolOfEbl` 保证一张 eBL 同时只支撑一个 offering；`Repaid` / `Cancelled` 时释放 | collateral |
+| 2 | oracle 能把发行价设到目标赎回价之上；`REPRICE_DOWN` 能涨价 | 新价必须 ≤ `targetRedemptionValue`；`REPRICE_DOWN` 必须严格降价；`riskLevel ≤ 3` | pricing bounds |
+| 3 | 没有人认购的 offering 也能记录回款并 `settle` | 回款证明与结算要求 `subscribed > 0`（`no subscribers`） | settlement |
+| 4 | 结算后 eBL 仍被质押、无法流转 | `settle` 和 `cancelOffering` 释放质押（尽力而为：已被 registry owner 释放时记录 `CollateralReleaseFailed`，不阻塞结算） | collateral |
+| 5 | 录错一次回款证明就永久无法结算 | owner 可 `correctImporterPayment`，旧值保留在 `ImporterPaymentCorrected` 事件里；executor 不能改自己的证明 | settlement |
+| 6 | `Cancelled` 状态不可达 | `cancelOffering`：仅 owner、仅无认购者的 `Open` / `Repriced` / `Paused` | cancelOffering |
+| 7 | 质押被 registry owner 释放后仍可继续认购 | `subscribe` 要求 eBL 仍质押给该池 | collateral |
+| 8 | `mintEBL`（V1）每次生成新的 cargoHash，同一张提单可重复铸造 | cargoHash 只由 `metadataHash` 派生，重复铸造会 revert | EBLRegistry hardening |
+| 9 | `PaymentOracle.transferOwnership` 让旧 owner 继续是 attestor | 两步转移，attestor 角色随 owner 转移 | PaymentOracle ownership |
+| 10 | `AgentBLRWA.reprice` 任何地址都能覆盖别人的价格、风险、证据 | 仅 creator；`action ≤ 5`、`riskLevel ≤ 3`、`riskScoreBps ≤ 10000` | AgentBLRWA hardening |
+| 11 | 单 owner，无法更换密钥 | 两步所有权转移（见 0.2） | two-step ownership |
+| 12 | `markInTransit` 的离港证明被丢弃；`setOracle` / `setPool` 没有事件 | 新事件 `DepartureRecorded`、`OracleSet`、`PoolSet` | settlement |
+
+新增事件：`DepartureRecorded`、`ImporterPaymentCorrected`、`OfferingCancelled`、`CollateralReleased`、`CollateralReleaseFailed`、`OracleSet`（池）；`PoolSet`（`RWAToken`）；`OwnershipTransferStarted` / `OwnershipTransferred`（`Owned` 合约和 `PaymentOracle`）。新增函数：`cancelOffering`、`correctImporterPayment`、`poolOfEbl`、`transferOwnership` / `acceptOwnership` / `pendingOwner`。原有函数签名和事件签名保持不变，旧客户端和 ABI 继续可用。
+
+### 0.4 offering 状态机（当前实现）
+
+| 从 | 调用 | 到 | 条件 |
+|---|---|---|---|
+| （新建） | `createOffering` | `Open` | eBL 已质押给本池且当前没有在售 offering；价格 ≤ 目标赎回价 |
+| `Open` / `Repriced` / `Subscribed` | `subscribe` | `Subscribed`，认购满时 `Funded` | 准入、数量、不超过供给、eBL 仍质押给本池 |
+| `Funded` / `Subscribed` | `markInTransit` | `InTransit` | 离港证明非零 |
+| 任一活跃状态 | `pauseOffering` / oracle `PAUSE_OFFERING` / `emergencyPause` | `Paused` | 记住暂停前的状态 |
+| `Paused` | `resumeOffering` / oracle `RESUME_OFFERING` | 暂停前的状态 | |
+| 任一活跃状态 | oracle `REPRICE_DOWN` | `Repriced` | 新价严格低于现价且 ≤ 目标；价格不变时只改状态 |
+| 任一活跃状态 | oracle `OPEN_OFFERING` / `OPEN_WITH_WARNING` | 状态不变 | 可调价（升降都可以），但 ≤ 目标赎回价 |
+| 活跃 / `Paused` | oracle `FREEZE_POOL` | `Frozen` | |
+| 活跃 / `Paused` / `Frozen` | oracle `TRIGGER_LIQUIDATION` | `Liquidation` | |
+| 任一活跃状态 | `settle` | `Repaid` | 有认购者；付款证明和到港证明齐全；金额一致；同时释放质押 |
+| `Open` / `Repriced` / `Paused` | `cancelOffering` | `Cancelled` | 无认购者；仅 owner；同时释放质押 |
+
+- 活跃状态 = `Open`、`Subscribed`、`Funded`、`InTransit`、`Repriced`。
+- `Created`、`Priced`、`Redeemed` 是保留的枚举值，目前不可达（offering 创建即为 `Open`；没有赎回支付腿，见 0.6）。
+- `Frozen`、`Liquidation` 是需要人工或链下处理的终点，质押不会自动释放。PRD 里的 `Defaulted` 只存在于链下模拟（`src/core/offeringSimulator.js`），不在链上枚举里，所以链下状态列表与链上枚举的序号并不一一对应：**链上以枚举序号为准**。
+
+动作码（`uint8 action`，`RWAOfferingPool` 的常量）：0 `OPEN_OFFERING`、1 `OPEN_WITH_WARNING`、2 `REPRICE_DOWN`、3 `PAUSE_OFFERING`、4 `FREEZE_POOL`、5 `TRIGGER_LIQUIDATION`、6 `RESUME_OFFERING`、7 `SETTLE_OFFERING`、8 `EMERGENCY_PAUSE`、9 `CANCEL_OFFERING`。0–5 可以由 AI 的 `PricingQuote` 携带；6 可以由 oracle 触发；7–9 是池自己在 `OfferingStateChanged` 里报告的生命周期动作（oracle 传入会以 `bad action` revert）。
+
+### 0.5 测试覆盖
+
+`cd hardhat && npm test`（或在仓库根目录运行 `npm run test:contracts`）：
+
+- `contractHardening.test.js`：上表每一项的回归测试；
+- `offeringModel.test.js`：参考模型对照。用固定种子的随机序列同时驱动模型和真实合约，逐步比对“该不该成功”和结果状态，并检查全局不变量（价格不超过目标、认购不超供给、`Repaid` 必有认购者和两份证明、终态不再占用 eBL 槽位等）。把合约里任一关键检查删掉（变异测试）都会让它失败；
+- `deploySmoke.test.js`：在本地重放 `deploy-protocol.js` 的链上冒烟序列，避免合约规则改动让真实部署的冒烟失败；
+- 其余是原有的单元测试。
+
+仓库根目录的 `tests/contractParity.test.js` 校验 JS harness 的动作码、风险等级与 Solidity 源码一致。
+
+### 0.6 已知限制
+
+这是演示级别的协议，**不要在其上放真实资金**：
+
+1. **没有支付腿。** `subscribe` 只铸造份额凭证，并在事件里记录应付金额（`paidAmount`），不托管任何稳定币；`settle` 只记录进口商回款证明，不向投资者分配。上线前需要加入 ERC-20 托管与按比例赎回（并因此启用 `Redeemed`）。`contractHardening` 里有一条测试把这个限制固定下来，补上支付腿时需要有意识地更新它。
+2. **质押由 registry owner 说了算。** `EBLRegistry.releasePledge` 允许 registry owner 随时解除质押；v2 只保证解除之后不会继续**新增**认购，并且结算时能容错。
+3. **单 owner 信任模型。** owner 能暂停、取消（无认购者时）、更正回款证明、更换 oracle。生产环境应换成多签，并把 executor、updater、attestor 的密钥分开（后端已按最小权限分角色，见 `.env.example`）。
+4. **oracle 是受信角色。** 价格只有上下界（≤ 目标赎回价，`REPRICE_DOWN` 必须降价），链上没有风险模型校验；可信度来自 updater 密钥以及事件里的 `evidenceHash` / `quoteHash` 审计线索。
+5. **`RWAToken` 不可转让**，没有二级市场；`setTransferPermission` 只是预留的白名单记录。
+6. **`AgentBLRWA` 是演示合约**：`tokenize` 对任何钱包开放，所有数据由调用方提供，链上不验证其真实性。
+
+---
+
 ## 1. 设计目标
 
 Web3 / Contract 层只解决一件事：
@@ -60,6 +168,10 @@ JS mock 可以保留人类可读的 `0.8` / `1`，但 Hardhat 合约测试应使
 | 3 | PAUSE_OFFERING | FREEZE_POOL | 暂停发行 |
 | 4 | FREEZE_POOL | FREEZE_POOL | 冻结池子 |
 | 5 | TRIGGER_LIQUIDATION | TRIGGER_LIQUIDATION | 进入清算 |
+| 6 | RESUME_OFFERING | — | 恢复暂停前的状态（v2 新增，可由 oracle 触发） |
+| 7 | SETTLE_OFFERING | — | 池结算时自己报告的动作，不是 AI 动作（v2 新增） |
+| 8 | EMERGENCY_PAUSE | — | owner 紧急暂停时池自己报告的动作（v2 新增） |
+| 9 | CANCEL_OFFERING | — | owner 取消无认购者的 offering 时池自己报告的动作（v2 新增） |
 
 ### 2.4 哈希字段
 
@@ -272,7 +384,7 @@ interface IRWAOfferingPool {
 | `subscribe` | permissioned investor | pool 必须 Open / Repriced，amount > 0 |
 | `pauseOffering` | owner / oracle / risk operator | pool 不能已结算 |
 | `applyPricingAction` | only `RiskPricingOracle` 或 risk operator | action 必须合法，hash 必须非空 |
-| `settle` | pool operator | pool 必须 Funded / InTransit / Repaid path |
+| `settle` | pool operator | pool 必须是有认购者的活跃状态，付款证明与到港证明齐全且金额一致（v2，见 §0.4） |
 
 ### 5.5 Action 到状态转换
 

@@ -13,6 +13,7 @@ pragma solidity ^0.8.24;
  */
 contract PaymentOracle {
     error NotOwner(address caller);
+    error NotPendingOwner(address caller);
     error UnauthorizedAttestor(address caller);
     error ZeroAddress();
     error ZeroHash();
@@ -21,6 +22,7 @@ contract PaymentOracle {
     error DuplicatePaymentTransaction(bytes32 paymentTxHash);
     error UnknownReceipt(bytes32 receiptId);
 
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event AttestorUpdated(address indexed attestor, bool allowed);
 
@@ -60,6 +62,7 @@ contract PaymentOracle {
     }
 
     address public owner;
+    address public pendingOwner;
     uint256 public attestationCount;
 
     mapping(address => bool) public isAttestor;
@@ -83,13 +86,32 @@ contract PaymentOracle {
         emit AttestorUpdated(msg.sender, true);
     }
 
+    /// @notice Nominate a new owner. The transfer only completes when that address calls
+    ///         acceptOwnership(), so a mistyped address cannot lock the contract.
     function transferOwnership(address newOwner) external onlyOwner {
         if (newOwner == address(0)) revert ZeroAddress();
+        pendingOwner = newOwner;
+        emit OwnershipTransferStarted(owner, newOwner);
+    }
+
+    /**
+     * @notice Complete an ownership transfer. The attestor role follows the owner: the
+     *         previous owner is revoked (it would otherwise keep write access to the
+     *         audit trail after handing the contract over) and the new owner is granted.
+     */
+    function acceptOwnership() external {
+        if (msg.sender != pendingOwner) revert NotPendingOwner(msg.sender);
         address previousOwner = owner;
-        owner = newOwner;
-        isAttestor[newOwner] = true;
-        emit OwnershipTransferred(previousOwner, newOwner);
-        emit AttestorUpdated(newOwner, true);
+        owner = msg.sender;
+        pendingOwner = address(0);
+        emit OwnershipTransferred(previousOwner, msg.sender);
+
+        if (isAttestor[previousOwner]) {
+            isAttestor[previousOwner] = false;
+            emit AttestorUpdated(previousOwner, false);
+        }
+        isAttestor[msg.sender] = true;
+        emit AttestorUpdated(msg.sender, true);
     }
 
     function setAttestor(address attestor, bool allowed) external onlyOwner {

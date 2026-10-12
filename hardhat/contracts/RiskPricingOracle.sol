@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {Owned} from "./Owned.sol";
+
 interface IRWAOfferingPoolActions {
     function applyPricingAction(
         uint256 poolId,
@@ -14,8 +16,9 @@ interface IRWAOfferingPoolActions {
 /// @title RiskPricingOracle (WEB3-4 / WEB3-7 / WEB3-9)
 /// @notice Records AI pricing + risk signals on-chain and forwards the action to the pool.
 /// @dev Aligns with docs/contracts.md §6. evidence/quote hashes are persisted and emitted.
-contract RiskPricingOracle {
-    address public owner;
+contract RiskPricingOracle is Owned {
+    uint8 public constant MAX_RISK_LEVEL = 3; // 0 LOW / 1 MEDIUM / 2 WARNING / 3 CRITICAL
+
     IRWAOfferingPoolActions public pool;
 
     mapping(address => bool) private _updaters;
@@ -34,13 +37,8 @@ contract RiskPricingOracle {
     );
     event UpdaterSet(address indexed updater, bool allowed);
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "not owner");
-        _;
-    }
-
     constructor(address pool_) {
-        owner = msg.sender;
+        require(pool_ != address(0), "pool=0");
         pool = IRWAOfferingPoolActions(pool_);
         _updaters[msg.sender] = true;
         emit UpdaterSet(msg.sender, true);
@@ -50,6 +48,16 @@ contract RiskPricingOracle {
         require(updater != address(0), "updater=0");
         _updaters[updater] = allowed;
         emit UpdaterSet(updater, allowed);
+    }
+
+    /// @dev The owner is an updater from deployment; that role moves with ownership.
+    function _afterOwnershipTransferred(address previousOwner, address newOwner) internal override {
+        if (_updaters[previousOwner]) {
+            _updaters[previousOwner] = false;
+            emit UpdaterSet(previousOwner, false);
+        }
+        _updaters[newOwner] = true;
+        emit UpdaterSet(newOwner, true);
     }
 
     function isUpdater(address updater) external view returns (bool) {
@@ -67,6 +75,7 @@ contract RiskPricingOracle {
     ) external {
         require(_updaters[msg.sender], "not updater");
         require(issuePrice > 0, "issuePrice=0");
+        require(riskLevel <= MAX_RISK_LEVEL, "riskLevel>3");
         require(evidenceHash != bytes32(0), "evidenceHash=0");
         require(quoteHash != bytes32(0), "quoteHash=0");
 

@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {Owned} from "./Owned.sol";
+
 /// @title EBLRegistry V2 (WEB3-12/13/14)
 /// @notice Unique-cargo eBL registry with structured metadata, endorsement,
 ///         transfer history and pledge-aware custody controls.
-contract EBLRegistry {
+contract EBLRegistry is Owned {
     struct EBLMetadata {
         string vessel;
         string voyage;
@@ -29,7 +31,6 @@ contract EBLRegistry {
         uint64 timestamp;
     }
 
-    address public owner;
     uint256 public nextEblId = 1;
 
     mapping(uint256 => address) private _holder;
@@ -57,19 +58,14 @@ contract EBLRegistry {
         bytes32 endorsementHash
     );
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "not owner");
-        _;
-    }
-
-    constructor() {
-        owner = msg.sender;
-    }
-
+    /// @notice Legacy (V1) mint without structured metadata. The cargo identity is derived
+    ///         from `metadataHash` alone, so the same document can only be registered once;
+    ///         the previous derivation also mixed in the holder and the running id, which let
+    ///         one physical bill of lading be minted any number of times.
     function mintEBL(bytes32 metadataHash, address holder) external onlyOwner returns (uint256 eblId) {
         require(metadataHash != bytes32(0), "metadataHash=0");
         require(holder != address(0), "holder=0");
-        bytes32 legacyCargoHash = keccak256(abi.encodePacked("legacy", metadataHash, holder, nextEblId));
+        bytes32 legacyCargoHash = keccak256(abi.encodePacked("legacy", metadataHash));
         EBLMetadata memory emptyMetadata;
         eblId = _mint(legacyCargoHash, metadataHash, holder, emptyMetadata);
     }

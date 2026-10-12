@@ -1,27 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {Owned} from "./Owned.sol";
+
 /// @title InvestorComplianceGate
 /// @notice Replaceable production eligibility module for RWAOfferingPool.
 /// @dev The pool depends only on isEligible(), so a KYC/AML or ZK gate can be
 ///      substituted without redeploying the pool's state machine.
-contract InvestorComplianceGate {
-    address public owner;
+contract InvestorComplianceGate is Owned {
     mapping(address => bool) private _globalEligibility;
     mapping(uint256 => mapping(address => bool)) private _poolEligibility;
     mapping(uint256 => mapping(address => bool)) private _hasPoolOverride;
 
     event EligibilitySet(address indexed investor, bool eligible);
     event PoolEligibilitySet(uint256 indexed poolId, address indexed investor, bool eligible);
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "not owner");
-        _;
-    }
-
-    constructor() {
-        owner = msg.sender;
-    }
 
     function setEligible(address investor, bool eligible) external onlyOwner {
         require(investor != address(0), "investor=0");

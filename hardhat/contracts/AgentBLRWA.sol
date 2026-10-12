@@ -39,6 +39,9 @@ contract AgentBLRWA {
         bool    exists;
     }
 
+    uint8 public constant MAX_RISK_LEVEL = 3;            // CRITICAL
+    uint32 public constant MAX_RISK_SCORE_BPS = 10_000;  // 100%
+
     uint256 public nextPoolId = 1;
     mapping(uint256 => Offering) public offerings;
     mapping(uint256 => mapping(address => uint256)) public rwaBalance;
@@ -86,6 +89,8 @@ contract AgentBLRWA {
     ) external returns (uint256 poolId, uint256 mintedAmount) {
         require(issuePriceE6 > 0, "issuePrice=0");
         require(tokenSupply > 0, "supply=0");
+        require(riskLevel <= MAX_RISK_LEVEL, "riskLevel>3");
+        require(riskScoreBps <= MAX_RISK_SCORE_BPS, "riskScore>100%");
 
         // RWA = financing / issue price. financingUsd is whole USD, issuePriceE6
         // is USD*1e6, so (financingUsd * 1e6) / issuePriceE6 yields whole tokens.
@@ -124,8 +129,10 @@ contract AgentBLRWA {
     }
 
     /// @notice Reprice an offering when an in-transit risk event arrives.
-    /// @dev Ungated for the demo: the dashboard's "simulate in-transit risk"
-    ///      buttons can anchor the AI's new price/risk on-chain.
+    /// @dev Only the wallet that tokenized the offering can reprice it: the dashboard's
+    ///      "simulate in-transit risk" buttons run from that same wallet, and anyone else
+    ///      overwriting another creator's price, risk and evidence anchors would defeat
+    ///      the point of anchoring them on-chain.
     function reprice(
         uint256 poolId,
         uint256 newIssuePriceE6,
@@ -137,6 +144,10 @@ contract AgentBLRWA {
     ) external {
         Offering storage o = offerings[poolId];
         require(o.exists, "pool missing");
+        require(msg.sender == o.creator, "not creator");
+        require(action <= uint8(type(Action).max), "bad action");
+        require(newRiskLevel <= MAX_RISK_LEVEL, "riskLevel>3");
+        require(newRiskScoreBps <= MAX_RISK_SCORE_BPS, "riskScore>100%");
 
         uint256 old = o.issuePriceE6;
         if (newIssuePriceE6 > 0) o.issuePriceE6 = newIssuePriceE6;

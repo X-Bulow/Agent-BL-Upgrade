@@ -30,14 +30,21 @@ export const RISK_LEVEL_TO_UINT8 = {
   CRITICAL: 3
 };
 
-// docs/contracts.md §2.3 (keyed by pricing_action)
+// docs/contracts.md §2.3 (keyed by pricing_action). Codes 0-5 are the actions an AI
+// PricingQuote can carry; 6-9 are lifecycle actions the pool itself reports in
+// OfferingStateChanged (RWAOfferingPool.sol is the source of truth, and
+// tests/contractParity.test.js keeps the two in step).
 export const PRICING_ACTION_TO_UINT8 = {
   OPEN_OFFERING: 0,
   OPEN_WITH_WARNING: 1,
   REPRICE_DOWN: 2,
   PAUSE_OFFERING: 3,
   FREEZE_POOL: 4,
-  TRIGGER_LIQUIDATION: 5
+  TRIGGER_LIQUIDATION: 5,
+  RESUME_OFFERING: 6,
+  SETTLE_OFFERING: 7,
+  EMERGENCY_PAUSE: 8,
+  CANCEL_OFFERING: 9
 };
 
 const DEFAULT_INVESTOR = 'permissioned-investor-1';
