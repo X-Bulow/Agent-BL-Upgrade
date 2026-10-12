@@ -5,7 +5,7 @@ import { evaluateWithConsensus } from '../src/agent/llmConsensus.js';
 const mockFallback = () => ({ riskLevel: 'HIGH', issues: ['Fallback used'] });
 
 test('AI-20: all succeed and reach consensus', async () => {
-  const mockChatFn = async (args, env) => {
+  const mockChatFn = async () => {
     // All return MEDIUM
     return { content: JSON.stringify({ riskLevel: 'MEDIUM', issues: ['Some minor issue'] }) };
   };

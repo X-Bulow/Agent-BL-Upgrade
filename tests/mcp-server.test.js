@@ -105,14 +105,7 @@ describe('MCP callTool Dispatcher', () => {
 
 describe('MCP Tool Chain', () => {
   test('pricing chain runs end-to-end', async () => {
-    const { runToolChain, PRICING_CHAIN } = await import('../src/mcp/mcpServer.js');
-
-    const chain = PRICING_CHAIN.map((step) => ({
-      ...step,
-      params: step.params?.case_id
-        ? { case_id: 'CASE-EBL-2026-0001' }
-        : step.params
-    }));
+    const { runToolChain } = await import('../src/mcp/mcpServer.js');
 
     const adaptedChain = [
       { tool: 'get_trade_case', params: { case_id: 'CASE-EBL-2026-0001' } },

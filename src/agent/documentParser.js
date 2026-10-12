@@ -404,6 +404,7 @@ async function resolveInput(input, options) {
 /** Parse one eBL, invoice, or insurance document. */
 export async function parseDocument(input, options = {}) {
   const resolved = await resolveInput(input, options);
+  // eslint-disable-next-line no-control-regex -- NUL bytes left by binary extraction are noise
   const text = resolved.text.replace(/\u0000/gu, '').trim();
   if (text.length < 20) throw new DocumentParseError('Document text is empty or too short', 'EMPTY_DOCUMENT', { filename: resolved.filename });
   const type = options.documentType ?? detectDocumentType(text, resolved.filename);

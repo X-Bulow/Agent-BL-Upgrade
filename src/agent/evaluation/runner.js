@@ -3,7 +3,7 @@
 
 import { EVAL_DATASET, EVAL_METRICS } from './dataset.js';
 
-export async function runEvaluation({ agent, verbose = false } = {}) {
+export async function runEvaluation({ verbose = false } = {}) {
   const results = [];
   let taskCompletionCount = 0;
   let toolCallSuccessCount = 0;
@@ -125,8 +125,8 @@ function checkGroundedness(output) {
   return output.evidence && output.evidence.length > 0;
 }
 
-// Export evaluation results as shareable JSON
-export function exportResults(evaluation, outputPath = './eval-results.json') {
+// Build a shareable JSON summary of an evaluation run (the caller decides where to write it)
+export function exportResults(evaluation) {
   const summary = {
     timestamp: new Date().toISOString(),
     metrics: evaluation.metrics,

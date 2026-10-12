@@ -13,7 +13,7 @@ function parseEnvLine(line) {
   const key = trimmed.slice(0, separator).trim();
   let value = trimmed.slice(separator + 1).trim();
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/u.test(key)) return null;
-  if ((value.startsWith('\"') && value.endsWith('\"')) || (value.startsWith("'") && value.endsWith("'"))) {
+  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
     value = value.slice(1, -1);
   }
   return [key, value];

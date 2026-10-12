@@ -6,6 +6,7 @@ import { assertRiskReport, assertTradeCase } from '../src/core/schema.js';
 import { quoteFromCase } from '../src/core/pricingEngine.js';
 import { assertPricingQuote, PAYOUT_SPEEDS } from '../src/core/pricingSchema.js';
 import chainConfigLib from './lib/chain-config.cjs';
+import { verifyVendor } from './vendor-frontend.mjs';
 
 const requiredFiles = [
   'README.md',
@@ -72,6 +73,9 @@ assert.ok(chainRegistry.networks['injective-mainnet']);
 assert.equal(chainRegistry.networks['injective-testnet'].accessModel, 'permissionless');
 assert.equal(chainRegistry.networks['injective-mainnet'].accessModel, 'compliance-gated');
 
+// Self-hosted browser modules must match their manifest (no silent edits to vendored code).
+assert.deepEqual(verifyVendor(), [], 'public/vendor is out of sync with public/vendor/manifest.json');
+
 const data = JSON.parse(await fs.readFile('data/demo-case.json', 'utf8'));
 assertTradeCase(data);
 const report = calculateRisk(data);
@@ -86,6 +90,16 @@ assert.ok(PAYOUT_SPEEDS.includes(financing.payout_speed), `demo-case financing.p
 assert.equal(financing.target_redemption_value_usd, 1, 'demo-case financing.target_redemption_value_usd must be 1');
 const demoQuote = quoteFromCase(data);
 assertPricingQuote(demoQuote, data);
+
+// Every curated case must price cleanly: an invalid financing.payout_speed in one
+// fixture (a legacy "SAFE") used to 500 the world-risk endpoint for that case only.
+for (const name of (await fs.readdir('data/cases')).filter((file) => file.endsWith('.case.json')).sort()) {
+  const fixture = JSON.parse(await fs.readFile(`data/cases/${name}`, 'utf8'));
+  const speed = fixture.financing?.payout_speed;
+  assert.ok(speed === undefined || PAYOUT_SPEEDS.includes(speed),
+    `data/cases/${name}: financing.payout_speed "${speed}" must be one of: ${PAYOUT_SPEEDS.join(', ')}`);
+  assertPricingQuote(quoteFromCase(fixture), fixture);
+}
 
 const scenarioResults = await runHarnessScenarios();
 assert.ok(scenarioResults.length >= 5, 'Expected demo case plus at least five scenario fixtures');

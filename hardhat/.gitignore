@@ -1,6 +1,5 @@
 node_modules
 artifacts
 cache
-package-lock.json
 deployments/*.json
 !deployments/injective_testnet-agentbl.json

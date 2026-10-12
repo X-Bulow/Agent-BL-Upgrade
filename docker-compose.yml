@@ -1,29 +1,29 @@
-version: '3.8'
-
 services:
   agentbl:
     build: .
+    image: agentbl:local
     ports:
-      - "3000:3000"
+      # Loopback only. To serve it publicly, put a reverse proxy (nginx, Caddy) with TLS in
+      # front instead of publishing the port; see docs/DEPLOYMENT.md.
+      - "127.0.0.1:${AGENTBL_PORT:-3000}:3000"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-    restart: unless-stopped
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: 0.0.0.0
     volumes:
-      - ./data:/app/data:ro
-      # Runtime state (x402 receipts, decision logs, mystery reveals) must stay writable
-      - ./data/runtime:/app/data/runtime
-    networks:
-      - agentbl-network
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      # Receipts, cached reports, decision logs and Mystery reveals survive restarts.
+      - agentbl-runtime:/app/data/runtime
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
 
-networks:
-  agentbl-network:
-    driver: bridge
+volumes:
+  agentbl-runtime:

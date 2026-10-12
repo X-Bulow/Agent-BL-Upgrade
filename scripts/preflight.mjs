@@ -13,7 +13,12 @@ import chainConfigLib from './lib/chain-config.cjs';
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+// When started through `npm run preflight`, npm_execpath is npm's own JS entry point: run it
+// with this Node directly, no shell involved. Fall back to the platform shim otherwise.
+const npmCli = process.env.npm_execpath && /npm-cli\.c?js$/u.test(process.env.npm_execpath)
+  ? process.env.npm_execpath
+  : null;
+const npm = npmCli ?? (process.platform === 'win32' ? 'npm.cmd' : 'npm');
 const results = [];
 const EXPECTED_CHECKS = 56;
 
@@ -39,14 +44,15 @@ async function text(relative) {
 }
 
 async function command(group, name, binary, args, cwd = root) {
+  const viaNode = binary === npmCli;
   try {
-    const { stdout, stderr } = await execFileAsync(binary, args, {
+    const { stdout, stderr } = await execFileAsync(viaNode ? process.execPath : binary, viaNode ? [binary, ...args] : args, {
       cwd,
       env: process.env,
       timeout: 180_000,
       maxBuffer: 12 * 1024 * 1024,
       windowsHide: true,
-      shell: process.platform === 'win32'
+      shell: !viaNode && process.platform === 'win32'
     });
     pass(group, name, (stdout || stderr).trim().split(/\r?\n/u).at(-1));
     return { ok: true, output: `${stdout}\n${stderr}` };
@@ -122,11 +128,14 @@ const nodeTests = await command(
   npm,
   ['test', '--', '--test-concurrency=4']
 );
-if (nodeTests.ok && !/# fail 0/u.test(nodeTests.output)) {
+// The exit code already decides pass/fail; this also reads the summary line (TAP "# fail N",
+// spec reporter "ℹ fail N") so a runner that exits 0 while reporting failures is still caught.
+const reportedFailures = /^\s*(?:#|ℹ) fail (\d+)\s*$/mu.exec(nodeTests.output)?.[1];
+if (nodeTests.ok && reportedFailures !== undefined && Number(reportedFailures) !== 0) {
   results.at(-1).status = 'FAIL';
-  results.at(-1).detail = 'test runner did not report # fail 0';
+  results.at(-1).detail = `test runner reported ${reportedFailures} failing tests`;
 }
-await command('Executable suites', 'Solidity contract suite (32 tests)', npm, ['test'], path.join(root, 'hardhat'));
+await command('Executable suites', 'Solidity contract suite', npm, ['test'], path.join(root, 'hardhat'));
 await command('Executable suites', 'Main API smoke flow', npm, ['run', 'smoke']);
 await command('Executable suites', 'Risk/pricing scenario regression', npm, ['run', 'scenarios']);
 if (runtimeMode.demoMode) await command('Executable suites', 'One-minute offline demo', npm, ['run', 'demo:once']);
@@ -256,15 +265,14 @@ const chainConfig = chainConfigLib.resolveNetworkConfig(chainRegistry, 'injectiv
 const addressPattern = /^0x[0-9a-fA-F]{40}$/u;
 const transactionPattern = /^0x[0-9a-fA-F]{64}$/u;
 const paymentOracleAbi = chainConfig.paymentOracle?.abi ?? [];
-let liveEvidence = {};
-try { liveEvidence = JSON.parse(await text('docs/evidence/x402-live-smoke.json')); }
-catch { liveEvidence = {}; }
-let protocolEvidence = {};
-let waveBGate = {};
-let officialMcpEvidence = {};
-try { protocolEvidence = JSON.parse(await text('docs/evidence/wave-b-protocol.json')); } catch { protocolEvidence = {}; }
-try { waveBGate = JSON.parse(await text('docs/evidence/wave-b-gate.json')); } catch { waveBGate = {}; }
-try { officialMcpEvidence = JSON.parse(await text('docs/evidence/injective-mcp-smoke.json')); } catch { officialMcpEvidence = {}; }
+// Evidence files are optional (they are not shipped in every checkout): a missing or unreadable one is {}.
+async function readJsonOrEmpty(relative) {
+  try { return JSON.parse(await text(relative)); } catch { return {}; }
+}
+const liveEvidence = await readJsonOrEmpty('docs/evidence/x402-live-smoke.json');
+const protocolEvidence = await readJsonOrEmpty('docs/evidence/wave-b-protocol.json');
+const waveBGate = await readJsonOrEmpty('docs/evidence/wave-b-gate.json');
+const officialMcpEvidence = await readJsonOrEmpty('docs/evidence/injective-mcp-smoke.json');
 const protocolNames = ['AgentBLRWA', 'EBLRegistry', 'RWAToken', 'RWAOfferingPool', 'RiskPricingOracle'];
 const officialWrite = officialMcpEvidence.tool_trace?.find((entry) => entry.tool === 'evm_broadcast');
 const liveEvidenceValid = protocolNames.every((name) => addressPattern.test(chainConfig.contracts?.[name]))

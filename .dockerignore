@@ -1,16 +1,22 @@
-node_modules
-npm-debug.log
+# Keep the build context small and free of secrets and local state.
+**/node_modules
 .git
-.env
-.env.local
-.env.*.local
-tests
-*.test.js
-.agents
-docs
-*.md
-!README.md
+.github
+.claude
 .vscode
 .idea
-hardhat/cache
-hardhat/artifacts
+.env
+.env.*
+!.env.example
+data/runtime
+coverage
+*.log
+npm-debug.log*
+
+# Not needed by the running app (the Dockerfile copies only src, public, data and scripts/lib).
+hardhat
+tests
+docs
+patches
+scripts/vendor
+Assign

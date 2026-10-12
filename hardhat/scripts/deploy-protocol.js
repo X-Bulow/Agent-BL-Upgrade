@@ -16,24 +16,6 @@ const RPC_URL = process.env.INJECTIVE_RPC_URL || 'https://k8s.testnet.json-rpc.i
 const DEPLOY_OVERRIDES = Object.freeze({ gasLimit: 6_000_000n });
 const CALL_OVERRIDES = Object.freeze({ gasLimit: 1_000_000n });
 
-async function rpc(method, params) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10_000);
-  try {
-    const response = await fetch(RPC_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
-      signal: controller.signal
-    });
-    const body = await response.json();
-    if (body.error) throw new Error(`${method}: ${body.error.message}`);
-    return body.result;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function waitForReceipt(txHash, timeoutMs = 120_000) {
   const deadline = Date.now() + timeoutMs;
   let lastError;

@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly: surfaces new dependency advisories even when the code did not change.
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    name: App · Node ${{ matrix.node }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, node: 22 }
+          - { os: ubuntu-latest, node: 24 }
+          # Windows catches line-ending and path assumptions (the vendored bundles are
+          # integrity-checked byte for byte).
+          - { os: windows-latest, node: 22 }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run check
+      - name: Tests with coverage thresholds
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 24
+        run: npm run test:coverage
+      - name: Tests
+        if: matrix.os != 'ubuntu-latest' || matrix.node != 24
+        run: npm test
+
+  contracts:
+    name: Contracts · Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    defaults:
+      run:
+        working-directory: hardhat
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: hardhat/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build
+        run: docker build -t agentbl:ci .
+      - name: Start with the hardened runtime options and wait for the healthcheck
+        run: |
+          docker run -d --name agentbl -p 127.0.0.1:3000:3000 \
+            --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges:true \
+            -v agentbl-runtime:/app/data/runtime agentbl:ci
+          for _ in $(seq 1 30); do
+            status=$(docker inspect -f '{{.State.Health.Status}}' agentbl)
+            if [ "$status" = healthy ]; then exit 0; fi
+            sleep 2
+          done
+          docker logs agentbl
+          exit 1
+      - name: Smoke the running container
+        run: |
+          curl --fail --silent http://127.0.0.1:3000/api/health
+          curl --fail --silent --output /dev/null http://127.0.0.1:3000/
+          test "$(docker exec agentbl id -u)" = 1000
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    # Advisories appear over time: report them without blocking unrelated changes.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm --prefix hardhat audit --audit-level=high

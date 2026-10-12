@@ -1,28 +1,36 @@
-# AgentBL Dockerfile
-FROM node:20-alpine
+# syntax=docker/dockerfile:1
+# AgentBL web app + API (src/app/server.js). Contracts and docs are not part of the image.
 
-# 设置工作目录
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+# Lifecycle scripts are not needed at runtime (postinstall only prints a banner).
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+
+FROM node:22-alpine
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOST=0.0.0.0 \
+    AGENTBL_RUNTIME_DIR=/app/data/runtime
 WORKDIR /app
 
-# 复制 package 文件
-COPY package*.json ./
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
+COPY src ./src
+COPY public ./public
+COPY data ./data
+# The server reads the chain registry helper at runtime.
+COPY scripts/lib ./scripts/lib
 
-# 安装依赖
-RUN npm ci --only=production
+# x402 receipts, cached paid reports, decision logs and Mystery reveals live here:
+# mount a volume to keep them across restarts.
+RUN mkdir -p /app/data/runtime && chown -R node:node /app/data/runtime
+VOLUME ["/app/data/runtime"]
 
-# 复制源代码
-COPY . .
-
-# 暴露端口
+USER node
 EXPOSE 3000
 
-# 设置环境变量
-ENV NODE_ENV=production
-ENV PORT=3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
-
-# 启动应用
 CMD ["node", "src/app/server.js"]

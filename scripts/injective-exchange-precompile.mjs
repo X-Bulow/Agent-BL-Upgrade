@@ -17,7 +17,6 @@ import { buildGoldHedgeOrder, evaluateHedgeEligibility, relevantMarketAudit } fr
 import {
   atomicJson,
   connectOfficialInjectiveMcp,
-  jsonSafe,
   loadDotEnv,
   requiredEnv,
   waitBlockscoutTransaction

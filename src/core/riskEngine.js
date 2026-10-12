@@ -45,7 +45,6 @@ export function calculateRisk(caseData) {
   const liquidationThreshold = financing.liquidation_threshold ?? 0.85;
 
   const marketValue = quantityMt * currentPrice;
-  const initialMarketValue = quantityMt * initialPrice;
   const verifiedCargoValue = Math.min(declaredValue, insuredValue, marketValue);
   const priceChangePct = (currentPrice - initialPrice) / initialPrice;
 

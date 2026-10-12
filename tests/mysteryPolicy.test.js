@@ -25,7 +25,6 @@ function pool(overrides = {}) {
     subscribedUsd: 0,
     investorEligible: true,
     complianceStatus: 'CLEARED',
-    quote,
     quoteUpdatedAt: '2026-07-23T00:00:00.000Z',
     createdAt: '2026-07-23T00:00:00.000Z',
     caseData: {
@@ -38,7 +37,7 @@ function pool(overrides = {}) {
       importer: { country: 'China' }
     },
     ...overrides,
-    quote
+    quote // after the spread: the merged quote must win over a partial overrides.quote
   };
 }
 

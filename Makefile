@@ -1,16 +1,25 @@
-.PHONY: install dev test check demo smoke scenarios mcp
+.PHONY: install dev test test-all test-contracts check preflight demo smoke scenarios mcp docker-build docker-up
 
 install:
 	npm install
+	npm --prefix hardhat install
 
 dev:
 	npm run dev
 
 test:
-	npm run test
+	npm test
+
+test-contracts:
+	npm run test:contracts
+
+test-all: test test-contracts
 
 check:
 	npm run check
+
+preflight:
+	npm run preflight
 
 demo:
 	npm run demo
@@ -23,3 +32,9 @@ scenarios:
 
 mcp:
 	npm run mcp
+
+docker-build:
+	docker build -t agentbl:local .
+
+docker-up:
+	docker compose up -d --build

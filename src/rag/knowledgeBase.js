@@ -12,10 +12,6 @@ export const KNOWLEDGE_CATEGORIES = [
   'buyer_country_risk'
 ];
 
-const ROUTE_KEYWORDS = {
-  'Shanghai->Hamburg': ['shanghai', 'hamburg', 'suez', 'indian ocean', 'red sea', 'mediterranean', 'north sea', 'east china sea', 'south china sea', 'singapore', 'rotterdam', 'pacific dawn']
-};
-
 export const KNOWLEDGE_BASE = [
   // ============================================================
   // Category 1: war_risk (4 entries)

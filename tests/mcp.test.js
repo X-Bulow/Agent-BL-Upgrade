@@ -4,7 +4,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MCP_TOOLS_MANIFEST, MCP_TOOL_HANDLERS, callTool, runToolChain } from '../src/mcp/mcpServer.js';
-import { KNOWLEDGE_BASE } from '../src/rag/knowledgeBase.js';
 
 // ============================================================
 // MCP-1: Manifest Tests

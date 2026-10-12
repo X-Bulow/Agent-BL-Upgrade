@@ -264,7 +264,7 @@ export async function callTool(toolName, params = {}) {
     return result;
   } catch (error) {
     // Re-throw with tool context
-    throw new Error(`Tool "${toolName}" failed: ${error.message}`);
+    throw new Error(`Tool "${toolName}" failed: ${error.message}`, { cause: error });
   }
 }
 

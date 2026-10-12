@@ -267,8 +267,6 @@ function buildCase(c) {
   const requested_cny = Math.round(c.amount_cny * ltv);
   const requested_usd = usd(requested_cny);
   const payout = c.payment === '先货后款' ? 'BALANCED' : 'FAST';
-  const lme_usd = c.lme_ref;
-  const smm_cny = c.smm_ref;
   const vat = Math.round(c.amount_cny * 0.13);
 
   const noteParts = [`${c.supplier}生产成本~${c.cost_basis.toLocaleString()}元/吨`];

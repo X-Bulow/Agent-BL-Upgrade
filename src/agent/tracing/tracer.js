@@ -1,9 +1,22 @@
 // SP-10: OpenTelemetry Tracing for Agent Call Chain
 // Records parser→checker→risk→valuation→pricing→payment→chain spans with latency, errors, and cost
+//
+// @opentelemetry/api is an OPTIONAL dependency (it is not installed by default): install it
+// (and an SDK/exporter) to emit spans. Without it every helper below still works and the
+// spans are no-ops, so importing this module can never fail.
 
-import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+let otel = null;
+try {
+  otel = await import('@opentelemetry/api');
+} catch {
+  otel = null;
+}
 
-const tracer = trace.getTracer('agentbl-agent', '1.0.0');
+const SpanStatusCode = otel?.SpanStatusCode ?? { OK: 1, ERROR: 2 };
+const NOOP_SPAN = Object.freeze({ setAttribute() {}, setStatus() {}, recordException() {}, end() {} });
+const tracer = otel
+  ? otel.trace.getTracer('agentbl-agent', '1.0.0')
+  : { startActiveSpan: (_name, callback) => callback(NOOP_SPAN) };
 
 /**
  * Trace a span with automatic error handling and privacy-safe attributes
@@ -40,7 +53,7 @@ export async function traceSpan(name, fn, attributes = {}) {
 /**
  * Sanitize attributes to remove PII and sensitive data
  */
-function sanitizeAttributes(attrs) {
+export function sanitizeAttributes(attrs) {
   const safe = {};
   const SENSITIVE_KEYS = ['api_key', 'token', 'password', 'secret', 'ssn', 'credit_card'];
 
@@ -79,7 +92,7 @@ function hashPII(value) {
  * Trace a full agent workflow with nested spans
  */
 export async function traceAgentWorkflow(workflowName, steps) {
-  return traceSpan(`workflow:${workflowName}`, async (parentSpan) => {
+  return traceSpan(`workflow:${workflowName}`, async () => {
     const results = {};
 
     for (const [stepName, stepFn] of Object.entries(steps)) {
@@ -179,5 +192,5 @@ export function initTracing() {
   // - APPLICATIONINSIGHTS_CONNECTION_STRING
   // - OTEL_SERVICE_NAME=agentbl-agent
 
-  console.log('OpenTelemetry tracing initialized');
+  console.log(otel ? 'OpenTelemetry tracing initialized' : 'OpenTelemetry API not installed: spans are no-ops');
 }

@@ -4,32 +4,8 @@
 
 import { KNOWLEDGE_BASE } from './knowledgeBase.js';
 
-// ---- Risk-intel feed loader (lazy) ----
-let _feedCache = null;
-
-function loadFeed() {
-  if (_feedCache) return _feedCache;
-  try {
-    // In Node.js, we read the file synchronously on first use.
-    // In the browser (via API), the feed is searched server-side.
-    // eslint-disable-next-line no-undef
-    if (typeof process !== 'undefined' && process.versions?.node) {
-      const fs = await_fs_read();
-      if (!fs) return [];
-      const path = await_fs_path();
-      if (!path) return [];
-      const feedPath = path.join(path.dirname(import.meta.url), '../../data/risk-intel/feed.json');
-      // Fall back to a try/catch with dynamic import
-    }
-  } catch {
-    // In non-Node environments, skip feed search
-  }
-  return _feedCache || [];
-}
-
-// We use a different approach: the search functions accept an optional feed array
-// that the server can pass in when calling from Node.js
-
+// Risk-intel feed documents are loaded lazily on the server (Node.js) the first time a
+// search asks for them; the browser only ever searches through the API.
 let _feedDocuments = null;
 
 async function ensureFeed() {
@@ -266,7 +242,7 @@ export function searchKnowledgeBase(query, { categories, limit = 5, minScore = 1
     return (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
   });
 
-  let kbResults = filtered.slice(0, limit);
+  const kbResults = filtered.slice(0, limit);
 
   // Merge feed results if requested
   if (includeFeed) {
@@ -362,7 +338,7 @@ function summarizeSweep(results) {
   const criticals = [];
   const warnings = [];
 
-  for (const [category, entries] of Object.entries(results)) {
+  for (const entries of Object.values(results)) {
     for (const entry of entries) {
       if (entry.severity === 'critical') criticals.push(entry.title);
       if (entry.severity === 'warning') warnings.push(entry.title);
