@@ -9,12 +9,14 @@ import {
   x402PayTo,
   x402Usdc
 } from './config.js';
-import { createPaidReportEnvelope, hashReportSnapshot } from './paidReport.js';
-import { getPaidReportCache } from './reportStore.js';
+import { HttpError, readJsonBody } from '../app/http.js';
+import { deliverPaidReport } from './delivery.js';
 import {
   JsonReceiptStore,
   PaymentSettlementError,
-  X402SettlementService
+  X402SettlementService,
+  recordPaymentEvidence,
+  usdcToAtomic
 } from './settlement.js';
 
 function base64Json(value) {
@@ -344,15 +346,14 @@ export function createX402Route({ serviceId, priceUSDC, preflight, handler }) {
     try {
       let nonce = 'onchain';
       try {
-        const chunks = [];
-        for await (const chunk of request) chunks.push(chunk);
-        const body = Buffer.concat(chunks).toString('utf8').trim();
-        if (body) {
-          request.x402Body = JSON.parse(body);
-          nonce = request.x402Body.nonce || nonce;
+        const body = await readJsonBody(request);
+        if (body !== null) {
+          request.x402Body = body;
+          nonce = body.nonce || nonce;
         }
-      } catch {
-        // A body is optional for compatibility clients.
+      } catch (error) {
+        // A body is optional for compatibility clients, but an oversized one is refused.
+        if (error instanceof HttpError && error.status === 413) throw error;
       }
 
       const message = buildLegacySignatureMessage({ serviceId, priceUSDC, nonce, network });
@@ -367,118 +368,69 @@ export function createX402Route({ serviceId, priceUSDC, preflight, handler }) {
         await preflight(request, { payer });
       }
 
-      let payment;
+      // This transport only signs an intent (personal_sign): it cannot verify a
+      // transaction hash the client claims, so it never produces a "settled live"
+      // payment. Verified, facilitator-settled payments use the V2 gateway.
       const clientTransaction = request.headers['x402-txhash'];
-      if (clientTransaction) {
-        if (!/^0x[0-9a-fA-F]{64}$/u.test(clientTransaction)) {
-          throw new Error('X402-TxHash must be a 32-byte transaction hash');
-        }
-        payment = { txHash: clientTransaction, live: true, payer };
-      } else {
-        const { recordPaymentEvidence } = await import('./settlement.js');
-        const result = await recordPaymentEvidence({
-          serviceId,
-          amountUSDC: priceUSDC,
-          payer,
-          responseData: { serviceId, priceUSDC, payer, nonce }
-        });
-        payment = result.payment;
+      if (clientTransaction && !/^0x[0-9a-fA-F]{64}$/u.test(clientTransaction)) {
+        throw new HttpError(400, 'invalid_tx_hash', 'X402-TxHash must be a 32-byte transaction hash');
       }
+      const { payment } = await recordPaymentEvidence({
+        serviceId,
+        amountUSDC: priceUSDC,
+        payer,
+        responseData: { serviceId, priceUSDC, payer, nonce }
+      });
 
       const settledAt = payment.receipt?.timestamp ?? new Date().toISOString();
-      const paymentTransaction = payment.live === true
-        ? payment.txHash
-        : `demo://receipt/${String(payment.txHash).replace(/^0x/u, '')}`;
+      const paymentTransaction = `demo://receipt/${String(payment.txHash).replace(/^0x/u, '')}`;
       paymentContext = {
         payer,
         payment_tx: paymentTransaction,
         settled_at: settledAt,
-        live: payment.live === true,
+        live: false,
         payment
       };
       paymentSettled = true;
       const report = await handler(request, paymentContext);
-      const reportEnvelope = createPaidReportEnvelope({
-        kind: report.kind,
-        case_id: report.case_id,
+      const { deliveredBody, reportEnvelope } = await deliverPaidReport({
+        serviceId,
+        priceUSDC,
         payer,
-        payee: payTo,
+        payTo,
         network,
         asset: x402Usdc(),
-        amount: String(Math.floor(priceUSDC * 1_000_000)),
-        payment_tx: paymentTransaction,
-        settled_at: settledAt,
-        data_snapshot: report,
-        model_provider: report.provider ?? 'deterministic-agentbl',
-        evidence_hash: report.evidence_hash
-          ?? report.pricing_result?.evidence_hash
-          ?? payment.evidence?.responseHash
-          ?? hashReportSnapshot(report),
-        ...(report.selected_pool_id ? { selected_pool_id: report.selected_pool_id } : {}),
-        ...(report.risk_passport_hash ? { risk_passport_hash: report.risk_passport_hash } : {}),
-        ...(report.reveal_proof_hash ? { reveal_proof_hash: report.reveal_proof_hash } : {})
-      }, {
-        ttlSeconds: Number(process.env.X402_REPORT_TTL_SECONDS ?? 300)
+        paymentTx: paymentTransaction,
+        settledAt,
+        live: false,
+        payment,
+        report
       });
-      if (payment.live === true) {
-        const { recordPaymentEvidence } = await import('./settlement.js');
-        const attestation = await recordPaymentEvidence({
-          serviceId,
-          amountUSDC: priceUSDC,
-          payer,
-          reportEnvelope,
-          paymentTxHash: payment.txHash,
-          asset: x402Usdc(),
-          responseData: report
-        });
-        payment = { ...payment, ...attestation.payment };
-      }
-      const deliveredBody = {
-        ...report,
-        report_envelope: reportEnvelope,
-        payment: {
-          status: 'settled',
-          payer,
-          txHash: payment.txHash,
-          explorerUrl: payment.explorerUrl || null,
-          attestationTxHash: payment.attestationTxHash ?? null,
-          attestationExplorerUrl: payment.attestationExplorerUrl ?? null,
-          live: payment.live === true,
-          serviceId,
-          amountUSDC: priceUSDC
-        }
-      };
-      // Cache the delivered report so the buyer can re-read it (e.g. after a
-      // page refresh) within its TTL without paying again. Best-effort: a cache
-      // failure must never block delivering the report the buyer paid for.
-      try {
-        await getPaidReportCache().save({ envelope: reportEnvelope, report: deliveredBody });
-      } catch {
-        // re-read is a convenience layer; settlement remains the source of truth
-      }
       response.writeHead(200, {
         'Content-Type': 'application/json; charset=utf-8',
         'PAYMENT-RESPONSE': JSON.stringify({
           network,
           txHash: payment.txHash,
-          amount: Math.floor(priceUSDC * 1_000_000),
+          amount: Number(usdcToAtomic(priceUSDC)),
           payer,
           reportId: reportEnvelope.report_id,
           reportHash: reportEnvelope.report_hash,
-          attestationTxHash: payment.attestationTxHash ?? null
+          attestationTxHash: null
         })
       });
       response.end(JSON.stringify(deliveredBody, null, 2));
     } catch (error) {
-      const status = error?.code === 'INVALID_ARGUMENT'
-        ? 401
-        : error?.code
-          ? 409
-          : 500;
+      const status = error instanceof HttpError
+        ? error.status
+        : error?.code === 'INVALID_ARGUMENT'
+          ? 401
+          : error?.code
+            ? 409
+            : 500;
       response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
       response.end(JSON.stringify({
         ok: false,
-        error: status === 401 ? 'Invalid payment signature' : error.message,
+        error: status === 401 ? 'Invalid payment signature' : (status >= 500 ? 'x402 delivery failed' : error.message),
         code: error.code ?? 'x402_delivery_failed',
         details: error.details,
         serviceId,

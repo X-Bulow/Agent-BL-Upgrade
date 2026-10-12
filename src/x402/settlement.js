@@ -7,6 +7,7 @@ import { createFacilitatorRequest } from '@injectivelabs/x402/protocol';
 import { SettleResponseSchema, VerifyResponseSchema } from '@injectivelabs/x402/schemas';
 import { x402Network, x402PayTo, x402RpcUrl, x402Usdc } from './config.js';
 import chainConfig from '../../scripts/lib/chain-config.cjs';
+import { resolveSignerKey, signerKeyRequirement } from '../chain/signerKeys.js';
 
 export const SETTLEMENT_STATES = Object.freeze({
   CHALLENGED: 'CHALLENGED',
@@ -457,6 +458,12 @@ const compatibilityRoot = path.resolve(path.dirname(fileURLToPath(import.meta.ur
 let compatibilityProvider;
 let compatibilityWallet;
 let compatibilityOracle;
+let oracleOverride = null;
+
+/** Test hook: use this PaymentOracle-like object instead of the lazily created contract. */
+export function setPaymentOracleOverride(oracle) {
+  oracleOverride = oracle ?? null;
+}
 
 function loadPaymentOracleConfig() {
   try {
@@ -468,16 +475,18 @@ function loadPaymentOracleConfig() {
 }
 
 async function getPaymentOracleContract() {
+  if (oracleOverride) return oracleOverride;
   if (compatibilityOracle) return compatibilityOracle;
   const config = loadPaymentOracleConfig();
   const address = config?.contracts?.PaymentOracle ?? config?.paymentOracle?.address;
   const abi = config?.paymentOracle?.abi;
-  const privateKey = process.env.DEPLOYER_PRIVATE_KEY?.trim();
-  if (!address || !abi || !privateKey) return null;
+  // Dedicated PAYMENT_ATTESTOR key; DEPLOYER_PRIVATE_KEY (the contract owner) is a deprecated fallback.
+  const signer = resolveSignerKey('PAYMENT_ATTESTOR');
+  if (!address || !abi || !signer) return null;
 
   const { ethers } = await import('ethers');
   compatibilityProvider ??= new ethers.JsonRpcProvider(x402RpcUrl());
-  compatibilityWallet ??= new ethers.Wallet(privateKey, compatibilityProvider);
+  compatibilityWallet ??= new ethers.Wallet(signer.privateKey, compatibilityProvider);
   compatibilityOracle ??= new ethers.Contract(address, abi, compatibilityWallet);
   return compatibilityOracle;
 }
@@ -525,94 +534,12 @@ export function buildPaymentEvidence({ requestId, payer, serviceId, amountUSDC, 
   };
 }
 
-export async function recordPaymentEvidence({
-  serviceId,
-  amountUSDC,
-  responseData,
-  payer,
-  reportEnvelope,
-  paymentTxHash,
-  asset
-}) {
-  const evidence = buildPaymentEvidence({ serviceId, amountUSDC, responseData, payer });
-  const demoMode = process.env.DEMO_MODE !== 'false';
-  // HACKATHON FIX: If no reportEnvelope is provided, fall back to demo mode
-  // even in live mode (for compatibility with personal_sign route)
-  if (!demoMode && reportEnvelope) {
-    try {
-      const { assertPaidReportEnvelope } = await import('./paidReport.js');
-      if (!reportEnvelope) {
-        throw new PaymentSettlementError(
-          'paid_report_required',
-          'Live PaymentOracle attestation requires a canonical PaidReportEnvelope'
-        );
-      }
-      assertPaidReportEnvelope(reportEnvelope);
-      const originalPaymentTx = paymentTxHash ?? reportEnvelope.payment_tx;
-      if (!TX_HASH_RE.test(originalPaymentTx)) {
-        throw new PaymentSettlementError(
-          'payment_tx_invalid',
-          'Live PaymentOracle attestation requires the original 32-byte settlement transaction hash'
-        );
-      }
-      const oracle = await getPaymentOracleContract();
-      if (!oracle) {
-        throw new PaymentSettlementError(
-          'payment_oracle_unavailable',
-          'Live mode requires DEPLOYER_PRIVATE_KEY and a deployed PaymentOracle'
-        );
-      }
-      const resolvedPayer = payer || await compatibilityWallet.getAddress();
-      if (resolvedPayer.toLowerCase() !== reportEnvelope.payer.toLowerCase()) {
-        throw new PaymentSettlementError('payment_payer_mismatch', 'Attested payer must match PaidReportEnvelope.payer');
-      }
-      const receiptId = `0x${reportEnvelope.report_id.slice(4)}`;
-      const caseIdHash = `0x${crypto.createHash('sha256').update(reportEnvelope.case_id).digest('hex')}`;
-      const amountAtomic = BigInt(reportEnvelope.amount);
-      const paymentAsset = asset ?? reportEnvelope.asset;
-      const transaction = await oracle.attestPayment(
-        receiptId,
-        reportEnvelope.report_hash,
-        caseIdHash,
-        originalPaymentTx,
-        resolvedPayer,
-        paymentAsset,
-        amountAtomic
-      );
-      const mined = await transaction.wait();
-      const config = loadPaymentOracleConfig();
-      const explorerBase = config?.explorerBase ?? 'https://testnet.blockscout.injective.network';
-      const timestamp = new Date().toISOString();
-      return {
-        ok: true,
-        payment: {
-          txHash: originalPaymentTx,
-          paymentTxHash: originalPaymentTx,
-          attestationTxHash: mined.hash,
-          attestationBlockNumber: mined.blockNumber,
-          attestationExplorerUrl: `${explorerBase}/tx/${mined.hash}`,
-          receipt: compatibilityReceipt({
-            serviceId,
-            amountUSDC,
-            paymentRef: originalPaymentTx,
-            timestamp
-          }),
-          evidence,
-          receiptId,
-          reportHash: reportEnvelope.report_hash,
-          caseIdHash,
-          onChainEvent: 'PaymentAttested',
-          live: true,
-          onchain: true
-        }
-      };
-    } catch (error) {
-      throw error instanceof PaymentSettlementError
-        ? error
-        : new PaymentSettlementError('payment_oracle_write_failed', `PaymentOracle write failed: ${error.message}`, { cause: error });
-    }
-  }
+/** Whole USDC amount -> atomic units, rounded (floor() lost a unit for values like 0.0029). */
+export function usdcToAtomic(amountUSDC, decimals = 6) {
+  return BigInt(Math.round(Number(amountUSDC) * 10 ** decimals));
+}
 
+function simulatedPaymentEvidence({ serviceId, amountUSDC, evidence }) {
   const generated = generatePaymentReceipt({ serviceId, amountUSDC, paymentRef: evidence.paymentRef });
   return {
     ok: true,
@@ -626,4 +553,111 @@ export async function recordPaymentEvidence({
       mode: 'demo'
     }
   };
+}
+
+/**
+ * Bind a settled payment to the report it unlocked.
+ *
+ * Demo mode returns a clearly-labelled simulated receipt. Live mode ALWAYS attests
+ * on-chain (PaymentOracle.attestPayment) and never degrades to a simulated receipt:
+ * a missing envelope or signer is an error, not a silent downgrade. Re-submitting an
+ * already-attested payment is a no-op, so a request that failed after the attestation
+ * was mined can be retried without reverting on DuplicatePaymentTransaction.
+ *
+ * `oracle` lets callers/tests supply the PaymentOracle contract instead of the
+ * lazily-created default.
+ */
+export async function recordPaymentEvidence({
+  serviceId,
+  amountUSDC,
+  responseData,
+  payer,
+  reportEnvelope,
+  paymentTxHash,
+  asset,
+  oracle: injectedOracle
+}) {
+  const evidence = buildPaymentEvidence({ serviceId, amountUSDC, responseData, payer });
+  const demoMode = process.env.DEMO_MODE !== 'false';
+  if (demoMode) return simulatedPaymentEvidence({ serviceId, amountUSDC, evidence });
+
+  if (!reportEnvelope) {
+    throw new PaymentSettlementError(
+      'paid_report_required',
+      'Live PaymentOracle attestation requires a canonical PaidReportEnvelope'
+    );
+  }
+  try {
+    const { assertPaidReportEnvelope } = await import('./paidReport.js');
+    assertPaidReportEnvelope(reportEnvelope);
+    const originalPaymentTx = paymentTxHash ?? reportEnvelope.payment_tx;
+    if (!TX_HASH_RE.test(originalPaymentTx)) {
+      throw new PaymentSettlementError(
+        'payment_tx_invalid',
+        'Live PaymentOracle attestation requires the original 32-byte settlement transaction hash'
+      );
+    }
+    const oracle = injectedOracle ?? await getPaymentOracleContract();
+    if (!oracle) {
+      throw new PaymentSettlementError(
+        'payment_oracle_unavailable',
+        `Live mode requires ${signerKeyRequirement('PAYMENT_ATTESTOR')} and a deployed PaymentOracle`
+      );
+    }
+    const resolvedPayer = payer || reportEnvelope.payer;
+    if (resolvedPayer.toLowerCase() !== reportEnvelope.payer.toLowerCase()) {
+      throw new PaymentSettlementError('payment_payer_mismatch', 'Attested payer must match PaidReportEnvelope.payer');
+    }
+
+    const receiptId = `0x${reportEnvelope.report_id.slice(4)}`;
+    const caseIdHash = `0x${crypto.createHash('sha256').update(reportEnvelope.case_id).digest('hex')}`;
+    const amountAtomic = BigInt(reportEnvelope.amount);
+    const paymentAsset = asset ?? reportEnvelope.asset;
+    const config = loadPaymentOracleConfig();
+    const explorerBase = config?.explorerBase ?? 'https://testnet.blockscout.injective.network';
+    const timestamp = new Date().toISOString();
+
+    const livePayment = {
+      txHash: originalPaymentTx,
+      paymentTxHash: originalPaymentTx,
+      receipt: compatibilityReceipt({ serviceId, amountUSDC, paymentRef: originalPaymentTx, timestamp }),
+      evidence,
+      receiptId,
+      reportHash: reportEnvelope.report_hash,
+      caseIdHash,
+      onChainEvent: 'PaymentAttested',
+      live: true,
+      onchain: true
+    };
+
+    if (typeof oracle.paymentTransactionAttested === 'function'
+      && await oracle.paymentTransactionAttested(originalPaymentTx)) {
+      return { ok: true, payment: { ...livePayment, attestation: 'already_recorded', attestationTxHash: null } };
+    }
+
+    const transaction = await oracle.attestPayment(
+      receiptId,
+      reportEnvelope.report_hash,
+      caseIdHash,
+      originalPaymentTx,
+      resolvedPayer,
+      paymentAsset,
+      amountAtomic
+    );
+    const mined = await transaction.wait();
+    return {
+      ok: true,
+      payment: {
+        ...livePayment,
+        attestation: 'recorded',
+        attestationTxHash: mined.hash,
+        attestationBlockNumber: mined.blockNumber,
+        attestationExplorerUrl: `${explorerBase}/tx/${mined.hash}`
+      }
+    };
+  } catch (error) {
+    // A malformed envelope is its own failure, not a chain-write failure.
+    if (error instanceof PaymentSettlementError || error?.code === 'paid_report_invalid') throw error;
+    throw new PaymentSettlementError('payment_oracle_write_failed', `PaymentOracle write failed: ${error.message}`, { cause: error });
+  }
 }

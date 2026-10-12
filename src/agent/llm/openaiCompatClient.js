@@ -35,11 +35,14 @@ const PROVIDERS = {
     keyEnv: 'DEEPSEEK_API_KEY'
   },
   qwen: {
-    // DashScope OpenAI-compatible endpoint.
+    // DashScope OpenAI-compatible endpoint. Ali_API_KEY / Ali_BASE_URL are
+    // accepted as aliases (they shipped in .env.example from the first commit).
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     baseUrlEnv: 'DASHSCOPE_BASE_URL',
+    baseUrlEnvAliases: ['Ali_BASE_URL'],
     model: 'qwen-plus',
-    keyEnv: 'DASHSCOPE_API_KEY'
+    keyEnv: 'DASHSCOPE_API_KEY',
+    keyEnvAliases: ['Ali_API_KEY']
   },
   openai: {
     baseUrl: 'https://api.openai.com/v1',
@@ -47,6 +50,32 @@ const PROVIDERS = {
     keyEnv: 'OPENAI_API_KEY'
   }
 };
+
+/** First non-empty value among the given env var names (undefined entries are skipped). */
+function firstEnv(env, names) {
+  for (const name of names) {
+    if (name && env[name]) return env[name];
+  }
+  return undefined;
+}
+
+/**
+ * The URL + auth headers for a provider's /chat/completions call. Shared by
+ * chatCompletion() and the browser-facing relay so both build requests alike.
+ */
+export function buildChatEndpoint(cfg) {
+  const headers = { 'content-type': 'application/json' };
+  if (cfg.provider === 'azure') {
+    // Azure OpenAI uses a deployment-specific endpoint and an api-key header.
+    headers['api-key'] = cfg.apiKey;
+    return {
+      url: `${cfg.baseUrl}/openai/deployments/${cfg.deployment}/chat/completions?api-version=${cfg.apiVersion}`,
+      headers
+    };
+  }
+  headers.authorization = `Bearer ${cfg.apiKey}`;
+  return { url: `${cfg.baseUrl}/chat/completions`, headers };
+}
 
 /**
  * Resolve which provider to use from the environment.
@@ -83,9 +112,9 @@ export function resolveProvider(env = process.env) {
 
   for (const name of order) {
     const cfg = PROVIDERS[name];
-    const apiKey = env[cfg.keyEnv];
+    const apiKey = firstEnv(env, [cfg.keyEnv, ...(cfg.keyEnvAliases ?? [])]);
     if (apiKey) {
-      const baseUrl = (cfg.baseUrlEnv && env[cfg.baseUrlEnv]) ? env[cfg.baseUrlEnv] : cfg.baseUrl;
+      const baseUrl = firstEnv(env, [cfg.baseUrlEnv, ...(cfg.baseUrlEnvAliases ?? [])]) ?? cfg.baseUrl;
       return {
         provider: name,
         baseUrl: baseUrl.replace(/\/$/, ''),
@@ -116,18 +145,7 @@ export async function chatCompletion({ messages, tools, toolChoice = 'auto', tem
     body.tool_choice = toolChoice;
   }
 
-  // Build URL based on provider
-  let url;
-  const headers = { 'content-type': 'application/json' };
-
-  if (cfg.provider === 'azure') {
-    // Azure OpenAI uses deployment-specific endpoint
-    url = `${cfg.baseUrl}/openai/deployments/${cfg.deployment}/chat/completions?api-version=${cfg.apiVersion}`;
-    headers['api-key'] = cfg.apiKey;
-  } else {
-    url = `${cfg.baseUrl}/chat/completions`;
-    headers['authorization'] = `Bearer ${cfg.apiKey}`;
-  }
+  const { url, headers } = buildChatEndpoint(cfg);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);

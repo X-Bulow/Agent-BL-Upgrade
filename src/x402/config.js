@@ -1,5 +1,6 @@
-import path from 'node:path';
 import { SupportedResponseSchema } from '@injectivelabs/x402/schemas';
+
+import { runtimePath } from '../runtimePaths.js';
 
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/u;
 const ATOMIC_AMOUNT_RE = /^[1-9][0-9]*$/u;
@@ -179,7 +180,7 @@ export function loadX402Config(env = process.env, options = {}) {
     network,
     allowInsecureTestnet
   });
-  const receiptStorePath = options.receiptStorePath ?? env.X402_RECEIPT_STORE_PATH ?? path.resolve('data/runtime/x402-receipts.json');
+  const receiptStorePath = options.receiptStorePath ?? env.X402_RECEIPT_STORE_PATH ?? runtimePath('x402-receipts.json', env);
 
   const config = {
     mode,

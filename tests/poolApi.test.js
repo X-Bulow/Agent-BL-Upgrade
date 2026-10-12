@@ -71,9 +71,62 @@ test('BE-12: Pool API Tests', async (t) => {
         pool_id: firstPoolId,
         amount_usd: remaining + 1000 // Exceed target
       });
-      assert.strictEqual(res.status, 500); 
+      // A business-rule conflict, not a server fault: 409, not 500.
+      assert.strictEqual(res.status, 409);
       assert.strictEqual(res.data.ok, false);
+      assert.strictEqual(res.data.code, 'subscription_exceeds_target');
       assert.ok(res.data.error.includes('Subscription exceeds target amount'));
+    });
+
+    await t.test('POST /api/pool/subscribe rejects missing, non-numeric and non-finite amounts without corrupting the pool', async () => {
+      const before = storeState.pools.get(firstPoolId).subscribedUsd;
+      const bad = [
+        {},                                  // amount_usd missing used to turn subscribedUsd into NaN
+        { amount_usd: '100' },               // numeric string used to be string-concatenated
+        { amount_usd: null },
+        { amount_usd: -5 },
+        { amount_usd: 0 },
+        { amount_usd: Number.POSITIVE_INFINITY }, // serialises to null -> must still be rejected
+        { amount_usd: [5] }
+      ];
+      for (const extra of bad) {
+        const res = await request('POST', '/api/pool/subscribe', { wallet_address: '0xTest', pool_id: firstPoolId, ...extra });
+        assert.strictEqual(res.status, 400, `expected 400 for ${JSON.stringify(extra)}`);
+        assert.strictEqual(res.data.ok, false);
+      }
+      const after = storeState.pools.get(firstPoolId).subscribedUsd;
+      assert.strictEqual(typeof after, 'number');
+      assert.strictEqual(after, before, 'pool total must be untouched by rejected requests');
+    });
+
+    await t.test('POST /api/pool/subscribe validates the request envelope', async () => {
+      const empty = await request('POST', '/api/pool/subscribe');
+      assert.strictEqual(empty.status, 400);
+      assert.strictEqual(empty.data.ok, false);
+      assert.ok(!/Cannot read properties/u.test(empty.data.error), 'internal error text must not leak');
+
+      const noPool = await request('POST', '/api/pool/subscribe', { amount_usd: 10 });
+      assert.strictEqual(noPool.status, 400);
+
+      const unknown = await request('POST', '/api/pool/subscribe', { pool_id: 'NO-SUCH-POOL', amount_usd: 10 });
+      assert.strictEqual(unknown.status, 404);
+      assert.strictEqual(unknown.data.code, 'pool_not_found');
+    });
+
+    await t.test('POST /api/pool/subscribe refuses wallet strings that could carry markup', async () => {
+      for (const wallet of ['<img src=x onerror=alert(1)>', '0x<script>', 'javascript:alert(1)', '0x' + 'a'.repeat(65), 42, '']) {
+        const res = await request('POST', '/api/pool/subscribe', { wallet_address: wallet, pool_id: firstPoolId, amount_usd: 1 });
+        assert.strictEqual(res.status, 400, `wallet ${JSON.stringify(wallet)}`);
+        assert.strictEqual(res.data.code, 'invalid_wallet');
+      }
+      const ok = await request('POST', '/api/pool/subscribe', { wallet_address: '0xAbC123', pool_id: firstPoolId, amount_usd: 1 });
+      assert.strictEqual(ok.status, 200);
+    });
+
+    await t.test('GET /api/pool/status answers 404 for an unknown pool', async () => {
+      const res = await request('GET', '/api/pool/status?pool_id=NO-SUCH-POOL');
+      assert.strictEqual(res.status, 404);
+      assert.strictEqual(res.data.ok, false);
     });
   } finally {
     server.close();

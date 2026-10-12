@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { runtimePath } from '../runtimePaths.js';
 
 /**
  * Short-TTL cache of already-paid report envelopes so a buyer can re-read a
@@ -116,7 +117,7 @@ export function getPaidReportCache(options = {}) {
   if (sharedCache && !options.filePath) return sharedCache;
   const filePath = options.filePath
     ?? process.env.X402_REPORT_CACHE_PATH
-    ?? path.resolve('data/runtime/x402-reports.json');
+    ?? runtimePath('x402-reports.json');
   const cache = new PaidReportCache({ filePath, now: options.now });
   if (!options.filePath) sharedCache = cache;
   return cache;

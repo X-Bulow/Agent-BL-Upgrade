@@ -18,6 +18,7 @@ import { checkDocumentConsistency } from '../agent/documentConsistency.js';
 import { authorizeMcpWrite, MCP_PINNED_NETWORK } from './security.js';
 import { X402_SERVICES } from '../x402/config.js';
 import chainConfigLib from '../../scripts/lib/chain-config.cjs';
+import { resolveSignerKey, signerKeyRequirement } from '../chain/signerKeys.js';
 import { previewMysteryVoyage } from '../mystery/service.js';
 import { MysteryRevealStore } from '../mystery/store.js';
 import { verifyRevealProof } from '../mystery/fairness.js';
@@ -150,11 +151,9 @@ export async function handleGeneratePricingQuote({ case_id, trade_case } = {}) {
   const riskReport = calculateRisk(caseData);
   const bl = caseData.bill_of_lading;
   const financing = caseData.financing;
-  const market = caseData.market;
 
   // Map risk to pricing
   const cargoHealthScore = riskReport.cargo_health_score;
-  const healthFactor = riskReport.health_factor;
 
   // Risk discount: based on cargo health score
   // Cargo health 100 = no discount. Cargo health 0 = maximum discount.
@@ -341,15 +340,20 @@ export async function handlePushPricingToOracle({
     };
   }
 
-  const privateKey = process.env.DEPLOYER_PRIVATE_KEY?.trim();
-  if (!privateKey) throw new Error('DEPLOYER_PRIVATE_KEY is required for an approved oracle write');
+  // A dedicated PRICING_UPDATER key (authorised via RiskPricingOracle.setUpdater);
+  // DEPLOYER_PRIVATE_KEY (the contract owner) is only a deprecated fallback.
+  const signer = resolveSignerKey('PRICING_UPDATER');
+  if (!signer) throw new Error(`An approved oracle write requires ${signerKeyRequirement('PRICING_UPDATER')}`);
+  // The ABI ships in chain-config.json; compiled Hardhat artifacts are not deployed with the app.
+  const oracleAbi = chainConfig.abis?.RiskPricingOracle;
+  if (!Array.isArray(oracleAbi) || oracleAbi.length === 0) {
+    throw new Error('RiskPricingOracle ABI is missing from public/chain-config.json');
+  }
   const { ethers } = await import('ethers');
   const rpcUrl = process.env.INJECTIVE_RPC_URL ?? 'https://k8s.testnet.json-rpc.injective.network';
   const provider = new ethers.JsonRpcProvider(rpcUrl, 1439);
-  const wallet = new ethers.Wallet(privateKey, provider);
-  const artifactPath = path.join(rootDir, 'hardhat', 'artifacts', 'contracts', 'RiskPricingOracle.sol', 'RiskPricingOracle.json');
-  const artifact = JSON.parse(await fs.readFile(artifactPath, 'utf8'));
-  const oracle = new ethers.Contract(oracleAddress, artifact.abi, wallet);
+  const wallet = new ethers.Wallet(signer.privateKey, provider);
+  const oracle = new ethers.Contract(oracleAddress, oracleAbi, wallet);
   const transaction = await oracle.updatePricing(
     txPayload.pool_id,
     txPayload.issue_price_e6,

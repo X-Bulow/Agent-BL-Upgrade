@@ -1,0 +1,209 @@
+// Same-origin relay for the browser assistant. The provider API key stays on the
+// server (it used to be injected into every HTML page); the browser only ever
+// talks to /api/llm/*. The server picks the model, caps output size, bounds the
+// request, limits concurrency and never echoes upstream error bodies.
+import { once } from 'node:events';
+import { buildChatEndpoint, resolveProvider } from '../agent/llm/openaiCompatClient.js';
+import { HttpError, readJsonBody, sendJson } from './http.js';
+
+export const LLM_BODY_LIMIT_BYTES = 256 * 1024;
+const MAX_MESSAGES = 60;
+const MAX_TOOLS = 16;
+const MAX_TOOL_CALLS = 8;
+const MAX_CONTENT_CHARS = 32_000;
+const MAX_TOKENS_CAP = 2048;
+const ROLES = new Set(['system', 'user', 'assistant', 'tool']);
+const TOOL_NAME = /^[A-Za-z0-9_-]{1,64}$/u;
+const UPSTREAM_TIMEOUT_MS = 60_000;
+
+let inflight = 0;
+
+function isRecord(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function invalid(message) {
+  return new HttpError(400, 'invalid_llm_request', message);
+}
+
+function text(value, label, { nullable = false } = {}) {
+  if (value === null && nullable) return null;
+  if (typeof value !== 'string') throw invalid(`${label} must be a string`);
+  if (value.length > MAX_CONTENT_CHARS) throw invalid(`${label} exceeds ${MAX_CONTENT_CHARS} characters`);
+  return value;
+}
+
+function normalizeToolCall(raw, index) {
+  if (!isRecord(raw) || !isRecord(raw.function)) throw invalid(`messages tool_calls[${index}] is malformed`);
+  const name = String(raw.function.name ?? '');
+  if (!TOOL_NAME.test(name)) throw invalid(`messages tool_calls[${index}] has an invalid function name`);
+  return {
+    id: text(String(raw.id ?? `call_${index}`), 'tool_call id'),
+    type: 'function',
+    function: { name, arguments: text(String(raw.function.arguments ?? '{}'), 'tool_call arguments') }
+  };
+}
+
+function normalizeMessage(raw, index) {
+  if (!isRecord(raw) || !ROLES.has(raw.role)) throw invalid(`messages[${index}].role must be one of ${[...ROLES].join(', ')}`);
+  const message = { role: raw.role };
+  if (raw.role === 'assistant' && Array.isArray(raw.tool_calls) && raw.tool_calls.length > 0) {
+    if (raw.tool_calls.length > MAX_TOOL_CALLS) throw invalid(`messages[${index}] has too many tool_calls`);
+    message.tool_calls = raw.tool_calls.map(normalizeToolCall);
+    message.content = text(raw.content ?? '', `messages[${index}].content`, { nullable: true }) || null;
+    return message;
+  }
+  message.content = text(raw.content, `messages[${index}].content`);
+  if (raw.role === 'tool') message.tool_call_id = text(String(raw.tool_call_id ?? ''), `messages[${index}].tool_call_id`);
+  return message;
+}
+
+function normalizeTool(raw, index) {
+  // Accept both the OpenAI shape and the flat { name, description, parameters } shape.
+  const fn = isRecord(raw?.function) ? raw.function : raw;
+  const name = String(fn?.name ?? '');
+  if (!TOOL_NAME.test(name)) throw invalid(`tools[${index}] has an invalid name`);
+  const parameters = fn.parameters === undefined ? { type: 'object', properties: {} } : fn.parameters;
+  if (!isRecord(parameters)) throw invalid(`tools[${index}].parameters must be an object`);
+  return {
+    type: 'function',
+    function: { name, description: text(fn.description ?? '', `tools[${index}].description`), parameters }
+  };
+}
+
+/** Validate + normalize a browser chat request. Anything not listed here is dropped. */
+export function normalizeChatRequest(body) {
+  if (!isRecord(body)) throw invalid('Request body must be a JSON object');
+  if (!Array.isArray(body.messages) || body.messages.length === 0) throw invalid('messages must be a non-empty array');
+  if (body.messages.length > MAX_MESSAGES) throw invalid(`messages is limited to ${MAX_MESSAGES} entries`);
+
+  const request = {
+    messages: body.messages.map(normalizeMessage),
+    stream: body.stream === true,
+    temperature: 0.3,
+    maxTokens: MAX_TOKENS_CAP
+  };
+  if (body.temperature !== undefined) {
+    const temperature = Number(body.temperature);
+    if (!Number.isFinite(temperature) || temperature < 0 || temperature > 1.5) throw invalid('temperature must be between 0 and 1.5');
+    request.temperature = temperature;
+  }
+  if (body.max_tokens !== undefined) {
+    const maxTokens = Number(body.max_tokens);
+    if (!Number.isInteger(maxTokens) || maxTokens < 1) throw invalid('max_tokens must be a positive integer');
+    request.maxTokens = Math.min(maxTokens, MAX_TOKENS_CAP);
+  }
+  if (body.tools !== undefined) {
+    if (!Array.isArray(body.tools) || body.tools.length > MAX_TOOLS) throw invalid(`tools must be an array of at most ${MAX_TOOLS} entries`);
+    request.tools = body.tools.map(normalizeTool);
+  }
+  return request;
+}
+
+/** What the UI is allowed to know about the relay (never the key). */
+export function llmStatus(env = process.env) {
+  if (String(env.LLM_PROXY_ENABLED ?? 'true').toLowerCase() === 'false') {
+    return { enabled: false, configured: false };
+  }
+  const provider = resolveProvider(env);
+  return provider
+    ? { enabled: true, configured: true, provider: provider.provider, model: provider.model }
+    : { enabled: true, configured: false };
+}
+
+function upstreamBody(request, model) {
+  const body = {
+    model,
+    messages: request.messages,
+    temperature: request.temperature,
+    max_tokens: request.maxTokens,
+    stream: request.stream
+  };
+  if (request.tools?.length) {
+    body.tools = request.tools;
+    body.tool_choice = 'auto';
+  }
+  return body;
+}
+
+async function failUpstream(upstream, provider, logger) {
+  const detail = (await upstream.text().catch(() => '')).slice(0, 300);
+  logger.error(`[agentbl] LLM upstream ${provider} answered HTTP ${upstream.status}: ${detail}`);
+  if (upstream.status === 429) {
+    throw new HttpError(429, 'llm_rate_limited', 'The LLM provider is rate limiting requests; retry shortly');
+  }
+  throw new HttpError(502, 'llm_upstream_error', `LLM provider returned HTTP ${upstream.status}`);
+}
+
+/**
+ * POST /api/llm/chat — relay one chat completion (optionally streamed) to the
+ * provider configured on the server.
+ */
+export async function relayChat(request, response, { env = process.env, fetchImpl = fetch, logger = console } = {}) {
+  const status = llmStatus(env);
+  if (!status.enabled) throw new HttpError(404, 'llm_proxy_disabled', 'The LLM relay is disabled on this server');
+  const provider = resolveProvider(env);
+  if (!provider) {
+    throw new HttpError(503, 'llm_not_configured', 'No LLM provider is configured on the server (set DEEPSEEK_API_KEY, DASHSCOPE_API_KEY, OPENAI_API_KEY or LLM_BASE_URL + LLM_API_KEY)');
+  }
+
+  const chat = normalizeChatRequest(await readJsonBody(request, { limit: LLM_BODY_LIMIT_BYTES }));
+
+  const maxConcurrent = Number(env.LLM_PROXY_MAX_CONCURRENCY) > 0 ? Number(env.LLM_PROXY_MAX_CONCURRENCY) : 4;
+  if (inflight >= maxConcurrent) {
+    response.setHeader('retry-after', '2');
+    throw new HttpError(429, 'llm_busy', 'Too many concurrent LLM requests; retry shortly');
+  }
+
+  inflight += 1;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+  const abortOnClientClose = () => { if (!response.writableEnded) controller.abort(); };
+  response.on('close', abortOnClientClose);
+  try {
+    const { url, headers } = buildChatEndpoint(provider);
+    let upstream;
+    try {
+      upstream = await fetchImpl(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(upstreamBody(chat, provider.model)),
+        signal: controller.signal
+      });
+    } catch (cause) {
+      logger.error(`[agentbl] LLM upstream ${provider.provider} unreachable: ${cause.message}`);
+      throw new HttpError(502, 'llm_upstream_unreachable', 'The LLM provider could not be reached');
+    }
+    if (!upstream.ok) await failUpstream(upstream, provider.provider, logger);
+
+    if (!chat.stream) {
+      const json = await upstream.json().catch(() => null);
+      const message = json?.choices?.[0]?.message;
+      if (!message) throw new HttpError(502, 'llm_upstream_error', 'The LLM provider returned no message');
+      sendJson(response, 200, { ok: true, provider: provider.provider, model: provider.model, choices: [{ message }] });
+      return;
+    }
+
+    response.writeHead(200, {
+      'content-type': 'text/event-stream',
+      'cache-control': 'no-cache, no-transform',
+      connection: 'keep-alive',
+      'x-accel-buffering': 'no'
+    });
+    for await (const chunk of upstream.body) {
+      if (!response.write(chunk)) await once(response, 'drain');
+    }
+    response.end();
+  } catch (error) {
+    if (controller.signal.aborted && response.headersSent) {
+      // Client left or the upstream stalled mid-stream: nothing more to say.
+      if (!response.writableEnded) response.end();
+      return;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    response.off('close', abortOnClientClose);
+    inflight -= 1;
+  }
+}

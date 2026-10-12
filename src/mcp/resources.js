@@ -60,7 +60,15 @@ async function caseCatalog() {
 async function deploymentEvidence() {
   const raw = JSON.parse(await fs.readFile(path.join(rootDir, 'public', 'chain-config.json'), 'utf8'));
   const config = chainConfig.resolveNetworkConfig(raw, 'injective-testnet');
-  const gate = JSON.parse(await fs.readFile(path.join(rootDir, 'docs', 'evidence', 'wave-b-gate.json'), 'utf8'));
+  // The Wave B evidence file lives under docs/, which is not shipped in the container
+  // image: its absence must not break the whole resource.
+  let gate = null;
+  try {
+    const evidenceDir = process.env.AGENTBL_EVIDENCE_DIR ?? path.join(rootDir, 'docs', 'evidence');
+    gate = JSON.parse(await fs.readFile(path.join(evidenceDir, 'wave-b-gate.json'), 'utf8'));
+  } catch {
+    // optional evidence
+  }
   const protocol = config.protocol ?? {};
   return {
     network: config.network,
@@ -71,13 +79,15 @@ async function deploymentEvidence() {
     deployedAt: protocol.deployedAt ?? config.deployedAt,
     deployTransactions: protocol.deployTransactions ?? { AgentBLRWA: config.deployTx },
     smoke: protocol.smoke ?? null,
-    latestPaidPricingProof: {
-      paymentTx: gate.payment?.tx,
-      reportHash: gate.paidReportEnvelope?.report_hash,
-      paymentAttestationTx: gate.paymentAttested?.tx,
-      pricingUpdateTx: gate.pricingUpdated?.tx,
-      finalIssuePriceE6: gate.offering?.final_issue_price_e6
-    }
+    latestPaidPricingProof: gate
+      ? {
+        paymentTx: gate.payment?.tx,
+        reportHash: gate.paidReportEnvelope?.report_hash,
+        paymentAttestationTx: gate.paymentAttested?.tx,
+        pricingUpdateTx: gate.pricingUpdated?.tx,
+        finalIssuePriceE6: gate.offering?.final_issue_price_e6
+      }
+      : null
   };
 }
 

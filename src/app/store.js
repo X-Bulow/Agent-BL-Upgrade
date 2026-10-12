@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { STATE_BY_PRICING_ACTION } from '../core/pricingSchema.js';
+import { HttpError } from './http.js';
 
 // In-memory data store for the AgentBL backend.
 // Satisfies hackathon requirements for mock persistence without an external DB.
@@ -34,17 +35,26 @@ export function createPool(poolId, caseData, quote, options = {}) {
   return storeState.pools.get(poolId);
 }
 
+/**
+ * Record a (mock) subscription. `amountUsd` must already be a finite number:
+ * anything else used to slip through the `<= 0` / `>` comparisons (NaN and
+ * strings compare false) and corrupt the pool's running total.
+ */
 export function subscribeToPool(walletAddress, poolId, amountUsd, options = {}) {
+  if (typeof amountUsd !== 'number' || !Number.isFinite(amountUsd) || amountUsd <= 0) {
+    throw new HttpError(400, 'invalid_amount', 'Subscription amount must be a finite number greater than 0');
+  }
   const pool = storeState.pools.get(poolId);
-  if (!pool) throw new Error('Pool not found');
-  if (pool.status !== 'Open') throw new Error(`Cannot subscribe to pool in status: ${pool.status}`);
-  if (amountUsd <= 0) throw new Error('Subscription amount must be greater than 0');
+  if (!pool) throw new HttpError(404, 'pool_not_found', 'Pool not found');
+  if (pool.status !== 'Open') {
+    throw new HttpError(409, 'pool_not_open', `Cannot subscribe to pool in status: ${pool.status}`);
+  }
   if (pool.subscribedUsd + amountUsd > pool.targetUsd) {
-    throw new Error('Subscription exceeds target amount');
+    throw new HttpError(409, 'subscription_exceeds_target', 'Subscription exceeds target amount');
   }
 
   pool.subscribedUsd += amountUsd;
-  
+
   if (pool.subscribedUsd >= pool.targetUsd) {
     pool.status = 'Funded';
   }

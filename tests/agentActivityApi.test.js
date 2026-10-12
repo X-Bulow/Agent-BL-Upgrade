@@ -135,7 +135,8 @@ test('BE-15: Agent Activity API Tests', async (t) => {
       }, (res) => {
         assert.strictEqual(res.statusCode, 200);
         assert.strictEqual(res.headers['content-type'], 'text/event-stream');
-        assert.strictEqual(res.headers['cache-control'], 'no-cache');
+        // "no-cache" plus "no-transform": proxies must not re-encode the stream.
+        assert.match(res.headers['cache-control'], /^no-cache(,|$)/u);
 
         let receivedData = '';
         res.on('data', (chunk) => {

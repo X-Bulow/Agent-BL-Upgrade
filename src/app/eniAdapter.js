@@ -2,10 +2,28 @@
 // Provides mock ENI interface when live ENI is unavailable
 
 import crypto from 'node:crypto';
+import { HttpError } from './http.js';
+
+export const ALLOWED_DOCUMENT_TYPES = Object.freeze(['application/pdf', 'image/jpeg', 'image/png']);
+export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+const MAX_NAME_LENGTH = 255;
+const MAX_TRACKED_DOCUMENTS = 1000;
+
+function invalidDocument(message) {
+  return new HttpError(400, 'invalid_document', message);
+}
+
+/** Keep only the base name and drop control characters so it is safe to log and echo. */
+export function sanitizeFileName(value) {
+  const base = String(value ?? '').split(/[\\/]/u).pop() ?? '';
+  // eslint-disable-next-line no-control-regex
+  return base.replace(/[\u0000-\u001f\u007f]/gu, '').trim().slice(0, MAX_NAME_LENGTH);
+}
 
 export class ENIAdapter {
   constructor(mode = 'mock') {
     this.mode = mode; // 'live' or 'mock'
+    this.documents = new Map(); // documentId -> record (bounded)
   }
 
   async uploadDocument(file) {
@@ -15,23 +33,35 @@ export class ENIAdapter {
     return this._mockUpload(file);
   }
 
-  async _uploadToENI(file) {
+  async _uploadToENI(_file) {
     // Real ENI integration would go here
     throw new Error('Live ENI not available - falling back to mock');
   }
 
   _mockUpload(file) {
-    const { name, type, size, content } = file;
+    if (!file || typeof file !== 'object' || Array.isArray(file)) {
+      throw invalidDocument('file must be an object with name, type and size');
+    }
+    const { type, size, content } = file;
+    const name = sanitizeFileName(file.name);
+    if (!name) throw invalidDocument('file.name is required');
 
     // Validate file type
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-    if (!allowedTypes.includes(type)) {
-      throw new Error(`Invalid file type: ${type}. Allowed: ${allowedTypes.join(', ')}`);
+    if (!ALLOWED_DOCUMENT_TYPES.includes(type)) {
+      throw invalidDocument(`Invalid file type: ${type}. Allowed: ${ALLOWED_DOCUMENT_TYPES.join(', ')}`);
     }
 
-    // Validate file size (10MB limit)
-    if (size > 10 * 1024 * 1024) {
-      throw new Error('File size exceeds 10MB limit');
+    // Validate file size (10MB limit). The browser only sends metadata, so the
+    // declared size is checked; when content is present its real size counts too.
+    if (typeof size !== 'number' || !Number.isFinite(size) || size < 0) {
+      throw invalidDocument('file.size must be a non-negative number of bytes');
+    }
+    if (content !== undefined && typeof content !== 'string') {
+      throw invalidDocument('file.content must be a string when provided');
+    }
+    const effectiveSize = Math.max(size, typeof content === 'string' ? Buffer.byteLength(content) : 0);
+    if (effectiveSize > MAX_DOCUMENT_BYTES) {
+      throw invalidDocument('File size exceeds 10MB limit');
     }
 
     // Generate document hash
@@ -39,8 +69,8 @@ export class ENIAdapter {
       .update(content || name + Date.now())
       .digest('hex');
 
-    return {
-      documentId: `ENI-DOC-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const record = {
+      documentId: `ENI-DOC-${Date.now()}-${crypto.randomBytes(5).toString('hex')}`,
       documentHash: hash,
       fileName: name,
       fileType: type,
@@ -49,13 +79,24 @@ export class ENIAdapter {
       status: 'verified',
       eniNetwork: 'injective_testnet_mock'
     };
+    this._remember(record);
+    return record;
+  }
+
+  _remember(record) {
+    if (this.documents.size >= MAX_TRACKED_DOCUMENTS) {
+      this.documents.delete(this.documents.keys().next().value);
+    }
+    this.documents.set(record.documentId, record);
   }
 
   async getDocumentStatus(documentId) {
+    const record = this.documents.get(String(documentId));
+    if (!record) throw new HttpError(404, 'document_not_found', 'Unknown document_id');
     return {
-      documentId,
-      status: 'verified',
-      verifiedAt: new Date().toISOString()
+      documentId: record.documentId,
+      status: record.status,
+      verifiedAt: record.uploadedAt
     };
   }
 }

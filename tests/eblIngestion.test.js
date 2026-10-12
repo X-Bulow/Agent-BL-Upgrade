@@ -119,6 +119,42 @@ test('BE-14: eBL Document Ingestion Tests', async (t) => {
       assert.ok(statusRes.data.verifiedAt);
     });
 
+    await t.test('POST /api/ebl/upload validates the file envelope', async () => {
+      const cases = {
+        'file is a string': { file: 'a.pdf' },
+        'file is an array': { file: [] },
+        'name missing': { file: { type: 'application/pdf', size: 10 } },
+        'name only control characters': { file: { name: '\u0000\u0007', type: 'application/pdf', size: 10 } },
+        'size missing': { file: { name: 'a.pdf', type: 'application/pdf' } },
+        'size is a string': { file: { name: 'a.pdf', type: 'application/pdf', size: '10' } },
+        'size negative': { file: { name: 'a.pdf', type: 'application/pdf', size: -1 } },
+        'content is an object': { file: { name: 'a.pdf', type: 'application/pdf', size: 1, content: {} } }
+      };
+      for (const [label, body] of Object.entries(cases)) {
+        const res = await request('POST', '/api/ebl/upload', body);
+        assert.strictEqual(res.status, 400, label);
+        assert.strictEqual(res.data.ok, false, label);
+        assert.strictEqual(res.data.code, 'invalid_document', label);
+      }
+    });
+
+    await t.test('uploaded file names are reduced to a safe base name', async () => {
+      const res = await request('POST', '/api/ebl/upload', {
+        file: { name: 'C:\\Users\\x\\..\\..\\secret\u0000.pdf', type: 'application/pdf', size: 10 }
+      });
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(res.data.document.fileName, 'secret.pdf');
+    });
+
+    await t.test('GET /api/ebl/document-status only knows documents it issued', async () => {
+      const unknown = await request('GET', '/api/ebl/document-status?document_id=ENI-DOC-0-doesnotexist');
+      assert.strictEqual(unknown.status, 404);
+      assert.strictEqual(unknown.data.code, 'document_not_found');
+
+      const missing = await request('GET', '/api/ebl/document-status');
+      assert.strictEqual(missing.status, 400);
+    });
+
     await t.test('POST /api/ebl/upload triggers AI-13 orchestrator when case_id provided', async () => {
       const res = await request('POST', '/api/ebl/upload', {
         file: {

@@ -7,10 +7,9 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { runtimePath } from '../runtimePaths.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_LOG_PATH = path.resolve(__dirname, '../../data/runtime/agent-decisions.json');
+const DEFAULT_LOG_PATH = runtimePath('agent-decisions.json');
 const HASH_RE = /^0x[0-9a-f]{64}$/u;
 
 function canonicalize(value) {

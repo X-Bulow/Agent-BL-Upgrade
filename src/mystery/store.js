@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { runtimePath } from '../runtimePaths.js';
 import { candidateSetHash, createRevealProof, createServerSecret, hashCanonical, serverCommitment } from './fairness.js';
 
 const HASH_RE = /^0x[0-9a-f]{64}$/u;
@@ -35,7 +36,7 @@ export class MysteryStoreError extends Error {
 
 export class MysteryRevealStore {
   constructor(options = {}) {
-    this.filePath = path.resolve(options.filePath ?? process.env.MYSTERY_STORE_PATH ?? 'data/runtime/mystery-reveals.json');
+    this.filePath = path.resolve(options.filePath ?? process.env.MYSTERY_STORE_PATH ?? runtimePath('mystery-reveals.json'));
     this.now = options.now ?? (() => new Date());
     this.records = new Map();
     this.paymentIndex = new Map();
