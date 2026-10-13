@@ -980,9 +980,14 @@ strong { color: var(--text); }
 	  position: absolute; left: 10px; font-size: 13px; pointer-events: none;
 	  z-index: 2; opacity: 0.7;
 	}
+	.cat-count {
+	  margin-left: 2px; padding: 0 6px; border-radius: 999px; font-size: 10.5px;
+	  color: var(--text-3); background: color-mix(in srgb, var(--text-3) 14%, transparent);
+	}
+	.cat-btn.active .cat-count { color: var(--text); background: color-mix(in srgb, var(--accent) 30%, transparent); }
 	.search-box input {
-	  width: 230px; background: var(--bg-inset); border: 1px solid var(--line); border-right: none;
-	  border-radius: 10px 0 0 10px; padding: 8px 12px 8px 30px;
+	  width: 230px; background: var(--bg-inset); border: 1px solid var(--line);
+	  border-radius: 10px; padding: 8px 12px 8px 30px;
 	  color: var(--text); font: inherit; font-size: 12.5px;
 	  transition: all 0.18s ease;
 	}

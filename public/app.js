@@ -15,6 +15,7 @@ import * as f from './format.js';
 import * as api from './api.js';
 import * as web3 from './web3.js';
 import * as protocol from './protocol.js';
+import { CASE_CATEGORIES, caseCategory, caseSearchFields, matchesSearch } from './catalog.js';
 import { t, tData, toggleLang, onLangChange, applyStaticI18n } from './i18n.js';
 import { initVoyage, renderVoyage, startVoyageClock, stopVoyageClock } from './voyage.js';
 import { initPopupAssistant } from './popup-assistant.js';
@@ -46,57 +47,30 @@ async function networkName() {
 state.categoryFilter = 'all';
 state.searchQuery = '';
 
-/** Map cargo names to category keys. */
-const CATEGORY_MAP = {
-  energy_chemical: ['crude', 'oil', 'refined', 'rubber', 'petroleum', 'chemical'],
-  metal: ['copper', 'iron', 'aluminum', 'aluminium', 'steel'],
-  ore: ['ore', 'concentrate']
-};
-
-function getCaseCategory(caseItem) {
-  const bl = caseItem.case?.bill_of_lading ?? {};
-  const cargo = (bl.cargo || caseItem.cargo || '').toLowerCase();
-  const cats = [];
-  if (CATEGORY_MAP.ore.some(k => cargo.includes(k.toLowerCase()))) cats.push('ore');
-  if (CATEGORY_MAP.metal.some(k => cargo.includes(k.toLowerCase()))) cats.push('metal');
-  if (CATEGORY_MAP.energy_chemical.some(k => cargo.includes(k.toLowerCase()))) cats.push('energy_chemical');
-  return cats.length ? cats : ['all'];
+/** Everything a case can be found by: its data, the displayed translation and its category. */
+function searchFieldsFor(caseItem) {
+  const fields = caseSearchFields(caseItem);
+  const category = caseCategory(caseItem);
+  // Include the displayed translation so Chinese queries work in the Chinese UI.
+  return [...fields, ...fields.map((value) => tData(value)), category, t(`cat_${category}`)];
 }
 
-/** Return cases filtered by current category + search query + AI match. */
-function visibleCases() {
+/** Cases matching the search query (and the AI match, when that interface is used). */
+function searchedCases() {
   let cases = state.cases;
-
-  // AI-matched IDs from natural-language filtering.
   if (state._aiMatchedIds) {
-    cases = cases.filter(c => state._aiMatchedIds.has(c.case_id));
+    cases = cases.filter((c) => state._aiMatchedIds.has(c.case_id));
+  } else if (state.searchQuery.trim()) {
+    cases = cases.filter((c) => matchesSearch(searchFieldsFor(c), state.searchQuery));
   }
-
-  // Category filter
-  if (state.categoryFilter !== 'all') {
-    cases = cases.filter(c => {
-      const cats = getCaseCategory(c);
-      return cats.includes(state.categoryFilter);
-    });
-  }
-
-  // Keyword search (skip when AI filter is active — AI already understands intent)
-  if (!state._aiMatchedIds && state.searchQuery.trim()) {
-    const q = state.searchQuery.trim().toLowerCase();
-    cases = cases.filter(c => {
-      const bl = c.case?.bill_of_lading ?? {};
-      const fields = [
-        c.label, c.cargo, c.route, c.risk_hint, c.case_id,
-        bl.cargo, bl.port_of_loading, bl.port_of_discharge,
-        bl.bl_id, bl.vessel_name
-      ].filter(Boolean);
-      // Match the source data and its displayed translation, so Chinese queries work in the Chinese UI.
-      const searchable = [...fields, ...fields.map((value) => tData(value))].join(' ').toLowerCase();
-      return searchable.includes(q);
-    });
-  }
-
   return cases;
+}
+
+/** Return cases filtered by the current category and search query. */
+function visibleCases() {
+  const cases = searchedCases();
+  if (state.categoryFilter === 'all') return cases;
+  return cases.filter((c) => caseCategory(c) === state.categoryFilter);
 }
 
 // ===========================================================================
@@ -123,6 +97,7 @@ async function boot() {
     toast(t('t_load_cases_fail', { msg: e.message }), true);
     return;
   }
+  highlightCategoryBtn();
   renderCaseSelector();
   renderSpeedSelector();
   await selectCase(state.cases[0]?.case_id);
@@ -1077,27 +1052,43 @@ function onCategoryClick(cat) {
   }
 }
 
+/** Render the category buttons with the number of matching cases; hide categories with no cases at all. */
 function highlightCategoryBtn() {
-  document.querySelectorAll('#category-filter .cat-btn').forEach((b) =>
-    b.classList.toggle('active', b.dataset.cat === state.categoryFilter));
+  const box = $('#category-filter');
+  if (!box) return;
+  clear(box);
+  const present = new Set(state.cases.map(caseCategory));
+  const searched = searchedCases();
+  const countOf = (cat) => (cat === 'all' ? searched.length : searched.filter((c) => caseCategory(c) === cat).length);
+  for (const cat of ['all', ...CASE_CATEGORIES.filter((key) => present.has(key))]) {
+    box.append(el('button', {
+      class: `cat-btn${cat === state.categoryFilter ? ' active' : ''}`,
+      'data-cat': cat,
+      onclick: () => onCategoryClick(cat)
+    }, t(`cat_${cat}`), ' ', el('span', { class: 'cat-count', text: String(countOf(cat)) })));
+  }
 }
 
 // ===========================================================================
 // Search + AI natural language filter
 // ===========================================================================
 let searchDebounce = null;
+function applySearch() {
+  clearTimeout(searchDebounce);
+  state.searchQuery = $('#search-input')?.value || '';
+  state._aiMatchedIds = null; // a typed query replaces any AI match
+  highlightCategoryBtn();
+  renderCaseSelector();
+  renderMarket();
+  const visible = visibleCases();
+  if (visible.length && !visible.find(c => c.case_id === state.caseId)) {
+    selectCase(visible[0].case_id);
+  }
+}
+
 function onSearchInput() {
   clearTimeout(searchDebounce);
-  searchDebounce = setTimeout(() => {
-    state.searchQuery = $('#search-input')?.value || '';
-    state._aiMatchedIds = null; // clear AI filter on manual input
-    renderCaseSelector();
-    renderMarket();
-    const visible = visibleCases();
-    if (visible.length && !visible.find(c => c.case_id === state.caseId)) {
-      selectCase(visible[0].case_id);
-    }
-  }, 300);
+  searchDebounce = setTimeout(applySearch, 250);
 }
 
 async function onAiSearch() {
@@ -3184,20 +3175,19 @@ function wireStaticHandlers() {
     $('#agent-activity-console').classList.toggle('collapsed');
   });
 
-  // Category filter buttons
-  document.querySelectorAll('#category-filter .cat-btn').forEach((b) =>
-    b.addEventListener('click', () => onCategoryClick(b.dataset.cat)));
+  // Category buttons are rendered by highlightCategoryBtn(), which wires their clicks.
 
-  // Search input
+  // Search input: filters as you type; Enter applies immediately.
   const searchInput = $('#search-input');
   if (searchInput) {
     searchInput.addEventListener('input', onSearchInput);
     searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') onAiSearch();
+      if (e.key === 'Enter') applySearch();
     });
   }
 
-  // AI search button
+  // The natural-language AI filter (onAiSearch) is kept for a future LLM backend but
+  // has no button in the UI; it is only wired if an #ai-search-btn element exists.
   $('#ai-search-btn')?.addEventListener('click', onAiSearch);
 
   $('#market-sort')?.addEventListener('change', (e) => {

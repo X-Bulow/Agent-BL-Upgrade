@@ -78,16 +78,10 @@
         <label class="control-label" data-i18n="case_label">Selected case / eBL</label>
         <div id="case-select" class="case-picker" data-i18n-title="case_select_aria"></div>
         <div class="subbar-right">
-          <div class="category-filter" id="category-filter">
-            <button class="cat-btn active" data-cat="all" data-i18n="cat_all">All</button>
-            <button class="cat-btn" data-cat="energy_chemical" data-i18n="cat_energy_chemical">Energy & Chemical</button>
-            <button class="cat-btn" data-cat="metal" data-i18n="cat_metal">Metal</button>
-            <button class="cat-btn" data-cat="ore" data-i18n="cat_ore">Ore</button>
-          </div>
+          <div class="category-filter" id="category-filter"></div>
           <div class="search-box" id="search-box">
             <span class="search-icon">🔍</span>
-            <input id="search-input" data-i18n-ph="search_ph" placeholder="Search eBLs or describe your preference…" />
-            <button id="ai-search-btn" class="btn ai-btn" data-i18n="ai_parse" data-i18n-title="ai_search_title" title="AI parses natural-language preferences">AI Filter</button>
+            <input id="search-input" type="search" data-i18n-ph="search_ph" placeholder="Search by cargo, port, route or eBL ID…" />
           </div>
         </div>
         <span id="chain-status" class="chain-status"></span>
