@@ -137,6 +137,7 @@ export function searchKnowledgeBase(query, { categories, limit = 5, minScore = 1
   // Normalize query: lowercase, remove punctuation, split into tokens
   const rawTokens = query
     .toLowerCase()
+    // The CJK range (一-鿿) keeps Chinese characters so Chinese queries can be tokenised.
     .replace(/[^a-z0-9一-鿿\s-]/g, ' ')
     .split(/\s+/)
     .filter(Boolean);

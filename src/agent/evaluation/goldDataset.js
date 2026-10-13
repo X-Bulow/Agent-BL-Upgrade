@@ -1,8 +1,8 @@
 // TRUST-1: Gold Dataset - 20+ test cases with ground truth
-// 真实/脱敏 eBL、发票、保险单，覆盖正常/欺诈/缺字段/战争/延误场景
+// Real/anonymised eBLs, invoices and insurance policies covering normal, fraud, missing-field, war and delay scenarios
 
 export const GOLD_DATASET = [
-  // 1-5: 正常贸易案例
+  // 1-5: normal trade cases
   {
     id: 'GOLD-001',
     category: 'normal',
@@ -76,7 +76,7 @@ export const GOLD_DATASET = [
     }
   },
 
-  // 6-10: 欺诈/异常案例
+  // 6-10: fraud / anomaly cases
   {
     id: 'GOLD-006',
     category: 'fraud',
@@ -86,14 +86,14 @@ export const GOLD_DATASET = [
       consignee: 'Suspicious Buyer LLC',
       cargo: 'Gold bullion',
       quantity: '100 MT',
-      value_usd: 6000000000, // 明显虚高
+      value_usd: 6000000000, // clearly inflated
       port_of_loading: 'Unknown Port',
       port_of_discharge: 'Tax Haven Port',
       vessel: 'MV Ghost Ship',
       eta: '2026-12-31'
     },
     invoice: { amount_usd: 6000000000, payment_terms: 'Cash on delivery' },
-    insurance: { coverage_usd: 0, type: 'None' }, // 无保险
+    insurance: { coverage_usd: 0, type: 'None' }, // no insurance
     ground_truth: {
       compliant: false,
       risk_level: 'CRITICAL',
@@ -107,7 +107,7 @@ export const GOLD_DATASET = [
     ebl: {
       bl_number: 'BL-2026-DUP-001',
       shipper: 'Singapore Metals Trading Ltd',
-      consignee: 'Multiple Buyers', // 一货多单
+      consignee: 'Multiple Buyers', // same cargo pledged under multiple bills
       cargo: 'Copper ore concentrate',
       quantity: '25000 MT',
       value_usd: 2100000,
@@ -126,7 +126,7 @@ export const GOLD_DATASET = [
     }
   },
 
-  // 11-15: 缺字段/不完整案例
+  // 11-15: missing-field / incomplete cases
   {
     id: 'GOLD-011',
     category: 'incomplete',
@@ -136,14 +136,14 @@ export const GOLD_DATASET = [
       consignee: 'Qingdao Import Ltd',
       cargo: 'Natural rubber',
       quantity: '10000 MT',
-      // value_usd 缺失
+      // value_usd missing
       port_of_loading: 'Bangkok',
       port_of_discharge: 'Qingdao',
       vessel: 'MV Rubber Express',
       eta: '2026-07-25'
     },
     invoice: { amount_usd: 850000, payment_terms: 'L/C 30 days' },
-    insurance: null, // 保险单缺失
+    insurance: null, // insurance policy missing
     ground_truth: {
       compliant: false,
       risk_level: 'HIGH',
@@ -152,7 +152,7 @@ export const GOLD_DATASET = [
     }
   },
 
-  // 16-20: 战争/延误高风险案例
+  // 16-20: war / delay high-risk cases
   {
     id: 'GOLD-016',
     category: 'war_risk',
@@ -165,7 +165,7 @@ export const GOLD_DATASET = [
       value_usd: 1800000,
       port_of_loading: 'Dubai',
       port_of_discharge: 'Rotterdam',
-      route: 'Via Strait of Hormuz', // 战争高风险
+      route: 'Via Strait of Hormuz', // high war risk
       vessel: 'MV Desert Star',
       eta: '2026-08-15'
     },
@@ -210,7 +210,7 @@ export const GOLD_DATASET = [
     category: 'sanctioned',
     ebl: {
       bl_number: 'BL-2026-SAN-001',
-      shipper: 'Sanctioned Entity Corp', // 受制裁实体
+      shipper: 'Sanctioned Entity Corp', // sanctioned entity
       consignee: 'Military Industrial Complex',
       cargo: 'Dual-use chemicals',
       quantity: '5000 MT',
@@ -283,7 +283,7 @@ export const GOLD_DATASET = [
   }
 ];
 
-// 数据来源说明
+// Data source notes
 export const DATASET_METADATA = {
   total_cases: 20,
   source: 'Synthetic dataset based on industry patterns, fully anonymized',

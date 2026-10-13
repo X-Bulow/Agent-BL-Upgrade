@@ -43,15 +43,15 @@ const casesDir = path.join(rootDir, 'data/cases');
 // critical without bundling case JSON. Cases not listed here still load (with a
 // derived label) so adding a *.case.json file is enough to surface it.
 const CASE_META = {
-  'CASE-EBL-2026-CU-SG-SHA': { label: '铜矿 · Singapore → Shanghai', risk_hint: 'MEDIUM', order: 1 },
-  'CASE-EBL-2026-REFINED-SG-JKT': { label: '成品油 · Singapore → Jakarta', risk_hint: 'LOW', order: 2 },
-  'CASE-EBL-2026-RUBBER-BKK-QD': { label: '橡胶 · Bangkok → Qingdao', risk_hint: 'MEDIUM', order: 3 },
-  'CASE-EBL-2026-0001': { label: '铜矿 · Shanghai → Hamburg (保险缺口)', risk_hint: 'WARNING', order: 4 },
-  'CASE-EBL-2026-OIL-SG-ULS': { label: '原油 · Singapore → Ulsan', risk_hint: 'MEDIUM', order: 5 },
-  'CASE-EBL-2026-IRONORE-AU-TJ': { label: '铁矿石 · Port Hedland → Tianjin', risk_hint: 'LOW', order: 6 },
-  'CASE-EBL-2026-ALU-DXB-RTM': { label: '铝 · Dubai → Rotterdam (Hormuz)', risk_hint: 'HIGH', order: 7 },
-  'CASE-EBL-2026-CUCONC-ANF-LYG': { label: '铜精矿 · Antofagasta → Lianyungang', risk_hint: 'MEDIUM', order: 8 },
-  'CASE-EBL-2026-CU-SG-SHA-WARCRISIS': { label: '铜矿 · Hormuz 战争危机 · Singapore → Shanghai', risk_hint: 'CRITICAL', order: 9 }
+  'CASE-EBL-2026-CU-SG-SHA': { label: 'Copper Ore · Singapore → Shanghai', risk_hint: 'MEDIUM', order: 1 },
+  'CASE-EBL-2026-REFINED-SG-JKT': { label: 'Refined Oil · Singapore → Jakarta', risk_hint: 'LOW', order: 2 },
+  'CASE-EBL-2026-RUBBER-BKK-QD': { label: 'Rubber · Bangkok → Qingdao', risk_hint: 'MEDIUM', order: 3 },
+  'CASE-EBL-2026-0001': { label: 'Copper Ore · Shanghai → Hamburg (Insurance Gap)', risk_hint: 'WARNING', order: 4 },
+  'CASE-EBL-2026-OIL-SG-ULS': { label: 'Crude Oil · Singapore → Ulsan', risk_hint: 'MEDIUM', order: 5 },
+  'CASE-EBL-2026-IRONORE-AU-TJ': { label: 'Iron Ore · Port Hedland → Tianjin', risk_hint: 'LOW', order: 6 },
+  'CASE-EBL-2026-ALU-DXB-RTM': { label: 'Aluminium · Dubai → Rotterdam (Hormuz)', risk_hint: 'HIGH', order: 7 },
+  'CASE-EBL-2026-CUCONC-ANF-LYG': { label: 'Copper Concentrate · Antofagasta → Lianyungang', risk_hint: 'MEDIUM', order: 8 },
+  'CASE-EBL-2026-CU-SG-SHA-WARCRISIS': { label: 'Copper Ore · Hormuz War Crisis · Singapore → Shanghai', risk_hint: 'CRITICAL', order: 9 }
 };
 
 async function readJsonBody(request) {
@@ -237,7 +237,7 @@ async function serveStatic(urlPath, response) {
       '.webp': 'image/webp'
     };
 
-    // 为 HTML 文件注入环境变量
+    // Inject environment variables into HTML files
     if (ext === '.html') {
       const envScript = `<script>window.ENV={DEEPSEEK_API_KEY:'${process.env.DEEPSEEK_API_KEY||''}',DEEPSEEK_BASE_URL:'${process.env.DEEPSEEK_BASE_URL||'https://api.deepseek.com'}'}</script>`;
       body = Buffer.from(body.toString().replace('</head>', `${envScript}</head>`));
@@ -300,7 +300,7 @@ export async function handleRequest(request, response) {
         return;
       }
 
-      // ---- 脱敏数据 API ----
+      // ---- Anonymised data API ----
 
       if (request.method === 'GET' && url.pathname === '/api/desensitization/spot-purchase') {
         const data = await loadSpotPurchase();

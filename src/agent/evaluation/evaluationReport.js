@@ -1,5 +1,5 @@
 // TRUST-2: Evaluation Report - AI Agent Quality Metrics
-// 评估 OCR/解析准确率、文档一致性、风险分单调性、估值误差、tool-call 成功率
+// Evaluates OCR/parsing accuracy, document consistency, risk-score monotonicity, valuation error and tool-call success rate
 
 import { GOLD_DATASET } from './goldDataset.js';
 
@@ -168,7 +168,7 @@ async function evaluateValuationAccuracy() {
 
 async function evaluateToolCalls() {
   let successCount = 0;
-  const totalCalls = GOLD_DATASET.length * 3; // 假设每个 case 调用 3 个工具
+  const totalCalls = GOLD_DATASET.length * 3; // assume each case calls 3 tools
 
   for (const testCase of GOLD_DATASET) {
     // Mock tool calls

@@ -1,11 +1,11 @@
 /**
- * AgentBL 一键演示脚本
+ * AgentBL one-click demo script
  *
- * 1 分钟内走完整条 AI 定价主线：
- *  案例加载 → AI 估值 → 定价折价 → 投资者认购 → 航运风险 → x402 付费情报
+ * Walks the full AI pricing storyline in about a minute:
+ *  case loading → AI valuation → pricing discount → investor subscription → shipping risk → x402 paid intel
  *
- * 对标 wohainengren 的 1 分钟闭环节奏。
- * 全程离线可跑，不需要钱包/合约/API Key。
+ * Mirrors the one-minute closed-loop pacing of wohainengren.
+ * Runs fully offline: no wallet, contract or API key needed.
  *
  * Usage: npm run demo:once
  */
@@ -13,8 +13,8 @@
 import { createServer } from '../src/app/server.js';
 
 console.log('╔══════════════════════════════════════════════════════════╗');
-console.log('║       AgentBL · AI 动态定价 eBL-backed RWA               ║');
-console.log('║       一键演示 — 1 分钟完整闭环                            ║');
+console.log('║       AgentBL · AI dynamic pricing for eBL-backed RWA    ║');
+console.log('║       One-click demo — full loop in 1 minute             ║');
 console.log('╚══════════════════════════════════════════════════════════╝\n');
 
 const server = createServer();
@@ -24,47 +24,55 @@ const API = `http://127.0.0.1:${port}`;
 
 try {
   // ═══════════════════════════════════════════════════════
-  // 第 1 幕：案例选择 (10 秒)
+  // Act 1: case selection (10 seconds)
   // ═══════════════════════════════════════════════════════
-  console.log('┌─ 第 1 幕 ─────────────────────────────────────────────┐');
-  console.log('│ 🚢 新加坡港，500 吨铜阴极板即将装船                   │');
-  console.log('│    目的地：上海港                                      │');
-  console.log('│    发票货值：$4,500,000                                │');
-  console.log('│    出口商：Shanghai Metals Export Co.                  │');
-  console.log('│    痛点：货在海上漂 18 天，钱要 45 天才回来             │');
+  console.log('┌─ Act 1 ──────────────────────────────────────────────┐');
+  console.log('│ 🚢 Port of Singapore: 500 t of copper cathodes        │');
+  console.log('│    about to be loaded                                │');
+  console.log('│    Destination: Port of Shanghai                     │');
+  console.log('│    Invoice value: $4,500,000                         │');
+  console.log('│    Exporter: Shanghai Metals Export Co.              │');
+  console.log('│    Pain point: cargo is at sea for 18 days, but the  │');
+  console.log('│    money takes 45 days to come back                  │');
   console.log('└──────────────────────────────────────────────────────┘\n');
 
   const cases = await fetch(`${API}/api/cases`).then((r) => r.json());
   const copperCase = cases.cases.find((c) => c.case_id === 'CASE-EBL-2026-0001');
-  console.log(`  ✓ 已加载案例: ${copperCase.label} (${copperCase.risk_hint})\n`);
+  console.log(`  ✓ Case loaded: ${copperCase.label} (${copperCase.risk_hint})\n`);
 
   // ═══════════════════════════════════════════════════════
-  // 第 2 幕：AI 定价 (15 秒)
+  // Act 2: AI pricing (15 seconds)
   // ═══════════════════════════════════════════════════════
-  console.log('┌─ 第 2 幕 ─────────────────────────────────────────────┐');
-  console.log('│ 🤖 AI 定价与风控 Agent 启动                            │');
-  console.log('│    ① 审单：交叉核验 eBL / 发票 / 保险                  │');
-  console.log('│    ② 估值：调用实时 LME 铜价 + UN Comtrade 历史成交  │');
-  console.log('│    ③ 风控：战争/天气/港口/保险/价格波动 五维评分      │');
-  console.log('│    ④ 定价：折价 = 到账速度 + 贸易风险                 │');
+  console.log('┌─ Act 2 ──────────────────────────────────────────────┐');
+  console.log('│ 🤖 AI pricing and risk-control agent starts          │');
+  console.log('│    ① Document check: cross-verify eBL / invoice /    │');
+  console.log('│       insurance                                      │');
+  console.log('│    ② Valuation: live LME copper price + UN Comtrade  │');
+  console.log('│       historical trades                              │');
+  console.log('│    ③ Risk: five-dimension score (war / weather /     │');
+  console.log('│       port / insurance / price volatility)           │');
+  console.log('│    ④ Pricing: discount = payout speed + trade risk   │');
   console.log('└──────────────────────────────────────────────────────┘\n');
 
   const comparison = await fetch(`${API}/api/pricing/quote?compare=true`, { method: 'POST' }).then((r) => r.json());
 
   for (const q of comparison.quotes) {
     const yield_pct = ((1 / q.final_issue_price_usd - 1) * 100).toFixed(1);
-    console.log(`  ${q.payout_speed.padEnd(10)} 发行价: $${q.final_issue_price_usd.toFixed(3)}  |  投资者回报: +${yield_pct}%  |  动作: ${q.pricing_action}`);
+    console.log(`  ${q.payout_speed.padEnd(10)} Issue price: $${q.final_issue_price_usd.toFixed(3)}  |  Investor return: +${yield_pct}%  |  Action: ${q.pricing_action}`);
   }
-  console.log(`\n  ✓ 推荐到账速度: ${comparison.recommended_payout_speed}\n`);
+  console.log(`\n  ✓ Recommended payout speed: ${comparison.recommended_payout_speed}\n`);
 
   // ═══════════════════════════════════════════════════════
-  // 第 3 幕：投资 (10 秒)
+  // Act 3: investment (10 seconds)
   // ═══════════════════════════════════════════════════════
-  console.log('┌─ 第 3 幕 ─────────────────────────────────────────────┐');
-  console.log('│ 💰 投资者认购                                          │');
-  console.log('│    出口商质押 eBL → 智能合约创建 RWA Offering        │');
-  console.log('│    投资者以 $0.80 折价认购 → 目标兑付 $1.00          │');
-  console.log('│    RiskPricingOracle 链上锚定定价决策                  │');
+  console.log('┌─ Act 3 ──────────────────────────────────────────────┐');
+  console.log('│ 💰 Investor subscription                              │');
+  console.log('│    Exporter pledges the eBL → smart contract creates │');
+  console.log('│    an RWA offering                                   │');
+  console.log('│    Investors subscribe at a $0.80 discount → target  │');
+  console.log('│    redemption $1.00                                  │');
+  console.log('│    RiskPricingOracle anchors the pricing decision    │');
+  console.log('│    on-chain                                          │');
   console.log('└──────────────────────────────────────────────────────┘\n');
 
   const offering = await fetch(`${API}/api/offering/simulate`, {
@@ -74,21 +82,25 @@ try {
   }).then((r) => r.json());
 
   const steps = offering.steps.map((s) => `${s.state} →`).join(' ');
-  console.log(`  ✓ 生命周期: ${steps} ${offering.final_state}`);
-  console.log(`  ✓ 初始定价: $${offering.initial_quote?.final_issue_price_usd?.toFixed(3)}\n`);
+  console.log(`  ✓ Lifecycle: ${steps} ${offering.final_state}`);
+  console.log(`  ✓ Initial price: $${offering.initial_quote?.final_issue_price_usd?.toFixed(3)}\n`);
 
   // ═══════════════════════════════════════════════════════
-  // 第 4 幕：航运风险 (15 秒)
+  // Act 4: shipping risk (15 seconds)
   // ═══════════════════════════════════════════════════════
-  console.log('┌─ 第 4 幕 ─────────────────────────────────────────────┐');
-  console.log('│ 🌪 航运途中的突发事件                                  │');
-  console.log('│    ① 台风在东海形成 → AI 打 150bps 天气风险          │');
-  console.log('│    ② 霍尔木兹冲突升级 → AI 识别战争溢价双刃剑         │');
-  console.log('│    ③ AI 反向操作：haircut 21% + 暂停发行              │');
-  console.log('│    "价格预言机以为铜价涨了更安全——完全看反"          │');
+  console.log('┌─ Act 4 ──────────────────────────────────────────────┐');
+  console.log('│ 🌪 Incidents during the voyage                         │');
+  console.log('│    ① Typhoon forms in the East China Sea → AI adds   │');
+  console.log('│       150 bps of weather risk                        │');
+  console.log('│    ② Hormuz conflict escalates → AI spots the        │');
+  console.log('│       double-edged war premium                       │');
+  console.log('│    ③ AI does the opposite: 21% haircut + pause       │');
+  console.log('│       issuance                                       │');
+  console.log('│    "A price oracle thinks a higher copper price is   │');
+  console.log('│     safer — exactly backwards"                       │');
   console.log('└──────────────────────────────────────────────────────┘\n');
 
-  // 战争危机案例
+  // War-crisis case
   const warRes = await fetch(`${API}/api/pricing/quote`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -97,18 +109,21 @@ try {
 
   if (warRes.ok) {
     const war = await warRes.json();
-    console.log(`  ⚔ 战争危机: 发行价 $${war.final_issue_price_usd?.toFixed(3)}  |  风险 ${war.risk_score_bps}bps  |  动作: ${war.pricing_action}`);
-    console.log(`  ✓ AI 看穿了战争溢价的欺骗性信号\n`);
+    console.log(`  ⚔ War crisis: issue price $${war.final_issue_price_usd?.toFixed(3)}  |  risk ${war.risk_score_bps}bps  |  Action: ${war.pricing_action}`);
+    console.log(`  ✓ The AI saw through the misleading war-premium signal\n`);
   }
 
   // ═══════════════════════════════════════════════════════
-  // 第 5 幕：x402 付费情报 (10 秒)
+  // Act 5: x402 paid intel (10 seconds)
   // ═══════════════════════════════════════════════════════
-  console.log('┌─ 第 5 幕 ─────────────────────────────────────────────┐');
-  console.log('│ 💎 x402 付费情报市场                                   │');
-  console.log('│    AI 判断免费情报不够 → 自动支付解锁高级数据          │');
-  console.log('│    HTTP 402 → EIP-3009 签名 → 链上结算 → 情报解锁    │');
-  console.log('│    PaymentOracle 记录链上支付证据，可审计              │');
+  console.log('┌─ Act 5 ──────────────────────────────────────────────┐');
+  console.log('│ 💎 x402 paid intel market                             │');
+  console.log('│    AI decides free intel is not enough → pays        │');
+  console.log('│    automatically to unlock premium data              │');
+  console.log('│    HTTP 402 → EIP-3009 signature → on-chain          │');
+  console.log('│    settlement → intel unlocked                       │');
+  console.log('│    PaymentOracle records auditable on-chain payment  │');
+  console.log('│    evidence                                          │');
   console.log('└──────────────────────────────────────────────────────┘\n');
 
   const x402 = await fetch(`${API}/api/x402/smoke`, {
@@ -118,23 +133,24 @@ try {
   }).then((r) => r.json());
 
   if (x402.ok) {
-    console.log(`  ✓ x402 付费流程: ${x402.steps.length} 步 (挑战→签名→结算→解锁)`);
-    console.log(`  ✓ 支付证据 txHash: ${x402.payment?.txHash?.slice(0, 42)}…`);
-    console.log(`  ✓ 情报解锁: ${x402.intel_preview?.events_count || 0} 个风险事件, ${x402.intel_preview?.deep_intel_count || 0} 条深度情报\n`);
+    console.log(`  ✓ x402 payment flow: ${x402.steps.length} steps (challenge → sign → settle → unlock)`);
+    console.log(`  ✓ Payment evidence txHash: ${x402.payment?.txHash?.slice(0, 42)}…`);
+    console.log(`  ✓ Intel unlocked: ${x402.intel_preview?.events_count || 0} risk events, ${x402.intel_preview?.deep_intel_count || 0} deep-intel items\n`);
   }
 
   // ═══════════════════════════════════════════════════════
-  // 收束
+  // Wrap-up
   // ═══════════════════════════════════════════════════════
   console.log('╔══════════════════════════════════════════════════════════╗');
-  console.log('║  🎯 一句话总结:                                         ║');
+  console.log('║  🎯 In one sentence:                                     ║');
   console.log('║                                                          ║');
-  console.log('║  普通 DeFi 让市场去猜价格、让清算去善后。                 ║');
-  console.log('║  AgentBL 让 AI 在投资者下单【之前】,                    ║');
-  console.log('║  就把贸易欺诈和真实世界风险，                            ║');
-  console.log('║  定成一个可解释、可上链的 RWA 折价。                     ║');
+  console.log('║  Ordinary DeFi lets the market guess the price and       ║');
+  console.log('║  leaves liquidation to clean up afterwards.              ║');
+  console.log('║  AgentBL lets AI turn trade fraud and real-world risk,   ║');
+  console.log('║  BEFORE the investor places an order,                    ║');
+  console.log('║  into an explainable, on-chain RWA discount.             ║');
   console.log('║                                                          ║');
-  console.log('║  AI 定价风险，链上强制执行。                              ║');
+  console.log('║  AI prices the risk; the chain enforces it.              ║');
   console.log('╚══════════════════════════════════════════════════════════╝');
 
 } finally {
