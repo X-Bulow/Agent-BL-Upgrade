@@ -122,11 +122,13 @@ const nodeTests = await command(
   npm,
   ['test', '--', '--test-concurrency=4']
 );
-if (nodeTests.ok && !/# fail 0/u.test(nodeTests.output)) {
+// Older Node versions print a TAP summary ("# fail 0"); newer ones default to
+// the spec reporter ("ℹ fail 0"). Accept either.
+if (nodeTests.ok && !/^(?:#|ℹ) fail 0$/mu.test(nodeTests.output)) {
   results.at(-1).status = 'FAIL';
-  results.at(-1).detail = 'test runner did not report # fail 0';
+  results.at(-1).detail = 'test runner did not report fail 0';
 }
-await command('Executable suites', 'Solidity contract suite (32 tests)', npm, ['test'], path.join(root, 'hardhat'));
+await command('Executable suites', 'Solidity contract suite (52 tests)', npm, ['test'], path.join(root, 'hardhat'));
 await command('Executable suites', 'Main API smoke flow', npm, ['run', 'smoke']);
 await command('Executable suites', 'Risk/pricing scenario regression', npm, ['run', 'scenarios']);
 if (runtimeMode.demoMode) await command('Executable suites', 'One-minute offline demo', npm, ['run', 'demo:once']);

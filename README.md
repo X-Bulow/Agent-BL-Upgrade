@@ -603,7 +603,7 @@ Live-network checks may be skipped or reported as warnings in **Demo Mode**.
 The contracts use Hardhat 3, which requires **Node.js 22.13+**. A locally reproduced run of `npm --prefix hardhat test` produced:
 
 ```text
-32 passing
+52 passing
 ```
 
 ---
