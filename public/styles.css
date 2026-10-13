@@ -965,10 +965,15 @@ strong { color: var(--text); }
 }
 .subbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap; }
 .chain-status {
-  flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%;
-  background: currentColor; color: var(--text-3); cursor: help;
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  color: var(--text-3); cursor: help;
 }
-.chain-status.tone-ok { color: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
+.chain-status::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor;
+}
+.chain-status.tone-ok { color: var(--ok); }
+.chain-status.tone-ok::before { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
 .chain-status.tone-muted { color: var(--text-3); }
 
 	/* ---- Category filter buttons ---- */

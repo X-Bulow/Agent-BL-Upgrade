@@ -1602,9 +1602,9 @@ async function reflectChainStatus() {
   if (!elx) return;
   const real = await web3.isRealChainConfigured();
   const net = await networkName();
-  // Shown as a status dot to keep the sub-bar on one row; the full text is the tooltip.
+  // A dot with a short label keeps the sub-bar on one row; the full text is the tooltip.
   const message = real ? t('chain_deployed', { network: net }) : t('chain_not_deployed');
-  elx.textContent = '';
+  elx.textContent = real ? t('chain_deployed_short') : t('chain_not_deployed_short');
   elx.title = message;
   elx.setAttribute('aria-label', message);
   elx.setAttribute('role', 'status');

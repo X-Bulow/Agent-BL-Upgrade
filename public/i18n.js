@@ -330,6 +330,8 @@ const DICT = {
 
     // chain status
     chain_deployed: '● 合约已部署 · 连接钱包铸造真实 {network} 交易',
+    chain_deployed_short: '已部署',
+    chain_not_deployed_short: '未部署',
     chain_not_deployed: '○ 合约未部署 · 当前为模拟上链（运行 deploy 脚本后切真实链）',
 
     // marketplace
@@ -875,6 +877,8 @@ const DICT = {
 
     // chain status
     chain_deployed: '● Contract deployed · connect a wallet to mint a real {network} tx',
+    chain_deployed_short: 'Deployed',
+    chain_not_deployed_short: 'Not deployed',
     chain_not_deployed: '○ Not deployed · simulated minting (run the deploy script to go live)',
 
     // marketplace
