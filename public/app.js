@@ -988,8 +988,19 @@ function renderCaseSelector() {
     onchange: (event) => selectCase(event.target.value)
   });
   for (const c of cases) {
-    const risk = c.risk_hint ? ` · ${f.riskLabel(c.risk_hint)}` : '';
-    select.append(el('option', { value: c.case_id, text: shortLabel(c) + risk }));
+    const bl = c.case?.bill_of_lading ?? {};
+    const route = bl.port_of_loading && bl.port_of_discharge
+      ? `${tData(bl.port_of_loading)} → ${tData(bl.port_of_discharge)}`
+      : null;
+    const risk = c.risk_hint ? f.riskLabel(c.risk_hint) : null;
+    // custom-select.js shows data-short on the closed picker and data-detail as a
+    // second line in the open list; the option text stays the full label.
+    select.append(el('option', {
+      value: c.case_id,
+      text: [shortLabel(c), risk].filter(Boolean).join(' · '),
+      'data-short': caseName(c),
+      'data-detail': [route, risk, c.case_id].filter(Boolean).join(' · ')
+    }));
   }
   box.append(select);
   highlightCase();
@@ -1001,6 +1012,14 @@ function shortLabel(c) {
   const load = tData(bl.port_of_loading);
   const disch = tData(bl.port_of_discharge);
   return load && disch ? `${cargo} · ${load} → ${disch}` : cargo;
+}
+
+/** Short display name of a case's cargo, preferring the structured commodity. */
+function caseName(c) {
+  const commodity = c.case?.cargo?.commodity;
+  if (commodity) return tData(commodity);
+  const bl = c.case?.bill_of_lading ?? {};
+  return shortCargoName(tData(bl.cargo || c.cargo || c.case_id));
 }
 
 function shortCargoName(value) {
@@ -1583,7 +1602,12 @@ async function reflectChainStatus() {
   if (!elx) return;
   const real = await web3.isRealChainConfigured();
   const net = await networkName();
-  elx.textContent = real ? t('chain_deployed', { network: net }) : t('chain_not_deployed');
+  // Shown as a status dot to keep the sub-bar on one row; the full text is the tooltip.
+  const message = real ? t('chain_deployed', { network: net }) : t('chain_not_deployed');
+  elx.textContent = '';
+  elx.title = message;
+  elx.setAttribute('aria-label', message);
+  elx.setAttribute('role', 'status');
   elx.className = `chain-status tone-${real ? 'ok' : 'muted'}`;
 }
 

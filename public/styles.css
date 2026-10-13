@@ -922,13 +922,22 @@ strong { color: var(--text); }
 }
 .subbar-inner {
   width: min(1240px, 94vw); margin: 0 auto;
-  display: flex; align-items: center; gap: 14px; padding: 10px 0; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 10px; padding: 6px 0; flex-wrap: wrap;
 }
-.subbar-inner .control-label { white-space: nowrap; }
+.subbar-inner .control-label { white-space: nowrap; margin: 0; }
 .case-picker {
-  flex: 0 1 360px;
-  min-width: 260px;
+  flex: 0 0 auto;
+  min-width: 170px;
+  max-width: 240px;
 }
+/* Compact case picker: the closed trigger shows only the cargo name. */
+.case-picker .custom-select-wrapper { min-width: 0; }
+.case-picker .custom-select-trigger { min-height: 32px; padding: 5px 10px; font-size: 13px; border-radius: 10px; }
+.case-picker .custom-select-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.case-picker .custom-select-dropdown { right: auto; min-width: 380px; max-height: 360px; }
+.case-picker .custom-select-item { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; }
+.custom-select-item-title { font-weight: 700; }
+.custom-select-item-detail { font-size: 11.5px; font-weight: 500; color: var(--text-3); }
 .case-dropdown {
   width: 100%;
   min-height: 36px;
@@ -955,8 +964,11 @@ strong { color: var(--text); }
   font-size: 12px;
 }
 .subbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap; }
-.chain-status { font-size: 11px; margin-left: auto; color: var(--tone, var(--text-3)); white-space: nowrap; }
-.chain-status.tone-ok { color: var(--ok); }
+.chain-status {
+  flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%;
+  background: currentColor; color: var(--text-3); cursor: help;
+}
+.chain-status.tone-ok { color: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
 .chain-status.tone-muted { color: var(--text-3); }
 
 	/* ---- Category filter buttons ---- */
@@ -964,7 +976,7 @@ strong { color: var(--text); }
 	.cat-btn {
 	  font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer;
 	  color: var(--text-2); background: var(--panel); border: 1px solid var(--line);
-	  border-radius: 8px; padding: 5px 12px; transition: all 0.16s ease;
+	  border-radius: 8px; padding: 4px 9px; transition: all 0.16s ease;
 	  white-space: nowrap;
 	}
 	.cat-btn:hover { color: var(--text); border-color: #3a4d78; transform: translateY(-1px); }
@@ -986,12 +998,12 @@ strong { color: var(--text); }
 	}
 	.cat-btn.active .cat-count { color: var(--text); background: color-mix(in srgb, var(--accent) 30%, transparent); }
 	.search-box input {
-	  width: 230px; background: var(--bg-inset); border: 1px solid var(--line);
-	  border-radius: 10px; padding: 8px 12px 8px 30px;
+	  width: 210px; background: var(--bg-inset); border: 1px solid var(--line);
+	  border-radius: 10px; padding: 6px 12px 6px 30px;
 	  color: var(--text); font: inherit; font-size: 12.5px;
 	  transition: all 0.18s ease;
 	}
-	.search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px #4f8cff22; width: 280px; }
+	.search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px #4f8cff22; width: 250px; }
 	.search-box input::placeholder { color: var(--text-3); font-size: 11.5px; }
 	.ai-btn {
 	  border-radius: 0 10px 10px 0 !important; padding: 8px 14px !important; font-size: 12px !important;
