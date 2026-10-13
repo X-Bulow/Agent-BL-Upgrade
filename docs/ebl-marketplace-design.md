@@ -1,86 +1,86 @@
-# eBL 淘宝式市场 + AI 智能推荐
+# eBL Taobao-Style Marketplace + AI Smart Recommendations
 
-> **设计目标**：将 AgentBL 的电子提单（eBL）浏览体验从「实验室开关」升级为「淘宝式产品市场」——卡片化展示、多维度筛选、自然语言 AI 推荐，降低投资决策门槛。
+> **Design goal**: upgrade AgentBL's electronic bill of lading (eBL) browsing experience from a "lab toggle" into a "Taobao-style product marketplace" — card-based display, multi-dimensional filtering and natural-language AI recommendations, lowering the barrier to investment decisions.
 >
-> **关联赛题**：[Injective 新星计划 gap analysis](./injective-hackathon-gap-analysis.md) — 方向四（供应链金融产品化）、方向六（前端产品化）、5.3（AI 融资顾问）、5.4（AI 对话界面）
+> **Related challenge**: [Injective Nova Program gap analysis](./injective-hackathon-gap-analysis.md) — Direction 4 (productising supply chain finance), Direction 6 (frontend productisation), 5.3 (AI financing advisor), 5.4 (AI conversational interface)
 >
-> **设计日期**：2026-06-20
+> **Design date**: 2026-06-20
 
 ---
 
-## 一、问题与机会
+## 1. Problem and Opportunity
 
-### 1.1 当前状态
-
-```
-┌─────────────────────────────────────────────────┐
-│  [铜矿·新加坡→上海] [铜矿·上海→汉堡]              │
-│  [原油·新加坡→蔚山] [战争危机]                    │  ← 顶部 pill-button，一次只能看一个
-└─────────────────────────────────────────────────┘
-```
-
-- 仅 4 个硬编码案例，通过顶部 `seg-btn` 切换
-- 用户无法一次性浏览所有可投资的 eBL
-- 没有筛选、排序、对比能力
-- AI 助手（popup-assistant）独立浮窗，与案例浏览脱节
-
-### 1.2 目标体验
+### 1.1 Current State
 
 ```
-┌──────────────────────────────────────────────────┐
-│  🤖 "我希望收益高一些，风险最好在中等"  [搜索]      │  ← AI 自然语言搜索栏
-├──────────────────────────────────────────────────┤
-│  分类: [全部] [铜矿] [原油] [农产品]               │
-│  风险: [🟢 低] [🟡 中] [🟠 高]                    │  ← 快捷筛选标签
-│  排序: 推荐优先 | 收益↑ | 风险↓ | 金额↑             │
-├──────────────────────────────────────────────────┤
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐          │
-│  │ 🚢 铜矿  │ │ 🛢️ 原油  │ │ 🚢 铜矿  │  ...     │  ← 商品卡片网格
-│  │ 收益8.5% │ │ 收益6.2% │ │ 收益12%  │          │
-│  │ 风险🟡中 │ │ 风险🟢低 │ │ 风险🔴高 │          │
-│  │ $0.87/枚 │ │ $0.93/枚 │ │ $0.72/枚 │          │
-│  └──────────┘ └──────────┘ └──────────┘          │
-└──────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  [Copper·Singapore→Shanghai] [Copper·Shanghai→Hamburg] │
+│  [Crude·Singapore→Ulsan] [War Crisis]                  │  ← top pill buttons, only one visible at a time
+└────────────────────────────────────────────────────────┘
+```
+
+- Only 4 hard-coded cases, switched via the top `seg-btn`
+- Users cannot browse all investable eBLs at once
+- No filtering, sorting or comparison
+- The AI assistant (popup-assistant) is a separate floating window, disconnected from case browsing
+
+### 1.2 Target Experience
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  🤖 "I want higher returns, ideally medium risk"  [Search]   │  ← AI natural-language search bar
+├──────────────────────────────────────────────────────────────┤
+│  Category: [All] [Copper] [Crude Oil] [Agricultural]         │
+│  Risk: [🟢 Low] [🟡 Medium] [🟠 High]                        │  ← quick filter tags
+│  Sort: Recommended | Yield↑ | Risk↓ | Amount↑                │
+├──────────────────────────────────────────────────────────────┤
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐                │
+│  │ 🚢 Copper  │ │ 🛢️ Crude   │ │ 🚢 Copper  │  ...           │  ← product card grid
+│  │ Yield 8.5% │ │ Yield 6.2% │ │ Yield 12%  │                │
+│  │ Risk 🟡 Med│ │ Risk 🟢 Low│ │ Risk 🔴 Hi │                │
+│  │ $0.87/unit │ │ $0.93/unit │ │ $0.72/unit │                │
+│  └────────────┘ └────────────┘ └────────────┘                │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 二、功能设计
+## 2. Feature Design
 
-### 2.1 AI 自然语言搜索栏
+### 2.1 AI Natural-Language Search Bar
 
-**交互方式**：
+**Interaction**:
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  🤖  请输入你的投资偏好…                              │  ← 主搜索栏
+│  🤖  Describe your investment preferences…           │  ← main search bar
 │  ─────────────────────────────────────────────────── │
-│  💡 试试这样说：                                      │
-│  · "收益高一点，风险不要太大"                          │
-│  · "只看铜矿的提单"                                   │
-│  · "金额在 200 万以内，风险低的"                       │
-│  · "最近新加坡出发的航线"                              │
+│  💡 Try saying:                                      │
+│  · "Higher returns, but not too much risk"           │
+│  · "Only show copper bills of lading"                │
+│  · "Under $2M, low risk"                             │
+│  · "Recent routes departing Singapore"               │
 └──────────────────────────────────────────────────────┘
 ```
 
-**处理流程**：
+**Processing flow**:
 
 ```
-用户输入 NL 描述
+User enters an NL description
     │
     ▼
 ┌─────────────────────┐
-│ DeepSeek Function   │  ← 复用 popup-assistant.js 的 DeepSeekClient
+│ DeepSeek Function   │  ← reuses the DeepSeekClient from popup-assistant.js
 │ Calling             │
 │                     │
-│ tool: recommendEBL  │  ← 新增工具
+│ tool: recommendEBL  │  ← new tool
 │   preference: "..." │
 └─────────┬───────────┘
           │
           ▼
 ┌─────────────────────┐
-│ 结构化偏好提取       │  AI 从 NL 中提取：
-│                     │  · risk_max: "MEDIUM"
+│ Extract structured  │  AI extracts from the NL:
+│ preferences         │  · risk_max: "MEDIUM"
 │                     │  · yield_min: 5%
 │                     │  · commodity: null
 │                     │  · financing_max: null
@@ -89,121 +89,121 @@
           │
           ▼
 ┌─────────────────────┐
-│ 逐单评分 + 排序      │  对 state.cases 中每单：
-│                     │  1. 调用 /api/pricing/quote
-│                     │  2. 计算「收益/风险比」
-│                     │  3. 按偏好过滤
-│                     │  4. 按分数排序
+│ Score + rank each   │  For each case in state.cases:
+│                     │  1. call /api/pricing/quote
+│                     │  2. compute the "yield/risk ratio"
+│                     │  3. filter by preference
+│                     │  4. sort by score
 └─────────┬───────────┘
           │
           ▼
 ┌─────────────────────┐
-│ 返回 Top N + 理由    │  渲染推荐卡片 + AI 解释文本
-│                     │  "推荐铜矿·新加坡→上海：
-│                     │   收益 8.53%，风险 MEDIUM，
-│                     │   在中等风险中收益最高"
+│ Return Top N + why  │  Render recommendation cards + AI explanation text
+│                     │  "Recommend Copper·Singapore→Shanghai:
+│                     │   yield 8.53%, risk MEDIUM,
+│                     │   highest yield among medium-risk options"
 └─────────────────────┘
 ```
 
-### 2.2 分类筛选栏
+### 2.2 Category Filter Bar
 
-**筛选维度**：
+**Filter dimensions**:
 
-| 筛选器 | 交互形式 | 数据字段 | 示例 |
+| Filter | Interaction | Data field | Example |
 |--------|---------|---------|------|
-| 货物类型 | 标签选择（多选） | `bill_of_lading.cargo` | 铜矿、原油、农产品 |
-| 风险等级 | 彩色标签（多选） | `risk_level` | 🟢LOW 🟡MEDIUM 🟠HIGH 🔴CRITICAL |
-| 航线区域 | 下拉搜索 | `port_of_loading` → `port_of_discharge` | 新加坡出发、到上海 |
-| 收益率范围 | 双滑块 | `implied_gross_yield_bps` | 5% – 12% |
-| 融资金额 | 双滑块 | `financing.requested_cash_usd` | $1M – $5M |
-| 发行价范围 | 双滑块 | `final_issue_price_usd` | $0.60 – $0.95 |
-| 到账速度 | 单选标签 | `payout_speed` | FAST / BALANCED / SAFE |
+| Cargo type | Tag selection (multi-select) | `bill_of_lading.cargo` | Copper, crude oil, agricultural products |
+| Risk level | Coloured tags (multi-select) | `risk_level` | 🟢LOW 🟡MEDIUM 🟠HIGH 🔴CRITICAL |
+| Route region | Searchable dropdown | `port_of_loading` → `port_of_discharge` | Departing Singapore, arriving Shanghai |
+| Yield range | Dual slider | `implied_gross_yield_bps` | 5% – 12% |
+| Financing amount | Dual slider | `financing.requested_cash_usd` | $1M – $5M |
+| Issue price range | Dual slider | `final_issue_price_usd` | $0.60 – $0.95 |
+| Payout speed | Single-select tag | `payout_speed` | FAST / BALANCED / SAFE |
 
-**筛选器状态管理**：
+**Filter state management**:
 
 ```javascript
-// 全局筛选状态
+// Global filter state
 const filterState = {
-  commodity: [],          // 货物类型多选
-  riskLevel: [],          // 风险等级多选
-  routeKeyword: '',       // 航线关键词
-  yieldRange: [0, 15],    // 收益率范围 (%)
-  financingRange: [0, 10000000], // 融资金额范围
-  priceRange: [0, 1],     // 发行价范围
-  payoutSpeed: null,      // 到账速度
-  sortBy: 'recommended',  // 排序方式
-  aiPreference: '',       // AI 自然语言偏好（优先级最高）
+  commodity: [],          // cargo type multi-select
+  riskLevel: [],          // risk level multi-select
+  routeKeyword: '',       // route keyword
+  yieldRange: [0, 15],    // yield range (%)
+  financingRange: [0, 10000000], // financing amount range
+  priceRange: [0, 1],     // issue price range
+  payoutSpeed: null,      // payout speed
+  sortBy: 'recommended',  // sort order
+  aiPreference: '',       // AI natural-language preference (highest priority)
 };
 ```
 
-### 2.3 商品卡片设计
+### 2.3 Product Card Design
 
 ```
-┌─────────────────────────────────────────┐
-│                                         │
-│  🚢 铜矿 · 新加坡 → 上海                 │  ← 标题行
-│  ─────────────────────────────────────── │
-│                                         │
-│  📦 铜阴极 LME Grade A                   │  ← 货物详情
-│     500 MT · EBL-2026-CU-04417          │
-│                                         │
-│  ┌──────────┬──────────┬──────────┐     │
-│  │ 发行价   │ 预期收益  │ 风险等级  │     │  ← 核心指标三列
-│  │ $0.87   │ 8.53%   │ 🟡 MEDIUM│     │
-│  └──────────┴──────────┴──────────┘     │
-│                                         │
-│  💰 融资 $3,300,000 · ⚡ FAST 到账       │  ← 辅助信息
-│                                         │
-│  ⭐ AI: 收益风险比最优                    │  ← AI 推荐标签（如有）
-│                                         │
-│  [ 查看详情 ]    [ ⛓ 一键铸造 ]          │  ← 操作按钮
-│                                         │
-└─────────────────────────────────────────┘
+┌───────────────────────────────────────────────┐
+│                                               │
+│  🚢 Copper · Singapore → Shanghai             │  ← title row
+│  ───────────────────────────────────────────  │
+│                                               │
+│  📦 Copper cathode LME Grade A                │  ← cargo details
+│     500 MT · EBL-2026-CU-04417                │
+│                                               │
+│  ┌──────────┬──────────┬──────────┐           │
+│  │ Price    │ Exp.Yield│ Risk     │           │  ← three core metric columns
+│  │ $0.87    │ 8.53%    │ 🟡 MEDIUM│           │
+│  └──────────┴──────────┴──────────┘           │
+│                                               │
+│  💰 Financing $3,300,000 · ⚡ FAST payout     │  ← supporting info
+│                                               │
+│  ⭐ AI: best yield/risk ratio                 │  ← AI recommendation tag (if any)
+│                                               │
+│  [ View details ]    [ ⛓ One-click mint ]     │  ← action buttons
+│                                               │
+└───────────────────────────────────────────────┘
 ```
 
-**卡片状态变体**：
+**Card state variants**:
 
-| 状态 | 视觉区别 | 触发条件 |
+| State | Visual difference | Trigger |
 |------|---------|---------|
-| 普通 | 默认样式 | 正常可投资 |
-| AI 推荐 | 蓝色边框 + ⭐ 角标 | AI 推荐结果中排名靠前 |
-| 已暂停 | 灰色遮罩 + 暂停图标 | `pricing_action = PAUSE_OFFERING` |
-| 高风险 | 橙色边框 | `risk_level = CRITICAL` |
-| 已售罄 | 半透明 | 认购完成 |
+| Normal | Default style | Normally investable |
+| AI recommended | Blue border + ⭐ corner badge | Ranked near the top of AI recommendation results |
+| Paused | Grey overlay + pause icon | `pricing_action = PAUSE_OFFERING` |
+| High risk | Orange border | `risk_level = CRITICAL` |
+| Sold out | Semi-transparent | Subscription complete |
 
-### 2.4 排序方式
+### 2.4 Sort Options
 
-| 排序选项 | 计算方式 | 适用场景 |
+| Sort option | Calculation | Use case |
 |---------|---------|---------|
-| 🤖 推荐优先 | AI 综合评分（默认） | 用户输入 NL 描述后 |
-| 📈 收益从高到低 | `implied_gross_yield_bps DESC` | 追求高收益 |
-| 🛡️ 风险从低到高 | `risk_score_bps ASC` | 保守型投资者 |
-| 💰 金额从大到小 | `requested_cash_usd DESC` | 大资金偏好 |
-| 🏷️ 发行价从低到高 | `final_issue_price_usd ASC` | 抄底思维 |
-| 📅 最新发布 | `issue_date DESC` | 看新货 |
+| 🤖 Recommended first | AI composite score (default) | After the user enters an NL description |
+| 📈 Yield high to low | `implied_gross_yield_bps DESC` | Seeking high returns |
+| 🛡️ Risk low to high | `risk_score_bps ASC` | Conservative investors |
+| 💰 Amount large to small | `requested_cash_usd DESC` | Preference for large tickets |
+| 🏷️ Issue price low to high | `final_issue_price_usd ASC` | Bargain-hunting mindset |
+| 📅 Newest | `issue_date DESC` | Looking for new listings |
 
 ---
 
-## 三、技术实现
+## 3. Technical Implementation
 
-### 3.1 新增文件
+### 3.1 New Files
 
 ```
 AgentBL/
 ├── public/
-│   ├── market.js          ← 新增：eBL 市场页面主逻辑
-│   ├── market.css          ← 新增：市场页样式（或合入 styles.css）
-│   ├── popup-assistant.js  ← 修改：新增 recommendEBL 工具
-│   └── app.js              ← 修改：新增 View ⓪ 路由 + market 导入
+│   ├── market.js          ← new: main logic for the eBL market page
+│   ├── market.css          ← new: market page styles (or merged into styles.css)
+│   ├── popup-assistant.js  ← modified: add the recommendEBL tool
+│   └── app.js              ← modified: add View ⓪ route + market import
 │
 └── docs/
-    └── ebl-marketplace-design.md  ← 本文档
+    └── ebl-marketplace-design.md  ← this document
 ```
 
-### 3.2 market.js 核心结构
+### 3.2 market.js Core Structure
 
 ```javascript
-// public/market.js — eBL 淘宝式市场
+// public/market.js — eBL Taobao-style marketplace
 
 import { state } from './store.js';
 import { $, el, clear, toast } from './dom.js';
@@ -211,7 +211,7 @@ import * as api from './api.js';
 import * as f from './format.js';
 import { t } from './i18n.js';
 
-// ==================== 筛选状态 ====================
+// ==================== Filter state ====================
 const filter = {
   commodity: [],
   riskLevel: [],
@@ -224,37 +224,37 @@ const filter = {
   aiPreference: '',
 };
 
-// ==================== 数据缓存 ====================
+// ==================== Data cache ====================
 let allQuotes = [];     // { case, quote }[]
 let filteredQuotes = [];
 
-// ==================== 渲染函数 ====================
+// ==================== Render functions ====================
 
-/** 渲染 AI 搜索栏 */
+/** Render the AI search bar */
 function renderSearchBar(container) { /* ... */ }
 
-/** 渲染分类/筛选标签 */
+/** Render category/filter tags */
 function renderFilterBar(container) { /* ... */ }
 
-/** 渲染排序选择器 */
+/** Render the sort selector */
 function renderSortSelector(container) { /* ... */ }
 
-/** 渲染商品卡片网格 */
+/** Render the product card grid */
 function renderCardGrid(container, quotes) { /* ... */ }
 
-/** 渲染单张 eBL 卡片 */
+/** Render a single eBL card */
 function renderCard(container, item, index) { /* ... */ }
 
-/** 渲染 AI 推荐横幅 */
+/** Render the AI recommendation banner */
 function renderAiBanner(container, preference, results) { /* ... */ }
 
-// ==================== 筛选逻辑 ====================
+// ==================== Filter logic ====================
 
-/** 应用全部筛选条件 */
+/** Apply all filter conditions */
 function applyFilters() {
   let result = [...allQuotes];
 
-  // 货物类型筛选
+  // Cargo type filter
   if (filter.commodity.length) {
     result = result.filter(item => {
       const cargo = item.case?.bill_of_lading?.cargo || '';
@@ -262,13 +262,13 @@ function applyFilters() {
     });
   }
 
-  // 风险等级筛选
+  // Risk level filter
   if (filter.riskLevel.length) {
     result = result.filter(item =>
       filter.riskLevel.includes(item.quote?.risk_level));
   }
 
-  // 航线关键词
+  // Route keyword
   if (filter.routeKeyword) {
     const kw = filter.routeKeyword.toLowerCase();
     result = result.filter(item => {
@@ -277,27 +277,27 @@ function applyFilters() {
     });
   }
 
-  // 收益率范围
+  // Yield range
   result = result.filter(item => {
     const y = (item.quote?.implied_gross_yield_bps || 0) / 100;
     return y >= filter.yieldRange[0] && y <= filter.yieldRange[1];
   });
 
-  // 融资金额范围
+  // Financing amount range
   result = result.filter(item => {
     const amt = item.quote?.requested_cash_usd
              || item.quote?.expected_cash_to_exporter_usd || 0;
     return amt >= filter.financingRange[0] && amt <= filter.financingRange[1];
   });
 
-  // 排序
+  // Sort
   result.sort(getSortFn(filter.sortBy));
 
   filteredQuotes = result;
   return result;
 }
 
-/** 获取排序函数 */
+/** Get the sort function */
 function getSortFn(sortBy) {
   switch (sortBy) {
     case 'yield_desc':
@@ -310,7 +310,7 @@ function getSortFn(sortBy) {
       return (a, b) => (a.quote?.final_issue_price_usd || 0) - (b.quote?.final_issue_price_usd || 0);
     case 'recommended':
     default:
-      // 默认按收益风险比排序
+      // Default: sort by yield/risk ratio
       return (a, b) => {
         const scoreA = (a.quote?.implied_gross_yield_bps || 0) / Math.max(a.quote?.risk_score_bps || 1, 1);
         const scoreB = (b.quote?.implied_gross_yield_bps || 0) / Math.max(b.quote?.risk_score_bps || 1, 1);
@@ -319,60 +319,60 @@ function getSortFn(sortBy) {
   }
 }
 
-// ==================== AI 推荐 ====================
+// ==================== AI recommendations ====================
 
-/** 处理 AI 自然语言搜索 */
+/** Handle AI natural-language search */
 async function handleAiSearch(preference) {
   if (!preference.trim()) return;
 
   filter.aiPreference = preference;
 
-  // 方案 A：通过 popup-assistant 的 DeepSeek 客户端
-  // 方案 B：纯前端关键词解析（离线 fallback）
+  // Option A: via the popup-assistant DeepSeek client
+  // Option B: pure frontend keyword parsing (offline fallback)
   const parsed = parsePreferenceOffline(preference);
   applyParsedPreference(parsed);
   refreshMarket();
 
-  // 异步获取 AI 精排
+  // Fetch AI fine-grained ranking asynchronously
   try {
     const aiResults = await callAiRecommend(preference);
     if (aiResults) renderAiBanner($('#ai-banner'), preference, aiResults);
-  } catch { /* AI 不可用时静默回退 */ }
+  } catch { /* fall back silently when AI is unavailable */ }
 }
 
-/** 离线关键词解析（AI 不可用时的 fallback） */
+/** Offline keyword parsing (fallback when AI is unavailable) */
 function parsePreferenceOffline(text) {
   const result = {};
 
-  // 风险偏好
-  if (/低风险|风险低|风险不要大|稳健|保守/.test(text)) result.riskMax = 'LOW';
-  else if (/中等风险|风险中等|风险不是那么高/.test(text)) result.riskMax = 'MEDIUM';
-  else if (/高风险|风险高|激进/.test(text)) result.riskMax = 'HIGH';
+  // Risk preference
+  if (/low risk|low-risk|not too (?:much )?risk|steady|conservative/i.test(text)) result.riskMax = 'LOW';
+  else if (/medium risk|moderate risk|not that risky/i.test(text)) result.riskMax = 'MEDIUM';
+  else if (/high risk|high-risk|aggressive/i.test(text)) result.riskMax = 'HIGH';
 
-  // 收益偏好
-  const yieldMatch = text.match(/收益[高>]*(\d+)/);
+  // Yield preference
+  const yieldMatch = text.match(/(?:yield|return)\s*(?:above|over|>)?\s*(\d+)/i);
   if (yieldMatch) result.yieldMin = parseInt(yieldMatch[1]);
-  else if (/收益高|高收益|高回报/.test(text)) result.yieldMin = 7;
+  else if (/high(?:er)? (?:yield|return)/i.test(text)) result.yieldMin = 7;
 
-  // 货物类型
-  if (/铜/.test(text)) result.commodity = '铜';
-  else if (/原油|石油/.test(text)) result.commodity = '原油';
-  else if (/农产品|大豆|小麦/.test(text)) result.commodity = '农产品';
+  // Cargo type
+  if (/copper/i.test(text)) result.commodity = 'copper';
+  else if (/crude|oil/i.test(text)) result.commodity = 'crude oil';
+  else if (/agri|soybean|wheat/i.test(text)) result.commodity = 'agricultural';
 
-  // 金额限制
-  const amtMatch = text.match(/(\d+)\s*万/);
-  if (amtMatch) result.financingMax = parseInt(amtMatch[1]) * 10000;
+  // Amount limit
+  const amtMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:m\b|million)/i);
+  if (amtMatch) result.financingMax = parseFloat(amtMatch[1]) * 1_000_000;
 
-  // 排序
-  if (/收益|回报/.test(text) && !/风险/.test(text)) result.sortBy = 'yield_desc';
-  else if (/安全|保守|稳健/.test(text)) result.sortBy = 'risk_asc';
+  // Sort
+  if (/yield|return/i.test(text) && !/risk/i.test(text)) result.sortBy = 'yield_desc';
+  else if (/safe|conservative|steady/i.test(text)) result.sortBy = 'risk_asc';
 
   return result;
 }
 
-// ==================== 市场初始化 ====================
+// ==================== Market initialisation ====================
 
-/** 加载所有 eBL 的定价数据 */
+/** Load pricing data for all eBLs */
 async function loadAllQuotes() {
   if (!state.cases?.length) {
     state.cases = await api.getCases();
@@ -394,59 +394,59 @@ async function loadAllQuotes() {
   return allQuotes;
 }
 
-/** 刷新市场视图 */
+/** Refresh the market view */
 function refreshMarket() {
   const results = applyFilters();
   renderCardGrid($('#market-grid'), results);
   updateFilterCounts();
 }
 
-/** 初始化市场页 */
+/** Initialise the market page */
 export async function initMarket() {
-  // TODO: 渲染页面骨架
+  // TODO: render the page skeleton
 }
 ```
 
-### 3.3 popup-assistant.js 扩展
+### 3.3 popup-assistant.js Extension
 
-新增 `recommendEBL` 工具和对应用执行器：
+Add the `recommendEBL` tool and its corresponding executor:
 
 ```javascript
-// TOOLS 数组中追加
+// Append to the TOOLS array
 {
   name: 'recommendEBL',
-  description: '根据用户的投资偏好（收益、风险、货物类型、航线、金额等），从可用 eBL 提单中智能推荐最匹配的。返回排序过滤后的推荐列表和每个提单的关键指标。',
+  description: 'Based on the user\'s investment preferences (yield, risk, cargo type, route, amount, etc.), intelligently recommend the best-matching eBLs from the available bills of lading. Returns a sorted and filtered recommendation list with the key metrics of each bill of lading.',
   parameters: {
     type: 'object',
     properties: {
       preference: {
         type: 'string',
-        description: '用户的自然语言偏好描述'
+        description: 'The user\'s natural-language preference description'
       },
       risk_max: {
         type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
-        description: '可接受最高风险等级'
+        description: 'Highest acceptable risk level'
       },
       yield_min: {
         type: 'number',
-        description: '最低预期收益率 (bps)，例如 500 表示 5%'
+        description: 'Minimum expected yield (bps), e.g. 500 means 5%'
       },
       commodity: {
         type: 'string',
-        description: '货物类型关键词'
+        description: 'Cargo type keyword'
       },
       financing_max: {
         type: 'number',
-        description: '最高融资金额 (USD)'
+        description: 'Maximum financing amount (USD)'
       },
       sort_by: {
         type: 'string',
         enum: ['yield_desc', 'risk_asc', 'score'],
-        description: '排序方式'
+        description: 'Sort order'
       },
       max_results: {
         type: 'number',
-        description: '最多返回结果数，默认 3'
+        description: 'Maximum number of results to return, default 3'
       }
     },
     required: ['preference']
@@ -455,12 +455,12 @@ export async function initMarket() {
 ```
 
 ```javascript
-// toolExecutors 中新增
+// Add to toolExecutors
 async recommendEBL(params) {
   if (!state.cases?.length) state.cases = await api.getCases();
-  if (!state.cases?.length) return '暂无可用提单。';
+  if (!state.cases?.length) return 'No bills of lading available yet.';
 
-  // 逐单获取定价
+  // Fetch pricing for each case
   const scored = (await Promise.all(state.cases.map(async (c) => {
     try {
       const comp = await api.compareSpeeds(c.case);
@@ -480,7 +480,7 @@ async recommendEBL(params) {
     } catch { return null; }
   }))).filter(Boolean);
 
-  // 筛选
+  // Filter
   let results = scored;
   const riskOrder = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
   if (params.risk_max) results = results.filter(r => riskOrder[r.riskLevel] <= riskOrder[params.risk_max]);
@@ -493,32 +493,32 @@ async recommendEBL(params) {
   }
   if (params.financing_max) results = results.filter(r => r.financingUsd <= params.financing_max);
 
-  // 排序
+  // Sort
   if (params.sort_by === 'yield_desc') results.sort((a, b) => b.yieldBps - a.yieldBps);
   else if (params.sort_by === 'risk_asc') results.sort((a, b) => a.riskBps - b.riskBps);
   else results.sort((a, b) => b.score - a.score);
 
   const top = results.slice(0, params.max_results || 3);
-  if (!top.length) return '没有找到符合你条件的提单，试试放宽筛选条件？';
+  if (!top.length) return 'No bills of lading match your criteria. Try relaxing the filters?';
 
   return top.map((r, i) => {
-    const stars = i === 0 ? ' ⭐ 首选推荐' : '';
+    const stars = i === 0 ? ' ⭐ Top pick' : '';
     return `${i + 1}. **${r.case.label}**${stars}
-   - 发行价: $${Number(r.price).toFixed(2)} | 收益率: ${(r.yieldBps / 100).toFixed(2)}%
-   - 风险: ${r.riskLevel} (${r.riskBps} bps) | 收益风险比: ${r.score.toFixed(2)}
-   - 路线: ${r.case.route} | 融资金额: $${(r.financingUsd / 1e6).toFixed(2)}M`;
+   - Issue price: $${Number(r.price).toFixed(2)} | Yield: ${(r.yieldBps / 100).toFixed(2)}%
+   - Risk: ${r.riskLevel} (${r.riskBps} bps) | Yield/risk ratio: ${r.score.toFixed(2)}
+   - Route: ${r.case.route} | Financing amount: $${(r.financingUsd / 1e6).toFixed(2)}M`;
   }).join('\n\n');
 }
 ```
 
-### 3.4 app.js 路由扩展
+### 3.4 app.js Routing Extension
 
 ```javascript
-// app.js 新增 View ⓪ 路由
+// app.js: add the View ⓪ route
 
 import { initMarket, renderMarket, refreshMarket } from './market.js';
 
-// setView() 中追加
+// Append in setView()
 function setView(name) {
   state.view = name;
   // ... existing logic ...
@@ -531,91 +531,91 @@ function setView(name) {
   // ...
 }
 
-// boot() 中追加
+// Append in boot()
 async function boot() {
   // ... existing ...
-  initMarket();     // 预加载市场数据
+  initMarket();     // preload market data
 }
 ```
 
-### 3.5 index.html 新增 View
+### 3.5 New View in index.html
 
 ```html
-<!-- View ⓪ — eBL 市场（新增） -->
+<!-- View ⓪ — eBL Market (new) -->
 <section class="view" id="view-market">
-  <!-- AI 搜索横幅 -->
+  <!-- AI search banner -->
   <section class="panel market-search-panel">
     <div class="ai-search-bar">
       <span class="ai-search-icon">🤖</span>
       <input id="ai-search-input"
              class="ai-search-input"
              type="text"
-             placeholder="用自然语言描述你的投资偏好…例如：收益高一些、风险中等"
+             placeholder="Describe your investment preferences in plain language… e.g. higher returns, medium risk"
              data-i18n-ph="ai_search_ph" />
-      <button id="ai-search-btn" class="btn ai-search-btn">AI 推荐</button>
+      <button id="ai-search-btn" class="btn ai-search-btn">AI Recommend</button>
     </div>
     <div class="ai-search-hints" id="ai-hints">
-      <span class="hint-label">💡 试试：</span>
-      <button class="hint-chip">收益高但风险可控</button>
-      <button class="hint-chip">只看铜矿提单</button>
-      <button class="hint-chip">200万以内低风险</button>
+      <span class="hint-label">💡 Try:</span>
+      <button class="hint-chip">High returns with controlled risk</button>
+      <button class="hint-chip">Only copper bills of lading</button>
+      <button class="hint-chip">Under $2M, low risk</button>
     </div>
     <div id="ai-banner" class="ai-banner" hidden></div>
   </section>
 
-  <!-- 筛选栏 -->
+  <!-- Filter bar -->
   <section class="panel filter-panel">
     <div class="filter-row">
-      <!-- 货物类型 -->
+      <!-- Cargo type -->
       <div class="filter-group">
-        <label>货物类型</label>
+        <label>Cargo type</label>
         <div id="filter-commodity" class="chip-group"></div>
       </div>
-      <!-- 风险等级 -->
+      <!-- Risk level -->
       <div class="filter-group">
-        <label>风险等级</label>
+        <label>Risk level</label>
         <div id="filter-risk" class="chip-group"></div>
       </div>
-      <!-- 到账速度 -->
+      <!-- Payout speed -->
       <div class="filter-group">
-        <label>到账速度</label>
+        <label>Payout speed</label>
         <div id="filter-speed" class="chip-group"></div>
       </div>
-      <!-- 排序 -->
+      <!-- Sort -->
       <div class="filter-group">
-        <label>排序</label>
+        <label>Sort</label>
         <select id="filter-sort" class="filter-select"></select>
       </div>
     </div>
-    <!-- 高级筛选（可折叠） -->
+    <!-- Advanced filters (collapsible) -->
     <div class="filter-advanced" id="filter-advanced" hidden>
       <div class="range-group">
-        <label>收益率范围</label>
+        <label>Yield range</label>
         <input type="range" id="range-yield-min" min="0" max="15" value="0" />
         <input type="range" id="range-yield-max" min="0" max="15" value="15" />
         <span id="range-yield-label">0% – 15%</span>
       </div>
       <div class="range-group">
-        <label>融资金额范围</label>
+        <label>Financing amount range</label>
         <input type="range" id="range-financing-min" min="0" max="10" step="0.5" value="0" />
         <input type="range" id="range-financing-max" min="0" max="10" step="0.5" value="10" />
         <span id="range-financing-label">$0M – $10M</span>
       </div>
     </div>
-    <button id="filter-toggle" class="btn ghost sm">高级筛选 ▾</button>
+    <button id="filter-toggle" class="btn ghost sm">Advanced filters ▾</button>
   </section>
 
-  <!-- 卡片网格 -->
+  <!-- Card grid -->
   <section class="panel market-grid-panel">
     <div class="market-stats">
-      <span id="market-count">共 0 个提单</span>
-      <button id="market-reset" class="btn ghost sm">清除筛选</button>
+      <span id="market-count">0 bills of lading</span>
+      <button id="market-reset" class="btn ghost sm">Clear filters</button>
     </div>
     <div id="market-grid" class="market-grid"></div>
     <div id="market-empty" class="market-empty" hidden>
       <span class="empty-icon">📭</span>
-      <p>没有找到符合条件提单</p>
-      <button class="btn ghost" onclick="resetAllFilters()">清除所有筛选</button>
+      <p>No bills of lading match the criteria</p>
+      <button class="btn ghost" onclick="resetAllFilters()">Clear all filters</button>
     </div>
   </section>
 </section>
@@ -623,93 +623,93 @@ async function boot() {
 
 ---
 
-## 四、AI 推荐 Prompt 设计
+## 4. AI Recommendation Prompt Design
 
-### 4.1 System Prompt 扩展
+### 4.1 System Prompt Extension
 
-在 popup-assistant.js 的 `SYSTEM_PROMPT` 中追加市场推荐相关指令：
+Append market-recommendation instructions to `SYSTEM_PROMPT` in popup-assistant.js:
 
 ```
-## eBL 市场推荐能力
-你可以调用 recommendEBL 工具来为用户推荐合适的提单投资标的。
-推荐时应：
-- 理解用户的偏好表述（收益、风险、货物、金额等）
-- 优先推荐收益风险比最优的提单
-- 给出明确的推荐理由（为什么这个提单适合用户）
-- 如果用户没有明确偏好，默认推荐风险 MEDIUM 以下、收益 5% 以上的提单
-- 推荐时突出关键指标：发行价、收益率、风险等级、融资金额
+## eBL market recommendation capability
+You can call the recommendEBL tool to recommend suitable bill of lading investments to the user.
+When recommending, you should:
+- Understand how the user expresses preferences (yield, risk, cargo, amount, etc.)
+- Prioritise bills of lading with the best yield/risk ratio
+- Give a clear reason for the recommendation (why this bill of lading suits the user)
+- If the user has no explicit preference, default to recommending bills of lading with risk at or below MEDIUM and yield above 5%
+- Highlight the key metrics when recommending: issue price, yield, risk level, financing amount
 ```
 
-### 4.2 推荐理由生成示例
+### 4.2 Example Recommendation Rationales
 
-| 用户输入 | AI 解析 | 推荐结果 |
+| User input | AI parse | Recommendation |
 |---------|--------|---------|
-| "收益高一些，风险别太大" | risk_max=MEDIUM, sort=score | 铜矿·新加坡→上海（收益8.5%/风险MEDIUM/收益风险比最高） |
-| "我就看铜矿的" | commodity=铜矿 | 两个铜矿提单，按收益排序 |
-| "200万以内，安全的" | financing_max=2M, risk_max=LOW | 过滤后推荐原油·新加坡→蔚山 |
-| "性价比最高的" | sort=score（默认） | 综合排序 Top 3 |
+| "Somewhat higher returns, not too much risk" | risk_max=MEDIUM, sort=score | Copper·Singapore→Shanghai (yield 8.5% / risk MEDIUM / highest yield-to-risk ratio) |
+| "I only want copper" | commodity=copper | Two copper bills of lading, sorted by yield |
+| "Under $2M, something safe" | financing_max=2M, risk_max=LOW | After filtering, recommend Crude·Singapore→Ulsan |
+| "Best value for money" | sort=score (default) | Composite ranking Top 3 |
 
 ---
 
-## 五、实现计划
+## 5. Implementation Plan
 
-### 5.1 分步开发
+### 5.1 Step-by-Step Development
 
-| 步骤 | 文件 | 内容 | 预估 |
+| Step | File | Content | Estimate |
 |------|------|------|------|
-| **Step 1** | `market.js` | 市场页面骨架：卡片网格 + 基础筛选 + 排序 | 半天 |
-| **Step 2** | `styles.css` | 卡片样式 + 筛选栏样式 + AI 搜索栏 | 半天 |
-| **Step 3** | `app.js` + `index.html` | View ⓪ 路由 + HTML 结构 + 导航栏新增入口 | 半天 |
-| **Step 4** | `popup-assistant.js` | 新增 `recommendEBL` 工具 + 执行器 + Prompt | 1 天 |
-| **Step 5** | `market.js` | AI 搜索联动：输入→AI解析→筛选→排序→渲染 | 半天 |
-| **Step 6** | `i18n.js` | 市场页双语文案 | 半天 |
+| **Step 1** | `market.js` | Market page skeleton: card grid + basic filters + sorting | Half a day |
+| **Step 2** | `styles.css` | Card styles + filter bar styles + AI search bar | Half a day |
+| **Step 3** | `app.js` + `index.html` | View ⓪ route + HTML structure + new entry in the nav bar | Half a day |
+| **Step 4** | `popup-assistant.js` | Add the `recommendEBL` tool + executor + prompt | 1 day |
+| **Step 5** | `market.js` | AI search wiring: input → AI parse → filter → sort → render | Half a day |
+| **Step 6** | `i18n.js` | Bilingual copy for the market page | Half a day |
 
-**总计：约 2–3 天**
+**Total: about 2–3 days**
 
-### 5.2 与现有功能的关系
+### 5.2 Relationship with Existing Features
 
 ```
-                   ┌────────────────────────┐
-                   │     View ⓪ eBL 市场     │  ← 新增：浏览 + 筛选 + AI 推荐
-                   └──────────┬─────────────┘
-                              │ 点击「查看详情」
-                              ▼
-                   ┌────────────────────────┐
-                   │  View ① 提单上链·铸造    │  ← 已有：详情 + 定价 + 铸造
-                   └──────────┬─────────────┘
-                              │ 点击「航运追踪」
-                              ▼
-                   ┌────────────────────────┐
-                   │ View ② 航运追踪·实时定价 │  ← 已有：在途事件 + 重定价
-                   └────────────────────────┘
+                   ┌──────────────────────────────┐
+                   │      View ⓪ eBL Market       │  ← new: browse + filter + AI recommend
+                   └──────────────┬───────────────┘
+                                  │ click "View details"
+                                  ▼
+                   ┌──────────────────────────────┐
+                   │  View ① Pledge eBL · Mint    │  ← existing: details + pricing + minting
+                   └──────────────┬───────────────┘
+                                  │ click "Voyage tracking"
+                                  ▼
+                   ┌──────────────────────────────┐
+                   │ View ② Voyage · Live Pricing │  ← existing: in-transit events + repricing
+                   └──────────────────────────────┘
 
         ┌──────────────────────────────────────┐
-        │      popup-assistant.js              │  ← 已有 + 扩展
+        │      popup-assistant.js              │  ← existing + extended
         │  · getCases / selectCase / ...       │
-        │  · recommendEBL  ← 新增              │
+        │  · recommendEBL  ← new               │
         └──────────────────────────────────────┘
 ```
 
 ---
 
-## 六、与 Injective 赛题的契合点
+## 6. Fit with the Injective Challenge
 
-| 赛题方向 | 本项目直接贡献 |
+| Challenge direction | Direct contribution of this project |
 |----------|---------------|
-| **方向四 · 4.1 多参与方角色** | eBL 市场天然服务「投资者」角色，展示所有可投标的 |
-| **方向四 · 4.2 融资产品矩阵** | 每个 eBL 卡片 = 一个产品，卡片网格 = 产品货架 |
-| **方向六 · 6.1 新增页面** | View ⓪「eBL 市场」入口页，可直接作为 demo 首页 |
-| **5.3 AI 融资顾问** | NL→结构化偏好→筛选排序→推荐理由 全链路 |
-| **5.4 AI 对话界面** | AI 搜索栏嵌入市场页，上下文感知当前浏览 |
-| **方向二 · 自主 AI Agent** | 未来可扩展为 Agent 自动推荐 + 定期推送 |
+| **Direction 4 · 4.1 Multi-party roles** | The eBL market naturally serves the "investor" role, showing every investable asset |
+| **Direction 4 · 4.2 Financing product matrix** | Each eBL card = one product; the card grid = the product shelf |
+| **Direction 6 · 6.1 New pages** | View ⓪ "eBL Market" entry page, usable directly as the demo home page |
+| **5.3 AI financing advisor** | NL → structured preferences → filter and sort → recommendation rationale, end to end |
+| **5.4 AI conversational interface** | AI search bar embedded in the market page, aware of what is currently being browsed |
+| **Direction 2 · Autonomous AI Agent** | Can later be extended to automatic Agent recommendations + periodic push notifications |
 
 ---
 
-## 七、后续扩展方向
+## 7. Future Extensions
 
-1. **用户个性化**：记录用户历史浏览/投资行为，推荐更精准
-2. **对比模式**：选中 2-3 个提单并排对比关键指标
-3. **价格走势图**：卡片内嵌入近期发行价曲线
-4. **订阅通知**：符合条件的新 eBL 上线时推送
-5. **社交证明**："已有 N 位投资者关注"热度标签
-6. **AR 展示**：扫描提单二维码看到货物实时位置（配合 View ② 航运地图）
+1. **Personalisation**: record users' browsing/investment history for more accurate recommendations
+2. **Comparison mode**: select 2-3 bills of lading and compare key metrics side by side
+3. **Price trend chart**: embed a recent issue-price curve in each card
+4. **Subscription alerts**: push a notification when a new eBL matching the criteria is listed
+5. **Social proof**: a "N investors are watching" popularity tag
+6. **AR display**: scan the bill of lading QR code to see the cargo's real-time location (works with the View ② shipping map)

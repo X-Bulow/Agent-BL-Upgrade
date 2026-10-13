@@ -1,535 +1,535 @@
-# AgentBL 增强方案：物理AI · 信任网络 · 保险机制 · 零知识担保
+# AgentBL Enhancement Proposal: Physical AI · Trust Network · Insurance Mechanism · Zero-Knowledge Guarantees
 
-> **核心洞察：在电子提单融资中，最稀缺的资源不是资金，而是信任。**
+> **Core insight: in electronic bill of lading financing, the scarcest resource is not capital, but trust.**
 >
-> 本文档从四个维度探讨如何将 AgentBL 从一个"AI 定价的 RWA 发行协议"，升级为一个"多层信任叠加的贸易融资可信基础设施"。
+> This document explores, along four dimensions, how to upgrade AgentBL from an "AI-priced RWA issuance protocol" into a "trusted trade finance infrastructure with multiple stacked layers of trust".
 
 ---
 
-## 目录
+## Table of Contents
 
-1. [问题回顾：信任为什么稀缺](#1-问题回顾信任为什么稀缺)
-2. [增强维度一：物理AI —— 从"纸面真实"到"物理真实"](#2-增强维度一物理ai--从纸面真实到物理真实)
-3. [增强维度二：AI 误差保险 —— 技术容错的经济兜底](#3-增强维度二ai-误差保险--技术容错的经济兜底)
-4. [增强维度三：ZK + 担保网络 —— 零知识证明驱动的去中心化信任](#4-增强维度三zk--担保网络--零知识证明驱动的去中心化信任)
-5. [增强维度四：信任稀缺性的经济学 —— 为什么"被担保"本身就是可定价的资产](#5-增强维度四信任稀缺性的经济学--为什么被担保本身就是可定价的资产)
-6. [整合架构：四层信任叠加模型](#6-整合架构四层信任叠加模型)
-7. [落地路径与优先级](#7-落地路径与优先级)
+1. [Problem Recap: Why Trust Is Scarce](#1-problem-recap-why-trust-is-scarce)
+2. [Enhancement 1: Physical AI — From "Paper Truth" to "Physical Truth"](#2-enhancement-1-physical-ai--from-paper-truth-to-physical-truth)
+3. [Enhancement 2: AI Error Insurance — An Economic Backstop for Technical Fallibility](#3-enhancement-2-ai-error-insurance--an-economic-backstop-for-technical-fallibility)
+4. [Enhancement 3: ZK + Guarantee Network — Decentralised Trust Powered by Zero-Knowledge Proofs](#4-enhancement-3-zk--guarantee-network--decentralised-trust-powered-by-zero-knowledge-proofs)
+5. [Enhancement 4: The Economics of Trust Scarcity — Why "Being Guaranteed" Is Itself a Priceable Asset](#5-enhancement-4-the-economics-of-trust-scarcity--why-being-guaranteed-is-itself-a-priceable-asset)
+6. [Integrated Architecture: A Four-Layer Stacked Trust Model](#6-integrated-architecture-a-four-layer-stacked-trust-model)
+7. [Rollout Path and Priorities](#7-rollout-path-and-priorities)
 
 ---
 
-## 1. 问题回顾：信任为什么稀缺
+## 1. Problem Recap: Why Trust Is Scarce
 
-### 1.1 当前 AgentBL 的信任模型
+### 1.1 AgentBL's current trust model
 
-AgentBL 现阶段建立了一条"AI 验证 → 链上存证"的单向信任链：
+At this stage AgentBL has built a one-way trust chain of "AI verification → on-chain attestation":
 
 ```
-纸质/电子单据 → AI 审单反欺诈 → AI 风险定价 → RiskPricingOracle 上链 → 投资者认购
+Paper/electronic documents → AI document review & anti-fraud → AI risk pricing → RiskPricingOracle on-chain → investor subscription
 ```
 
-这条链路解决了**单据级别**的可信问题——eBL、发票、保险单是否自洽。但它仍有一个根本局限：**AI 看到的是"纸面真实"，不是"物理真实"。**
+This chain solves trust at the **document level**: whether the eBL, invoice and insurance policy are consistent with one another. But it still has a fundamental limitation: **what the AI sees is "paper truth", not "physical truth".**
 
-### 1.2 信任的层次
+### 1.2 Layers of trust
 
-在贸易融资场景中，信任至少分为四个层次：
+In trade finance, trust has at least four layers:
 
-| 层次 | 验证内容 | 当前 AgentBL | 差距 |
+| Layer | What is verified | Current AgentBL | Gap |
 |------|---------|-------------|------|
-| **L1 单据自洽** | eBL/发票/保险三单是否一致 | ✅ 已实现 | — |
-| **L2 物理真实** | 货物是否真的在船上、位置是否对、状态是否完好 | ❌ 缺失 | 单据可能造假，AI 无从判断 |
-| **L3 历史信用** | 出口商/进口商过去是否有违约、这条船是否可靠 | ❌ 缺失 | 新进入者"无信用可查" |
-| **L4 社会担保** | 有没有可信第三方为这笔交易背书 | ❌ 缺失 | 纯算法没有"人情"维度的信任 |
+| **L1 Document consistency** | Whether the eBL, invoice and insurance policy agree | ✅ Implemented | — |
+| **L2 Physical truth** | Whether the cargo is really on the ship, in the right place, and in good condition | ❌ Missing | Documents can be forged; the AI has no way to tell |
+| **L3 Credit history** | Whether the exporter/importer has defaulted before, and whether this vessel is reliable | ❌ Missing | New entrants have "no credit to check" |
+| **L4 Social guarantee** | Whether a trusted third party vouches for this deal | ❌ Missing | A pure algorithm lacks the "relationship" dimension of trust |
 
-**当 L2-L4 全部缺失时，AI 定价本质上是在"盲猜"——它只能假设单据是真的、货物是真实存在的、交易方是诚实的。** 这正是今天全球贸易融资 $2.5 万亿缺口的深层原因。
+**When L2–L4 are all missing, AI pricing is essentially "guessing blind": it can only assume the documents are genuine, the cargo really exists and the counterparties are honest.** This is the deeper reason behind today's $2.5 trillion global trade finance gap.
 
 ---
 
-## 2. 增强维度一：物理AI —— 从"纸面真实"到"物理真实"
+## 2. Enhancement 1: Physical AI — From "Paper Truth" to "Physical Truth"
 
-### 2.1 核心概念
+### 2.1 Core concept
 
-> **物理AI（Physical AI）** 指接入真实世界的物理传感器、监控设备和通信网络，让 AI 不仅能"读单据"，还能"看实物"。
+> **Physical AI** means connecting to real-world physical sensors, monitoring equipment and communication networks, so the AI can not only "read documents" but also "see the goods".
 
-### 2.2 为什么物理AI 对 AgentBL 至关重要
+### 2.2 Why Physical AI is critical to AgentBL
 
-当前 AI 审单的盲区：
+Blind spots of today's AI document review:
 
-- **货物真实存在性**：AI 验了三张单据的一致性，但如果整套单据都是伪造的，AI 无法察觉。
-- **货物途中状态**：集装箱是否被打开过？温度是否超过阈值（生鲜/化学品）？是否偏离了预定航线？
-- **虚假定位信号**：GPS 数据可以被伪造。一个没有物理冗余验证的 GPS 报告，和一张假发票没有本质区别。
+- **Whether the cargo actually exists**: the AI checks the consistency of three documents, but if the entire document set is forged, the AI cannot detect it.
+- **Cargo condition in transit**: has the container been opened? Has the temperature exceeded a threshold (fresh produce / chemicals)? Has the vessel deviated from its planned route?
+- **Spoofed location signals**: GPS data can be faked. A GPS report with no physical redundancy check is essentially no different from a fake invoice.
 
-物理AI 解决的是**"单据背后的物理世界是否真实"**的问题。
+Physical AI answers the question of **"whether the physical world behind the documents is real"**.
 
-### 2.3 具体实现路径
+### 2.3 Concrete implementation path
 
-#### 层级一：基础IoT接入（近期可行）
-
-```
-货物级传感器（温度/湿度/震动/光线）
-   → IoT 网关（船上/港口）
-   → 卫星/5G 回传
-   → AgentBL 物理AI 模块（物理数据校验层）
-   → 与 eBL 声明的货物类型、运输条件交叉比对
-   → 异常信号 → 风险加码 or 暂停发行
-```
-
-**可接入的现有基础设施**：
-- **马士基 Remote Container Management (RCM)**：已部署在 38 万+ 冷藏集装箱上，提供实时温度、湿度、CO₂ 数据
-- **Traxens / Orbcomm**：集装箱追踪设备，监测位置、震动、开门事件
-- **星链海事版（Starlink Maritime）**：为远洋船舶提供宽带连接，使实时视频/传感器回传成为可能
-
-#### 层级二：物理层交叉验证（中期）
-
-**关键创新：用多源物理信号交叉验证，而非信任单一传感器。**
+#### Tier 1: basic IoT integration (feasible in the near term)
 
 ```
-GPS 定位 ← 交叉验证 → AIS 船舶自动识别系统 ← 交叉验证 → 星链卫星信号时间戳
-     ↓                        ↓                              ↓
-  位置异常检测              船舶身份校验                  信号防欺骗
+Cargo-level sensors (temperature/humidity/vibration/light)
+   → IoT gateway (on board / at port)
+   → Satellite/5G backhaul
+   → AgentBL Physical AI module (physical-data validation layer)
+   → Cross-check against the cargo type and transport conditions declared in the eBL
+   → Anomaly signal → raise the risk premium or pause issuance
 ```
 
-- **AIS 数据**：已公开可用，可以验证"声称在船上的货物"对应的船舶是否真的在那个位置
-- **卫星图像**：港口/航道的商业卫星图像可以验证"船是否真的装了货"
-- **物理不可克隆函数（PUF）**：给集装箱加装基于芯片 PUF 的电子封条，开箱即留下不可逆的物理证据
+**Existing infrastructure we can connect to**:
+- **Maersk Remote Container Management (RCM)**: deployed on 380,000+ refrigerated containers, providing real-time temperature, humidity and CO₂ data
+- **Traxens / Orbcomm**: container tracking devices monitoring location, vibration and door-opening events
+- **Starlink Maritime**: broadband connectivity for ocean-going vessels, making real-time video/sensor backhaul possible
 
-#### 层级三：AI 多模态物理感知（远期）
+#### Tier 2: physical-layer cross-validation (medium term)
+
+**Key innovation: cross-validate using multiple physical signal sources instead of trusting any single sensor.**
 
 ```
-监控摄像头（船载/港口）→ 计算机视觉识别货物装卸
-声学传感器 → 检测集装箱异常撞击
-气象传感器 → 验证"台风导致延误"是否属实
+GPS position ← cross-check → AIS (Automatic Identification System) ← cross-check → Starlink satellite signal timestamp
+     ↓                              ↓                                             ↓
+Position anomaly detection     Vessel identity check                        Anti-spoofing
 ```
 
-### 2.4 物理AI 对定价引擎的增强
+- **AIS data**: already publicly available; can verify whether the vessel carrying the "cargo claimed to be on board" is really at that location
+- **Satellite imagery**: commercial satellite images of ports/shipping lanes can verify "whether the ship was really loaded"
+- **Physically Unclonable Functions (PUF)**: fit containers with chip-based PUF electronic seals, so opening the container leaves irreversible physical evidence
 
-在 `PricingQuote` schema 中新增**物理置信度维度**：
+#### Tier 3: multimodal AI physical perception (long term)
+
+```
+Surveillance cameras (on board / at port) → computer vision recognises cargo loading and unloading
+Acoustic sensors → detect abnormal impacts on containers
+Weather sensors → verify whether "typhoon-caused delays" are genuine
+```
+
+### 2.4 How Physical AI enhances the pricing engine
+
+Add a **physical confidence dimension** to the `PricingQuote` schema:
 
 ```typescript
-// 新增字段
+// New field
 type PhysicalConfidence = {
   source_level: 'NONE' | 'DOCUMENT_ONLY' | 'GPS_TRACKED' | 'MULTI_SENSOR' | 'FULL_STACK';
-  gps_corroborated: boolean;         // GPS 是否与 AIS 交叉验证
-  sensor_data_consistent: boolean;   // 传感器数据是否与货物声明一致
-  container_seal_intact: boolean;    // 电子封条是否完好
-  anomaly_events: {                  // 物理异常事件列表
+  gps_corroborated: boolean;         // Whether GPS is cross-validated against AIS
+  sensor_data_consistent: boolean;   // Whether sensor data matches the cargo declaration
+  container_seal_intact: boolean;    // Whether the electronic seal is intact
+  anomaly_events: {                  // List of physical anomaly events
     type: 'ROUTE_DEVIATION' | 'TEMPERATURE_EXCURSION' | 'SHOCK_DETECTED' | 'SEAL_BROKEN';
     timestamp: string;
     severity: 'info' | 'warning' | 'critical';
   }[];
-  confidence_score: number;          // 0-1，综合物理置信度
+  confidence_score: number;          // 0-1, overall physical confidence
 };
 ```
 
-**对定价的影响**：
+**Impact on pricing**:
 
-| 物理数据丰富度 | 风险折扣调整 | 投资者信心 |
+| Richness of physical data | Risk discount adjustment | Investor confidence |
 |---------------|-------------|-----------|
-| `NONE`（仅单据） | 基准 | 低 |
-| `GPS_TRACKED` | -50bps | 中 |
-| `MULTI_SENSOR` | -120bps | 高 |
-| `FULL_STACK` | -180bps | 很高 |
+| `NONE` (documents only) | Baseline | Low |
+| `GPS_TRACKED` | -50bps | Medium |
+| `MULTI_SENSOR` | -120bps | High |
+| `FULL_STACK` | -180bps | Very high |
 
-> **直觉**：物理数据越丰富，信息不对称越低，AI 定价的不确定性越小，风险折扣可以更低——出口商融资成本更便宜。
+> **Intuition**: the richer the physical data, the lower the information asymmetry and the smaller the uncertainty in AI pricing, so the risk discount can be lower and financing becomes cheaper for the exporter.
 
-### 2.5 促进基础设施建设的正向飞轮
+### 2.5 A positive flywheel that drives infrastructure investment
 
-这是一个非常有洞察力的点：
+This is a particularly insightful point:
 
 ```
-更好的物理监控设备
+Better physical monitoring equipment
        ↓
-→ 物理AI 能获取更丰富的数据 → 风险折扣更低 → 出口商融资成本更低
+→ Physical AI gets richer data → lower risk discount → lower financing cost for exporters
        ↓
-→ 更多出口商愿意使用 AgentBL → 更多船东/物流公司升级监控设备
+→ More exporters want to use AgentBL → more shipowners/logistics firms upgrade their monitoring equipment
        ↓
-→ 设备升级 → 数据更丰富 → 融资成本进一步降低 → 生态扩大
-       ↑                                               ↓
-       ←———— 融资更容易，吸引更多资金方 ———— 更好的设备 → 更低的违约率 ←
+→ Equipment upgrades → richer data → financing costs fall further → the ecosystem grows
+       ↑                                                                    ↓
+       ←———— Easier financing attracts more capital providers ———— Better equipment → lower default rates ←
 ```
 
-**这个飞轮的本质是：AgentBL 不仅是一个融资协议，更是一个"推动全球航运基础设施数字化升级"的经济激励引擎。**
+**At its core, this flywheel means AgentBL is not only a financing protocol, but also an economic incentive engine that "drives the digital upgrade of global shipping infrastructure".**
 
-### 2.6 与现有系统的集成
+### 2.6 Integration with the existing system
 
-在 AgentBL 现有的 `world-intel/` 和 `risk-intel/` 数据层之上，新增：
+On top of AgentBL's existing `world-intel/` and `risk-intel/` data layers, add:
 
 ```
 data/
-├── physical-intel/           # 新增
-│   ├── vessel-tracking/      # AIS/GPS 船舶追踪
-│   ├── container-sensors/    # IoT 传感器聚合
-│   ├── port-cameras/         # 港口视觉数据
-│   └── seal-registry/        # 电子封条状态注册表
+├── physical-intel/           # New
+│   ├── vessel-tracking/      # AIS/GPS vessel tracking
+│   ├── container-sensors/    # IoT sensor aggregation
+│   ├── port-cameras/         # Port visual data
+│   └── seal-registry/        # Electronic seal status registry
 ```
 
-`PhysicalConfidence` 成为 `PricingQuote` 的一个可选的、向后兼容的新输入。
+`PhysicalConfidence` becomes an optional, backward-compatible new input to `PricingQuote`.
 
 ---
 
-## 3. 增强维度二：AI 误差保险 —— 技术容错的经济兜底
+## 3. Enhancement 2: AI Error Insurance — An Economic Backstop for Technical Fallibility
 
-### 3.1 问题本质
+### 3.1 The essence of the problem
 
-> 就像 CRL 讲 Web1 → Web4 时指出的：任何技术系统都存在误差和偏差。AI 定价模型也不例外。
+> As CRL pointed out when discussing Web1 → Web4: every technical system has errors and biases. AI pricing models are no exception.
 
-AgentBL 的 AI 定价引擎可能出现的误差类型：
+Types of error AgentBL's AI pricing engine may make:
 
-| 误差类型 | 场景举例 | 后果 |
+| Error type | Example scenario | Consequence |
 |---------|---------|------|
-| **单据漏检** | AI 未识别出精心伪造的假发票 | 高估抵押物 → 投资者亏损 |
-| **风险评估偏差** | AI 低估了战争升级速度 | 折扣不足 → 投资者承担了过多尾部风险 |
-| **数据滞后** | 商品价格剧烈波动但 AI 未及时更新 | 发行价偏离公允价 |
-| **模型幻觉** | LLM 生成的风险解释看起来合理但事实错误 | 投资者被误导 |
-| **传感器数据被欺骗** | GPS 信号被伪造（即使有了物理AI） | 物理置信度虚高 |
+| **Missed document fraud** | The AI fails to spot a carefully forged invoice | Collateral overvalued → investor losses |
+| **Risk assessment bias** | The AI underestimates how fast a war escalates | Insufficient discount → investors bear too much tail risk |
+| **Data lag** | Commodity prices swing sharply but the AI does not update in time | Issue price drifts from fair value |
+| **Model hallucination** | The LLM's risk explanation sounds plausible but is factually wrong | Investors are misled |
+| **Spoofed sensor data** | GPS signals are faked (even with Physical AI) | Physical confidence is inflated |
 
-### 3.2 保险机制设计
+### 3.2 Insurance mechanism design
 
-**核心思路：AgentBL 协议内置一个"AI 误差保险池"，由多方共同注资，覆盖因 AI 定价误差导致的投资者超额损失。**
+**Core idea: the AgentBL protocol has a built-in "AI error insurance pool", jointly funded by multiple parties, that covers investors' excess losses caused by AI pricing errors.**
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                  AI 误差保险池                            │
-├─────────────────────────────────────────────────────────┤
-│ 资金来源：                                               │
-│  • 协议费用抽成（RWA 发行量的 0.05%）                     │
-│  • AI 决策者质押金（AgentBL 节点运营者）                  │
-│  • 出口商自愿购买额外保险                                 │
-│  • 第三方承保人（如传统保险公司、Lloyd's 市场）            │
-├─────────────────────────────────────────────────────────┤
-│ 赔付条件：                                               │
-│  • AI 定价结果与"事后可验证事实"之间存在显著偏差           │
-│  • 偏差导致了投资者的超额损失                             │
-│  • 偏差不是由投资者自身的投资决策错误导致的               │
-├─────────────────────────────────────────────────────────┤
-│ 赔付判定：                                               │
-│  • 由独立的多签仲裁委员会（3/5 或 5/7）判定               │
-│  • 仲裁成员：技术专家 + 贸易金融专家 + 法律专家            │
-│  • 所有判定结果和证据链上链                               │
-└─────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                  AI Error Insurance Pool                                   │
+├────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Funding sources:                                                                           │
+│  • Protocol fee share (0.05% of RWA issuance volume)                                       │
+│  • Stakes posted by AI decision-makers (AgentBL node operators)                            │
+│  • Optional extra insurance bought by exporters                                            │
+│  • Third-party underwriters (e.g. traditional insurers, the Lloyd's market)                │
+├────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Payout conditions:                                                                         │
+│  • Significant deviation between the AI pricing result and "facts verifiable ex post"      │
+│  • The deviation caused investors excess losses                                            │
+│  • The deviation was not caused by the investor's own investment decision errors           │
+├────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Payout adjudication:                                                                       │
+│  • Decided by an independent multisig arbitration committee (3/5 or 5/7)                   │
+│  • Arbitrators: technical experts + trade finance experts + legal experts                  │
+│  • All decisions and the evidence are recorded on-chain                                    │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.3 智能合约实现
+### 3.3 Smart contract implementation
 
 ```solidity
-// 新增合约：AIGuaranteePool.sol
+// New contract: AIGuaranteePool.sol
 contract AIGuaranteePool {
-    // 全局保险池
+    // Global insurance pool
     uint256 public totalPoolBalance;
     
-    // 每个 offering 的保险覆盖
+    // Insurance coverage per offering
     mapping(uint256 => OfferingCoverage) public coverages;
     
     struct OfferingCoverage {
-        uint256 coverageAmount;      // 保额上限
-        uint256 premiumPaid;         // 已支付保费
-        uint256 deductibleBps;       // 免赔比例（基点）
-        CoverageTier tier;           // 保险档次
+        uint256 coverageAmount;      // Coverage cap
+        uint256 premiumPaid;         // Premium paid
+        uint256 deductibleBps;       // Deductible ratio (basis points)
+        CoverageTier tier;           // Coverage tier
         bool active;
     }
     
     enum CoverageTier {
-        BASIC,      // 基础：覆盖重大 AI 错误（如漏检伪造单据）
-        STANDARD,   // 标准：覆盖风险评估偏差
-        PREMIUM     // 高级：覆盖全部 AI 误差（含传感器欺骗）
+        BASIC,      // Basic: covers major AI errors (e.g. missing forged documents)
+        STANDARD,   // Standard: covers risk assessment bias
+        PREMIUM     // Premium: covers all AI errors (including sensor spoofing)
     }
     
-    // 核心函数
+    // Core functions
     function purchaseCoverage(uint256 poolId, CoverageTier tier) external payable;
     function fileClaim(uint256 poolId, uint256 lossAmount, bytes calldata evidence) external;
     function arbitrateClaim(uint256 claimId, bool approved, uint256 payoutAmount) external onlyArbitrator;
 }
 ```
 
-### 3.4 为什么这很有价值
+### 3.4 Why this is valuable
 
-1. **降低投资者心理门槛**：知道"就算 AI 出错也有保险兜底"，投资者更愿意参与
-2. **给 AI 定价一个"纠错"机制**：不是让 AI 完美无缺，而是承认 AI 会犯错并为此准备经济补偿
-3. **创造新的收入流**：保险保费本身就是一个可持续的商业模式
-4. **与传统保险市场对接**：Lloyd's 市场已经在承保网络风险——AI 误差保险是自然延伸
-5. **用经济机制倒逼技术进化**：AI 节点运营者有动力降低误差率（因为他们的质押金在保险池里）
+1. **Lowers investors' psychological barrier**: knowing "there is insurance even if the AI gets it wrong" makes investors more willing to participate
+2. **Gives AI pricing an "error-correction" mechanism**: instead of demanding a flawless AI, it accepts that AI will make mistakes and prepares economic compensation for them
+3. **Creates a new revenue stream**: insurance premiums are themselves a sustainable business model
+4. **Connects to the traditional insurance market**: the Lloyd's market already underwrites cyber risk; AI error insurance is a natural extension
+5. **Uses economic incentives to push the technology forward**: AI node operators are motivated to reduce error rates (because their stake sits in the insurance pool)
 
-### 3.5 与现有系统的关系
+### 3.5 Relationship to the existing system
 
-在 `pricingEngine.js` 中，`PricingQuote` 新增保险相关字段：
+In `pricingEngine.js`, `PricingQuote` gains insurance-related fields:
 
 ```typescript
-// 定价结果中的保险建议
+// Insurance recommendation in the pricing result
 insurance_recommendation: {
   recommended_tier: 'BASIC' | 'STANDARD' | 'PREMIUM';
-  estimated_premium_bps: number;      // 预估保费（基点）
-  coverage_ratio: number;             // 保险覆盖比例
-  reasoning: string;                  // "风险评分 > 800bps，建议至少购买 STANDARD 级别保险"
+  estimated_premium_bps: number;      // Estimated premium (basis points)
+  coverage_ratio: number;             // Insurance coverage ratio
+  reasoning: string;                  // "Risk score > 800bps; recommend at least STANDARD-tier insurance"
 }
 ```
 
 ---
 
-## 4. 增强维度三：ZK + 担保网络 —— 零知识证明驱动的去中心化信任
+## 4. Enhancement 3: ZK + Guarantee Network — Decentralised Trust Powered by Zero-Knowledge Proofs
 
-### 4.1 问题本质
+### 4.1 The essence of the problem
 
-> **假如你是一个投资者，面对一个从未合作过的出口商，你怎么知道他靠不靠谱？**
+> **Suppose you are an investor facing an exporter you have never worked with. How do you know whether they are reliable?**
 >
-> 传统答案是"看历史记录"——但新进入者没有历史。传统贸易金融用"银行信用"替代"交易对手信用"，但中小企业恰好被银行拒之门外。
+> The traditional answer is "look at their track record", but new entrants have no history. Traditional trade finance substitutes "bank credit" for "counterparty credit", yet SMEs are exactly the ones banks turn away.
 
-ZK + 担保网络要解决的核心问题：**如何在保护隐私的前提下，把"谁为这笔交易做了担保"变成可验证的公共信息。**
+The core problem the ZK + guarantee network solves: **how to turn "who has guaranteed this deal" into verifiable public information while protecting privacy.**
 
-### 4.2 担保网络模型
-
-```
-                    ┌──────────────┐
-                    │  担保人 A    │ ← 大型贸易公司，与出口商合作过 5 年
-                    │  (质押了 $X) │
-                    └──────┬───────┘
-                           │ 签名担保（ZK 证明）
-                           ▼
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│   出口商     │───▶│  eBL + RWA   │◀───│   投资者     │
-│  (需融资)    │    │  融资发行    │    │  (提供资金)  │
-└──────────────┘    └──────────────┘    └──────────────┘
-                           ▲
-                           │ 签名担保（ZK 证明）
-                    ┌──────┴───────┐
-                    │  担保人 B    │ ← 货运代理公司，确认货物真实
-                    │  (质押了 $Y) │
-                    └──────────────┘
-```
-
-### 4.3 ZK 的技术角色
-
-零知识证明在此场景中解决三个隐私问题：
-
-#### 问题一：担保人不想公开自己的身份和金额
-
-**不用 ZK**：链上公开记录"大型贸易公司 A 担保了 100 万美元"→ 竞争对手知道 A 在做什么生意。
-
-**用 ZK**：担保人生成一个 ZK Proof，证明"有一个质押了 ≥ $X 的已认证担保人为这笔交易提供了担保"，而不透露：
-- 担保人是谁
-- 具体质押金额
-- 担保的历史记录
-
-#### 问题二：出口商不想公开交易细节
-
-**不用 ZK**：融资申请细节在链上公开可见 → 竞争对手知道出口商的现金流状况。
-
-**用 ZK**：出口商生成 ZK Proof，证明"这笔 eBL 对应的货物价值在 [Y, Z] 区间内，且单据通过了 AI 一致性检查"，而不透露具体货值。
-
-#### 问题三：投资者需要验证但不信任任何一个单独的担保人
-
-**不用 ZK**：信任某个担保人 → 如果该担保人与出口商串通，投资者受损。
-
-**用 ZK**：聚合多个担保人的证明，设置阈值——"至少 3 个担保人中，有 2 个以上确认了同一批货物"→ 分散信任，抵抗串通。
-
-### 4.4 担保的经济激励
-
-担保人为什么要参与？
+### 4.2 Guarantee network model
 
 ```
-担保人质押 USDC/INJ 到担保注册表
-       ↓
-为某笔交易的"真实性"提供担保签名（ZK）
-       ↓
-交易成功 → 担保人获得保费分成（如融资金额的 0.1-0.3%）
-交易违约 → 担保人质押金被部分削减
-       ↓
-担保人长期收益 = 累计保费收入 - 累计违约赔付
-       ↓
-理性的担保人只会为"他们亲自验证过的交易"担保
+                          ┌────────────────────┐
+                          │  Guarantor A       │ ← Large trading company that has worked with the exporter for 5 years
+                          │  (staked $X)       │
+                          └──────────┬─────────┘
+                                     │ Signed guarantee (ZK proof)
+                                     ▼
+┌────────────────────┐    ┌────────────────────┐    ┌────────────────────┐
+│  Exporter          │───▶│  eBL + RWA         │◀───│  Investor          │
+│  (needs financing) │    │  financing issue   │    │  (provides capital)│
+└────────────────────┘    └────────────────────┘    └────────────────────┘
+                                     ▲
+                                     │ Signed guarantee (ZK proof)
+                          ┌──────────┴─────────┐
+                          │  Guarantor B       │ ← Freight forwarder, confirms the cargo is real
+                          │  (staked $Y)       │
+                          └────────────────────┘
 ```
 
-**这创造了一个去中心化的"声誉市场"：担保人的历史准确率越高，他们签名的担保越有价值，出口商越愿意支付更高保费获得他们的担保。**
+### 4.3 The technical role of ZK
 
-### 4.5 智能合约设计
+In this scenario, zero-knowledge proofs solve three privacy problems:
+
+#### Problem 1: guarantors don't want to reveal their identity or amounts
+
+**Without ZK**: the chain publicly records "large trading company A guaranteed $1 million" → competitors learn what business A is doing.
+
+**With ZK**: the guarantor generates a ZK proof showing that "a certified guarantor who has staked ≥ $X has guaranteed this deal", without revealing:
+- who the guarantor is
+- the exact staked amount
+- the guarantor's track record
+
+#### Problem 2: exporters don't want to reveal deal details
+
+**Without ZK**: the details of the financing application are publicly visible on-chain → competitors learn the exporter's cash-flow position.
+
+**With ZK**: the exporter generates a ZK proof showing that "the cargo behind this eBL is worth somewhere in the range [Y, Z], and the documents passed the AI consistency check", without revealing the exact cargo value.
+
+#### Problem 3: investors need verification but don't trust any single guarantor
+
+**Without ZK**: trust one guarantor → if that guarantor colludes with the exporter, the investor loses.
+
+**With ZK**: aggregate proofs from multiple guarantors and set a threshold, e.g. "of at least 3 guarantors, 2 or more confirmed the same cargo" → trust is distributed and collusion is resisted.
+
+### 4.4 Economic incentives for guarantors
+
+Why would guarantors participate?
+
+```
+Guarantor stakes USDC/INJ in the guarantee registry
+       ↓
+Provides a guarantee signature (ZK) for the "authenticity" of a deal
+       ↓
+Deal succeeds → guarantor earns a share of the premium (e.g. 0.1–0.3% of the financed amount)
+Deal defaults → part of the guarantor's stake is slashed
+       ↓
+Guarantor's long-term return = cumulative premium income - cumulative default payouts
+       ↓
+A rational guarantor will only guarantee "deals they have personally verified"
+```
+
+**This creates a decentralised "reputation market": the higher a guarantor's historical accuracy, the more valuable their signed guarantees, and the more exporters are willing to pay higher premiums to obtain them.**
+
+### 4.5 Smart contract design
 
 ```solidity
-// 新增合约：TrustGuarantorRegistry.sol
+// New contract: TrustGuarantorRegistry.sol
 contract TrustGuarantorRegistry {
     struct Guarantor {
         uint256 stakedAmount;
-        uint256 totalGuaranteed;      // 累计担保金额
-        uint256 successfulCount;      // 成功担保次数
-        uint256 defaultCount;         // 违约担保次数
-        uint256 reputationScore;      // 声誉评分（0-10000）
+        uint256 totalGuaranteed;      // Cumulative guaranteed amount
+        uint256 successfulCount;      // Number of successful guarantees
+        uint256 defaultCount;         // Number of defaulted guarantees
+        uint256 reputationScore;      // Reputation score (0-10000)
         bool active;
     }
     
     struct Guarantee {
         uint256 poolId;
-        address guarantor;            // 担保人地址
-        uint256 guaranteeAmount;      // 担保金额
-        bytes zkProof;                // ZK 证明哈希
+        address guarantor;            // Guarantor address
+        uint256 guaranteeAmount;      // Guaranteed amount
+        bytes zkProof;                // ZK proof hash
         uint256 timestamp;
     }
     
     mapping(address => Guarantor) public guarantors;
     mapping(uint256 => Guarantee[]) public poolGuarantees;
     
-    // 核心函数
-    function registerAsGuarantor() external payable;  // 质押注册
+    // Core functions
+    function registerAsGuarantor() external payable;  // Stake to register
     function issueGuarantee(uint256 poolId, uint256 amount, bytes calldata zkProof) external;
     function slashGuarantor(address guarantor, uint256 poolId, uint256 amount) external onlyArbitrator;
-    function getGuaranteeStrength(uint256 poolId) external view returns (uint256); // 综合担保力度
+    function getGuaranteeStrength(uint256 poolId) external view returns (uint256); // Overall guarantee strength
 }
 ```
 
-### 4.6 担保力度对定价的影响
+### 4.6 How guarantee strength affects pricing
 
-在 `PricingQuote` 中新增担保维度：
+Add a guarantee dimension to `PricingQuote`:
 
 ```typescript
-// 新增字段
+// New field
 trust_layer: {
-  guarantee_count: number;             // 担保人数
-  total_guarantee_amount_usd: number;  // 总担保金额
-  weighted_reputation_score: number;   // 加权声誉评分（0-100）
-  guarantee_cover_ratio: number;       // 担保覆盖率（担保金额/融资金额）
+  guarantee_count: number;             // Number of guarantors
+  total_guarantee_amount_usd: number;  // Total guaranteed amount
+  weighted_reputation_score: number;   // Weighted reputation score (0-100)
+  guarantee_cover_ratio: number;       // Guarantee coverage ratio (guaranteed amount / financed amount)
   
-  // 担保驱动的风险折扣调整
-  trust_discount_bps: number;          // 信任折扣（降低风险折扣）
-  // 担保覆盖率越高 → trust_discount_bps 越大 → 风险折扣越低
+  // Guarantee-driven risk discount adjustment
+  trust_discount_bps: number;          // Trust discount (reduces the risk discount)
+  // Higher guarantee coverage → larger trust_discount_bps → lower risk discount
 };
 ```
 
-**定价公式扩展**：
+**Pricing formula extension**:
 
 ```
-原始风险折扣 = base_risk_discount_bps
-调整后风险折扣 = max(0, base_risk_discount_bps - trust_discount_bps)
+Original risk discount = base_risk_discount_bps
+Adjusted risk discount = max(0, base_risk_discount_bps - trust_discount_bps)
 
-# 担保覆盖率 80% 且声誉 > 70分 → 风险折扣打 7 折
-# 担保覆盖率 100% 且声誉 > 90分 → 风险折扣打 5 折
+# Guarantee coverage 80% and reputation > 70 → risk discount cut to 70%
+# Guarantee coverage 100% and reputation > 90 → risk discount cut to 50%
 ```
 
 ---
 
-## 5. 增强维度四：信任稀缺性的经济学 —— 为什么"被担保"本身就是可定价的资产
+## 5. Enhancement 4: The Economics of Trust Scarcity — Why "Being Guaranteed" Is Itself a Priceable Asset
 
-### 5.1 信任作为一种生产要素
+### 5.1 Trust as a factor of production
 
-在传统经济学中，生产要素是土地、劳动、资本、技术。但在贸易融资领域，**信任是第五种、而且往往是最稀缺的生产要素。**
+In traditional economics, the factors of production are land, labour, capital and technology. But in trade finance, **trust is a fifth factor of production, and often the scarcest one.**
 
 ```
-一笔贸易融资能否成交，取决于：
+Whether a trade finance deal closes depends on:
 
-资本供给（投资者有钱）          ← 充裕（全球 DeFi 有数十亿美元流动性）
+Capital supply (investors have money)                         ← Abundant (billions of dollars of liquidity across global DeFi)
   ×
-抵押物质量（货物有价值）          ← 充裕（每年有 20 万亿美元的货物在海上）
+Collateral quality (the cargo has value)                      ← Abundant ($20 trillion of goods at sea every year)
   ×
-信任（我凭什么相信你说的都是真的）← 极度稀缺 ← 这是瓶颈
+Trust (why should I believe everything you say is true?)      ← Extremely scarce ← this is the bottleneck
 ```
 
-### 5.2 信任的定价
+### 5.2 Pricing trust
 
-AgentBL 可以将"信任"显式定价。在 `PricingQuote` 的折价分解中：
+AgentBL can price "trust" explicitly. In the discount breakdown of `PricingQuote`:
 
 ```
 final_issue_price = base_issue_price
-                  - urgency_discount          （到账速度成本，出口商可控）
-                  - risk_discount             （风险成本，AI 评估）
-                  + trust_premium             （信任溢价，新增）
-                  - [collateral_floor]        （抵押护栏）
+                  - urgency_discount          (cost of cash speed, controlled by the exporter)
+                  - risk_discount             (cost of risk, assessed by AI)
+                  + trust_premium             (trust premium, new)
+                  - [collateral_floor]        (collateral guardrail)
 ```
 
-**信任溢价 `trust_premium` 的来源**：
+**Sources of the trust premium `trust_premium`**:
 
-| 信任来源 | 信任溢价贡献 | 可验证性 |
+| Source of trust | Trust premium contribution | Verifiability |
 |---------|-------------|---------|
-| 物理AI 全栈覆盖（`FULL_STACK`） | +30-50bps | 链上证据哈希 |
-| 3+ 个高声誉担保人 | +20-40bps | 链上 ZK 证明 |
-| 已购买 PREMIUM 级别 AI 误差保险 | +15-25bps | 链上保险合约 |
-| 出口商历史还款记录（5+ 笔成功） | +10-20bps | 链上交易历史 |
+| Full-stack Physical AI coverage (`FULL_STACK`) | +30-50bps | On-chain evidence hash |
+| 3+ high-reputation guarantors | +20-40bps | On-chain ZK proof |
+| PREMIUM-tier AI error insurance purchased | +15-25bps | On-chain insurance contract |
+| Exporter repayment history (5+ successful deals) | +10-20bps | On-chain transaction history |
 
-> **直觉**：信任溢价是对风险折扣的"对冲"——你为信任付出的努力，直接转化为更低的融资成本。
+> **Intuition**: the trust premium is a "hedge" against the risk discount: the effort you put into building trust translates directly into lower financing costs.
 
-### 5.3 信任网络效应
+### 5.3 Trust network effects
 
 ```
-新的出口商（0 信用记录）
+New exporter (no credit history)
        ↓
-选择：购买物理AI 监控 + 邀请担保人 + 购买保险
+Chooses to: buy Physical AI monitoring + invite guarantors + buy insurance
        ↓
-第一笔交易成功 → 积累 1 条还款记录
+First deal succeeds → one repayment record accumulated
        ↓
-第二笔交易 → 担保人愿意降低保费（因为有历史了）
+Second deal → guarantors are willing to lower their premium (because there is now a history)
        ↓
-第 5 笔交易 → 不需要担保人了（自身信用足够）
+Fifth deal → no guarantors needed any more (own credit is sufficient)
        ↓
-信用溢出 → 可以为自己合作过的出口商当担保人 → 赚取保费
+Credit spillover → can act as a guarantor for exporters it has worked with → earns premiums
 ```
 
-**这个网络效应的关键**：信任一旦建立，不会消失——它在链上永久记录，且随着时间推移而增值。
+**The key to this network effect**: once trust is built, it does not disappear. It is recorded permanently on-chain and grows in value over time.
 
 ---
 
-## 6. 整合架构：四层信任叠加模型
+## 6. Integrated Architecture: A Four-Layer Stacked Trust Model
 
-### 6.1 整体架构
+### 6.1 Overall architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    AGENTBL 信任增强架构                              │
-│              四层信任叠加 → 从"盲猜"到"可验证可信"                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   AGENTBL TRUST ENHANCEMENT ARCHITECTURE                                  │
+│                 Four stacked trust layers → from "guessing blind" to "verifiably trusted"                 │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────────┐
-│ L4：社会担保层（谁为这笔交易背书？）                                   │
-│ ┌─────────────────────────────────────────────────────────────────┐ │
-│ │ TrustGuarantorRegistry  │  ZK Proof Aggregator  │  声誉评分引擎  │ │
-│ │ • 担保人质押注册         │  • 多担保人证明聚合    │  • 历史准确率  │ │
-│ │ • 担保签发/削减          │  • 隐私保护           │  • 加权算法    │ │
-│ └─────────────────────────────────────────────────────────────────┘ │
-│                              ↕                                       │
-├─────────────────────────────────────────────────────────────────────┤
-│ L3：经济兜底层（AI 错了谁来赔？）                                     │
-│ ┌─────────────────────────────────────────────────────────────────┐ │
-│ │ AIGuaranteePool         │  仲裁多签委员会       │  保险定价引擎   │ │
-│ │ • 保费收取/赔付          │  • 争议判定           │  • 风险精算     │ │
-│ │ • 多档次覆盖             │  • 证据链上链         │  • 动态保费     │ │
-│ └─────────────────────────────────────────────────────────────────┘ │
-│                              ↕                                       │
-├─────────────────────────────────────────────────────────────────────┤
-│ L2：物理验证层（货物真的在哪儿？状态如何？）                             │
-│ ┌─────────────────────────────────────────────────────────────────┐ │
-│ │ PhysicalIntel            │  SensorAggregator     │  AnomalyDetect│ │
-│ │ • GPS/AIS 交叉验证       │  • IoT 传感器聚合      │  • 异常检测    │ │
-│ │ • 卫星图像比对           │  • 电子封条注册        │  • 实时告警    │ │
-│ │ • 温度/震动/光线监测     │  • 多源信号融合        │  • 风险加码    │ │
-│ └─────────────────────────────────────────────────────────────────┘ │
-│                              ↕                                       │
-├─────────────────────────────────────────────────────────────────────┤
-│ L1：单据验证层（现有 AgentBL 核心）                                    │
-│ ┌─────────────────────────────────────────────────────────────────┐ │
-│ │ DocumentConsistency     │  PricingEngine        │  RiskPricingOrcl│ │
-│ │ • eBL/发票/保险三单核验 │  • 利润-份额-折价模型  │  • 链上存证    │ │
-│ │ • 7 项交叉检查          │  • 速度+风险双驱动     │  • 事件审计    │ │
-│ │ • 反欺诈检测            │  • 双护栏机制          │  • x402 结算   │ │
-│ └─────────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ L4: Social guarantee layer (who vouches for this deal?)                                                   │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │ TrustGuarantorRegistry           │ ZK Proof Aggregator                  │ Reputation scoring engine   │ │
+│ │ • Guarantor stake registration   │ • Multi-guarantor proof aggregation  │ • Historical accuracy       │ │
+│ │ • Guarantee issuance/slashing    │ • Privacy protection                 │ • Weighted algorithm        │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                     ↕                                                     │
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ L3: Economic backstop layer (who pays if the AI is wrong?)                                                │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │ AIGuaranteePool                  │ Arbitration multisig committee       │ Insurance pricing engine    │ │
+│ │ • Premium collection/payouts     │ • Dispute adjudication               │ • Actuarial risk modelling  │ │
+│ │ • Multi-tier coverage            │ • Evidence recorded on-chain         │ • Dynamic premiums          │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                     ↕                                                     │
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ L2: Physical verification layer (where is the cargo really? what state is it in?)                         │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │ PhysicalIntel                    │ SensorAggregator                     │ AnomalyDetect               │ │
+│ │ • GPS/AIS cross-validation       │ • IoT sensor aggregation             │ • Anomaly detection         │ │
+│ │ • Satellite image comparison     │ • Electronic seal registry           │ • Real-time alerts          │ │
+│ │ • Temp/shock/light monitoring    │ • Multi-source signal fusion         │ • Risk premium increase     │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                     ↕                                                     │
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ L1: Document verification layer (existing AgentBL core)                                                   │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │ DocumentConsistency              │ PricingEngine                        │ RiskPricingOracle           │ │
+│ │ • eBL/invoice/policy 3-doc check │ • Margin-share-discount model        │ • On-chain attestation      │ │
+│ │ • 7 cross-checks                 │ • Speed + risk dual drivers          │ • Event audit               │ │
+│ │ • Anti-fraud detection           │ • Dual guardrails                    │ • x402 settlement           │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-输入：L1→L2→L3→L4 逐层叠加信任证据
-输出：trust_adjusted_issue_price = base_price - urgency - risk + trust_premium
-       + 完整的信任证据图谱（Trust Evidence Graph）
+Input: L1→L2→L3→L4 stack trust evidence layer by layer
+Output: trust_adjusted_issue_price = base_price - urgency - risk + trust_premium
+        + a complete Trust Evidence Graph
 ```
 
-### 6.2 信任叠加的定价效果
+### 6.2 Pricing effect of stacked trust
 
-以铜案例（现金需求 330 万，毛利 137.5 万，基准风险 MEDIUM 350bps）为例：
+Taking the copper case as an example (cash need $3.3M, gross margin $1.375M, baseline risk MEDIUM 350bps):
 
-| 信任配置 | L1 | L2 | L3 | L4 | 风险折扣 | 发行价 | 投资者上行 |
+| Trust configuration | L1 | L2 | L3 | L4 | Risk discount | Issue price | Investor upside |
 |---------|:--:|:--:|:--:|:--:|---------|--------|----------|
-| 仅单据验证 | ✅ | — | — | — | 350bps | 0.80 | 25.0% |
-| + 物理AI GPS追踪 | ✅ | ✅ | — | — | 300bps | 0.82 | 22.0% |
-| + 标准AI误差保险 | ✅ | ✅ | ✅ | — | 260bps | 0.83 | 20.2% |
-| + 2 个高声誉担保人 | ✅ | ✅ | ✅ | ✅ | 200bps | 0.85 | 17.9% |
+| Document verification only | ✅ | — | — | — | 350bps | 0.80 | 25.0% |
+| + Physical AI GPS tracking | ✅ | ✅ | — | — | 300bps | 0.82 | 22.0% |
+| + Standard AI error insurance | ✅ | ✅ | ✅ | — | 260bps | 0.83 | 20.2% |
+| + 2 high-reputation guarantors | ✅ | ✅ | ✅ | ✅ | 200bps | 0.85 | 17.9% |
 
-> **关键发现**：四层全栈信任叠加，让同样的交易从 0.80 提升到 0.85——出口商融资成本从 825,000 降至 591,250，节省 233,750 美元。**这就是信任的经济价值。**
+> **Key finding**: stacking all four layers of trust lifts the same deal from 0.80 to 0.85, cutting the exporter's financing cost from 825,000 to 591,250, a saving of $233,750. **This is the economic value of trust.**
 
-### 6.3 `PricingQuote` Schema 扩展（完整版）
+### 6.3 `PricingQuote` schema extension (full version)
 
 ```typescript
 type EnhancedPricingQuote = PricingQuote & {
-  // === L2 物理验证层 ===
+  // === L2 physical verification layer ===
   physical_confidence: {
     source_level: 'NONE' | 'DOCUMENT_ONLY' | 'GPS_TRACKED' | 'MULTI_SENSOR' | 'FULL_STACK';
     gps_corroborated: boolean;
@@ -539,115 +539,115 @@ type EnhancedPricingQuote = PricingQuote & {
     confidence_score: number;
   };
 
-  // === L3 经济兜底层 ===
+  // === L3 economic backstop layer ===
   insurance_coverage: {
     tier: 'NONE' | 'BASIC' | 'STANDARD' | 'PREMIUM';
     coverage_amount_usd: number;
     premium_paid_usd: number;
     deductible_bps: number;
-    pool_balance_usd: number;  // 保险池余额
+    pool_balance_usd: number;  // Insurance pool balance
   };
 
-  // === L4 社会担保层 ===
+  // === L4 social guarantee layer ===
   trust_layer: {
     guarantee_count: number;
     total_guarantee_amount_usd: number;
     weighted_reputation_score: number;
     guarantee_cover_ratio: number;
     trust_discount_bps: number;
-    guarantor_zk_proofs: string[];  // ZK 证明哈希列表
+    guarantor_zk_proofs: string[];  // List of ZK proof hashes
   };
 
-  // === 综合信任调整 ===
-  trust_adjusted_risk_discount_bps: number;  // 信任调整后的风险折扣
-  trust_premium_bps: number;                  // 信任溢价
-  trust_evidence_graph: TrustEvidenceNode[];  // 完整的信任证据图谱
+  // === Overall trust adjustment ===
+  trust_adjusted_risk_discount_bps: number;  // Risk discount after trust adjustment
+  trust_premium_bps: number;                  // Trust premium
+  trust_evidence_graph: TrustEvidenceNode[];  // Full trust evidence graph
 };
 ```
 
 ---
 
-## 7. 落地路径与优先级
+## 7. Rollout Path and Priorities
 
-### 7.1 三阶段路线图
+### 7.1 Three-phase roadmap
 
 ```
-Phase 1（当前 → 3 个月）：物理AI 基础 + 信任数据接入
-├── 接入 AIS 船舶追踪 API → 在 physical-intel/ 中建立基础追踪
-├── PhysicalConfidence 字段加入 PricingQuote（默认 NONE，向后兼容）
-├── 与 1-2 家 IoT 设备商（如 Traxens）建立数据合作
-└── 在 Dashboard 中展示"物理置信度"指标
+Phase 1 (now → 3 months): Physical AI foundations + trust data integration
+├── Integrate an AIS vessel tracking API → build basic tracking in physical-intel/
+├── Add the PhysicalConfidence field to PricingQuote (defaults to NONE, backward compatible)
+├── Set up data partnerships with 1-2 IoT device vendors (e.g. Traxens)
+└── Show a "physical confidence" metric in the Dashboard
 
-Phase 2（3 → 9 个月）：保险机制 + 担保网络 MVP
-├── 部署 AIGuaranteePool 合约（Injective 测试网）
-├── 实现保险购买/赔付流程
-├── 部署 TrustGuarantorRegistry 合约
-├── 实现基础 ZK 证明（使用 circom + Groth16 / PLONK）
-├── 建立担保人声誉模型（贝叶斯更新）
-└── 在 Dashboard 中展示"信任溢价"和"担保人网络"
+Phase 2 (3 → 9 months): insurance mechanism + guarantee network MVP
+├── Deploy the AIGuaranteePool contract (Injective testnet)
+├── Implement the insurance purchase/payout flow
+├── Deploy the TrustGuarantorRegistry contract
+├── Implement basic ZK proofs (using circom + Groth16 / PLONK)
+├── Build the guarantor reputation model (Bayesian updating)
+└── Show the "trust premium" and the "guarantor network" in the Dashboard
 
-Phase 3（9 → 18 个月）：全栈信任网络
-├── ZK 证明聚合器（多担保人）
-├── 与传统保险公司对接（Lloyd's 市场）
-├── 导出信任 API → 其他 DeFi 协议也可消费 AgentBL 的信任评分
-├── 信用溢出机制 → 担保人可以跨交易"传递"信任
-└── 成为贸易融资领域的"信任基础设施"
+Phase 3 (9 → 18 months): full-stack trust network
+├── ZK proof aggregator (multiple guarantors)
+├── Integration with traditional insurers (the Lloyd's market)
+├── Export a trust API → other DeFi protocols can also consume AgentBL's trust scores
+├── Credit spillover mechanism → guarantors can "pass on" trust across deals
+└── Become the "trust infrastructure" of trade finance
 ```
 
-### 7.2 为什么不一次性全部实现
+### 7.2 Why not build everything at once
 
-1. **每一层都需要独立验证**：物理AI 需要真实的硬件和数据合作方，不能只靠代码
-2. **保险需要精算数据**：没有任何历史赔付数据的情况下，无法精确定价保费
-3. **ZK 证明的工程复杂度**：需要专门的密码学工程师和审计
-4. **信任网络需要冷启动**：没有足够多的参与者时，网络效应无法发挥作用
+1. **Each layer needs independent validation**: Physical AI needs real hardware and data partners; code alone is not enough
+2. **Insurance needs actuarial data**: without any historical claims data, premiums cannot be priced accurately
+3. **ZK proofs are engineering-heavy**: they need dedicated cryptography engineers and audits
+4. **The trust network needs a cold start**: without enough participants, network effects cannot kick in
 
-### 7.3 优先级的判断标准
+### 7.3 Criteria for prioritisation
 
-按"投入产出比"排序：
+Ranked by return on investment:
 
-| 优先级 | 增强维度 | 投入 | 产出 | 理由 |
+| Priority | Enhancement | Investment | Return | Rationale |
 |--------|---------|------|------|------|
-| **P0** | 物理AI 基础 | 中（API 接入） | 高 | 最直接解决"单据造假"问题，实现路径最清晰 |
-| **P1** | AI 误差保险 | 中（合约 + 精算） | 高 | 给投资者"安全感"，是降低参与门槛的最有效手段 |
-| **P2** | 信任数据整合定价 | 低（纯软件） | 中 | 在现有 pricingEngine 中利用物理数据和保险数据调整定价 |
-| **P3** | ZK 担保网络 | 高（密码学 + 冷启动） | 极高（长期） | 是"信任基础设施"的终局形态，但需要用前三个阶段的数据和用户基础来冷启动 |
+| **P0** | Physical AI foundations | Medium (API integration) | High | Most directly tackles "forged documents", with the clearest implementation path |
+| **P1** | AI error insurance | Medium (contracts + actuarial work) | High | Gives investors a "sense of safety"; the most effective way to lower the participation barrier |
+| **P2** | Pricing with integrated trust data | Low (pure software) | Medium | Uses physical and insurance data to adjust pricing within the existing pricingEngine |
+| **P3** | ZK guarantee network | High (cryptography + cold start) | Very high (long term) | The end-state form of "trust infrastructure", but needs the data and user base from the first three stages to cold-start |
 
 ---
 
-## 8. 总结：从"AI 定价工具"到"信任基础设施"
+## 8. Summary: From "AI Pricing Tool" to "Trust Infrastructure"
 
-### 8.1 一句话
+### 8.1 In one sentence
 
-> **AgentBL 的终极愿景不是做一个更好的 AI 定价模型，而是成为全球贸易融资领域的"信任定价基础设施"——让信任变得可量化、可交易、可叠加。**
+> **AgentBL's ultimate vision is not to build a better AI pricing model, but to become the "trust pricing infrastructure" of global trade finance, making trust quantifiable, tradable and stackable.**
 
-### 8.2 核心价值主张
+### 8.2 Core value proposition
 
 ```
-传统贸易融资：
-  信任 = 银行信用背书（中心化、不透明、拒绝 45% 的中小企业）
+Traditional trade finance:
+  Trust = bank credit endorsement (centralised, opaque, rejects 45% of SMEs)
 
-AgentBL 现有：
-  信任 = AI 审单（单据自洽，但看不到物理世界）
+AgentBL today:
+  Trust = AI document review (documents are consistent, but the physical world is invisible)
 
-AgentBL 增强后：
-  信任 = AI 审单（L1）
-       + 物理世界验证（L2：GPS/AIS/IoT/卫星）
-       + 经济兜底（L3：AI 误差保险）
-       + 社会担保（L4：ZK 担保网络）
-       = 可叠加、可量化、可定价的多层信任
+AgentBL enhanced:
+  Trust = AI document review (L1)
+       + Physical-world verification (L2: GPS/AIS/IoT/satellite)
+       + Economic backstop (L3: AI error insurance)
+       + Social guarantee (L4: ZK guarantee network)
+       = Stackable, quantifiable, priceable multi-layer trust
 ```
 
-### 8.3 为什么"信任稀缺"是最重要的洞察
+### 8.3 Why "trust scarcity" is the most important insight
 
-在电子提单融资领域：
+In electronic bill of lading financing:
 
-- **资金不稀缺**：全球 DeFi 市场有数十亿美元闲置流动性
-- **需求不稀缺**：每年有 20 万亿美元的货物在海上，45% 的中小企业融不到资
-- **技术不稀缺**：区块链、AI、IoT 都是成熟技术
-- **信任是唯一的瓶颈**：解决了信任问题，资金和需求自然对接
+- **Capital is not scarce**: the global DeFi market has billions of dollars of idle liquidity
+- **Demand is not scarce**: $20 trillion of goods are at sea every year, and 45% of SMEs cannot get financing
+- **Technology is not scarce**: blockchain, AI and IoT are all mature technologies
+- **Trust is the only bottleneck**: solve trust, and capital and demand will naturally meet
 
-**AgentBL 的四个增强维度——物理AI、AI 误差保险、ZK 担保网络、信任的显式定价——全部指向同一个目标：让信任不再稀缺。**
+**AgentBL's four enhancements (Physical AI, AI error insurance, the ZK guarantee network and explicit pricing of trust) all point to the same goal: making trust no longer scarce.**
 
 ---
 
-> *本文档由分析 AgentBL 现有架构后提出，四个增强维度可以与现有系统逐步集成，每个维度都可以独立实施并独立产生价值。*
+> *This document was written after analysing AgentBL's existing architecture. The four enhancements can be integrated into the existing system step by step, and each one can be implemented independently and deliver value on its own.*

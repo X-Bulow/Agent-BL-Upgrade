@@ -1,10 +1,10 @@
-# Wave B：链上可信与 Agent 可组合
+# Wave B: On-chain Trust and Agent Composability
 
-状态：**Gate B 已达成（Injective Testnet，2026-06-29）**。
+Status: **Gate B achieved (Injective Testnet, 2026-06-29)**.
 
-## 1. 可追溯的付费定价闭环
+## 1. Traceable Paid-Pricing Loop
 
-同一个 `report_hash` 将真实付费报告与链上定价连接起来：
+A single `report_hash` links the real paid report to the on-chain pricing:
 
 ```text
 0.001 USDC payment
@@ -14,19 +14,19 @@
   → RWAOfferingPool #2 final quote = $0.80
 ```
 
-| 证据 | 值 |
+| Evidence | Value |
 |---|---|
 | USDC payment tx | [`0x6d796d…a0b49`](https://testnet.blockscout.injective.network/tx/0x6d796d39de0de3becd57f2c8b0ff72e6baf33e570259530cb294ff819d1a0b49) |
 | PaidReportEnvelope hash | `0x994078c73bdb44f13007d7b6ff4ea899ff9dc44d11f1d3afae1320df418168ce` |
 | `PaymentAttested` tx | [`0xa03ab9…ef6e`](https://testnet.blockscout.injective.network/tx/0xa03ab9622dbc1af7bd448af2a52b5322963abf65853916dc13c75a139adfef6e) |
 | `PricingUpdated` tx | [`0xee6b65…bac3`](https://testnet.blockscout.injective.network/tx/0xee6b6520c040662f3644c2514de628baa2351abe185623e9c22dbbcab76bbac3) |
-| 最终报价 | pool `2`，`$0.80`，`OPEN_OFFERING` |
+| Final quote | pool `2`, `$0.80`, `OPEN_OFFERING` |
 
-公开证据见 [`evidence/wave-b-gate.json`](./evidence/wave-b-gate.json)。付费报告正文不公开，证据文件只保留通过运行时 schema 校验的承诺与脱敏字段。
+The public evidence is in [`evidence/wave-b-gate.json`](./evidence/wave-b-gate.json). The body of the paid report is not published; the evidence file keeps only the commitments and redacted fields that pass runtime schema validation.
 
-## 2. Injective Testnet 五合约协议
+## 2. Five-Contract Protocol on Injective Testnet
 
-| 合约 | 地址 | 部署交易 |
+| Contract | Address | Deployment tx |
 |---|---|---|
 | AgentBLRWA | [`0x1e4998…48Ab`](https://testnet.blockscout.injective.network/address/0x1e499819cfbD847a3152CdFaD313C3229b9148Ab) | [`0xd66686…819e`](https://testnet.blockscout.injective.network/tx/0xd666868dadc99a1020a697ba71e40e8886c2dbe382259cefef65ba581749819e) |
 | EBLRegistry V2 | [`0x99eBa4…d6ae`](https://testnet.blockscout.injective.network/address/0x99eBa4CD00B6650cac7dc57F3b1fB4Ed03Cfd6ae) | [`0xec930a…d808`](https://testnet.blockscout.injective.network/tx/0xec930a68ac9ab9a2f6d5d9c6f1c12be165708a6603d722e9d8bb3e0aba96d808) |
@@ -34,15 +34,15 @@
 | RWAOfferingPool | [`0x61ac2E…529d`](https://testnet.blockscout.injective.network/address/0x61ac2E4E261fCa58725e5fe8a2E1aBEd48d6529d) | [`0x5a915a…6724`](https://testnet.blockscout.injective.network/tx/0x5a915ad39ba7421301c6d714c87496425b00a93a38ac4d9727b8df1cf1536724) |
 | RiskPricingOracle | [`0xaE19a6…618b`](https://testnet.blockscout.injective.network/address/0xaE19a62e26B17B32B183DC89b365da898987618b) | [`0x24f3fc…2d78`](https://testnet.blockscout.injective.network/tx/0x24f3fcf0f34ea73f0f2e1da3be1de4fef5d56d3a8ee40d93937ddabf00782d78) |
 
-部署脚本会合并而非覆盖 `public/chain-config.json`，随后执行 `mintEBLV2 → pledge → create → subscribe → reprice → pause → resume → settle`。最终链上状态为 `Repaid`，完整交易清单见 [`evidence/wave-b-protocol.json`](./evidence/wave-b-protocol.json)。
+The deployment script merges into `public/chain-config.json` rather than overwriting it, then runs `mintEBLV2 → pledge → create → subscribe → reprice → pause → resume → settle`. The final on-chain state is `Repaid`; the full transaction list is in [`evidence/wave-b-protocol.json`](./evidence/wave-b-protocol.json).
 
-## 3. 标准 MCP：9 tools + 3 resources
+## 3. Standard MCP: 9 tools + 3 resources
 
-Wave B 的原始基线是 7 个工具；Mystery Voyage 增加了只读的 `preview_mystery_voyage` 与 `verify_mystery_reveal`，因此当前 surface 为 9 tools + 3 resources。
+The original Wave B baseline was 7 tools; Mystery Voyage added the read-only `preview_mystery_voyage` and `verify_mystery_reveal`, so the current surface is 9 tools + 3 resources.
 
-`npm run mcp:stdio` 使用官方 Model Context Protocol SDK 和 stdio transport，支持 `initialize/listTools/callTool/listResources/readResource`，stdout 仅承载协议帧。
+`npm run mcp:stdio` uses the official Model Context Protocol SDK with the stdio transport and supports `initialize/listTools/callTool/listResources/readResource`; stdout carries protocol frames only.
 
-Tools：
+Tools:
 
 1. `get_trade_case`
 2. `generate_pricing_quote`
@@ -52,30 +52,30 @@ Tools：
 6. `simulate_offering`
 7. `push_pricing_to_oracle`
 
-Resources：
+Resources:
 
 1. `agentbl://cases/catalog`
 2. `agentbl://risk/methodology`
 3. `agentbl://contracts/deployments`
 
-所有资源固定为 `application/json`，只公开摘要；未知 URI 返回协议错误。`tests/mcpProtocol.test.js` 通过真实 SDK client 对 Wave B 的 7 个基线工具逐一调用并读取 3 个资源；Mystery Voyage 的 2 个只读工具由当前协议 manifest 额外覆盖。
+All resources are fixed to `application/json` and expose summaries only; an unknown URI returns a protocol error. `tests/mcpProtocol.test.js` uses a real SDK client to call each of the 7 Wave B baseline tools and read the 3 resources; the 2 read-only Mystery Voyage tools are additionally covered by the current protocol manifest.
 
-## 4. 官方 Injective MCP adapter 与安全边界
+## 4. Official Injective MCP Adapter and Security Boundary
 
-AgentBL 通过 `InjectiveMcpAdapter` 调用 InjectiveLabs 官方 MCP Server 的 `usdc_native_info` 与 `evm_broadcast`。已完成一次查询和一笔指向 allowlist 合约、value 为 0 的受控 testnet EVM 交易：[`0x1578c1…984f`](https://testnet.blockscout.injective.network/tx/0x1578c10144a6216d8580eabc1497ee02c99a435c20cd315c1492fc0d78d8984f)。脱敏 tool trace 见 [`evidence/injective-mcp-smoke.json`](./evidence/injective-mcp-smoke.json)。
+AgentBL calls `usdc_native_info` and `evm_broadcast` on the official InjectiveLabs MCP Server through `InjectiveMcpAdapter`. One query and one controlled testnet EVM transaction with value 0, targeting an allowlisted contract, have been completed: [`0x1578c1…984f`](https://testnet.blockscout.injective.network/tx/0x1578c10144a6216d8580eabc1497ee02c99a435c20cd315c1492fc0d78d8984f). The redacted tool trace is in [`evidence/injective-mcp-smoke.json`](./evidence/injective-mcp-smoke.json).
 
-所有写操作均 fail-closed：网络固定 `eip155:1439`、目标来自本地部署 allowlist、金额上限 `0.005 USDC`、默认 dry-run。真实写入必须同时具备 `approved=true` 与不进入模型上下文的本地 `MCP_HUMAN_APPROVAL_TOKEN`；raw-EVM smoke 还只允许 `nextPoolId()` 的 selector `0x18e56131`。prompt 或单据正文不参与授权判断。
+All write operations are fail-closed: the network is fixed to `eip155:1439`, targets come from the local deployment allowlist, the amount is capped at `0.005 USDC`, and dry-run is the default. A real write requires both `approved=true` and a local `MCP_HUMAN_APPROVAL_TOKEN` that never enters the model context; the raw-EVM smoke test additionally only allows the `nextPoolId()` selector `0x18e56131`. Prompts and document bodies play no part in authorization decisions.
 
-当前官方 MCP 源码构造 `MsgEthereumTx` 时缺少 protobuf `from` 字段，testnet ante handler 会返回 `sender address missing`。复现官方 raw EVM smoke 前，对官方 checkout 应用仓库中的最小兼容补丁：
+The current official MCP source omits the protobuf `from` field when constructing `MsgEthereumTx`, so the testnet ante handler returns `sender address missing`. Before reproducing the official raw EVM smoke test, apply the minimal compatibility patch from this repository to the official checkout:
 
 ```bash
 git -C <injective-mcp-server> apply <agentbl>/patches/injective-mcp-msg-sender.patch
 npm --prefix <injective-mcp-server> run build
 ```
 
-AgentBL adapter 另外固定非零 gas price，并将 Ethereum extension 交易的 Cosmos memo 留空；这些是协议兼容参数，不会放宽上述安全策略。
+The AgentBL adapter also pins a non-zero gas price and leaves the Cosmos memo empty for Ethereum extension transactions; these are protocol-compatibility parameters and do not relax the security policy above.
 
-## 5. 复验命令
+## 5. Re-verification Commands
 
 ```bash
 npm test
@@ -83,8 +83,8 @@ npm --prefix hardhat test
 npm run verify:wave-b
 npm run mcp:stdio
 MCP_LIVE_CONFIRM=injective-testnet npm run smoke:mcp:injective
-                              # 需要测试网私钥、gas 与官方 MCP build
+                              # requires a testnet private key, gas and an official MCP build
 npm run preflight
 ```
 
-`verify:wave-b` 会再次读取 explorer 交易与事件并生成 Gate B 证据；它会发送新的 eBL / offering / pricing testnet 交易。普通离线验收只需 `npm test`，不会自动花费或写链。
+`verify:wave-b` re-reads the explorer transactions and events and regenerates the Gate B evidence; it sends new eBL / offering / pricing testnet transactions. Routine offline acceptance only needs `npm test`, which never spends funds or writes to the chain.

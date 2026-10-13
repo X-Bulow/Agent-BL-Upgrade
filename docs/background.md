@@ -1,415 +1,415 @@
-# AgentBL Agent 背景入门手册
+# AgentBL Agent Background Primer
 
-> 给非国际贸易、非供应链金融背景同学的黑客松补课材料。
-> 目标是让团队在 30-60 分钟内理解：为什么电子提单可以成为 RWA 贸易融资的核心资产，为什么 **AI Pricing & Risk Agent** 不是装饰，而是这个项目真正给 RWA 折价定价、控制发行额度的核心引擎。
-> 更新时间：2026-06-06。当前主线见 `docs/PRD.md`（v0.2 AI Dynamic Pricing RWA）与 `docs/tasks.md`。本文用于项目设计和学习，不构成法律意见、投资建议、融资建议或合规意见。
+> Hackathon catch-up material for teammates without a background in international trade or supply-chain finance.
+> The goal is for the team to understand, within 30-60 minutes, why an electronic bill of lading can be the core asset of RWA trade finance, and why the **AI Pricing & Risk Agent** is not decoration but the core engine that actually sets the RWA discount and controls the issuance amount in this project.
+> Last updated: 2026-06-06. For the current mainline see `docs/PRD.md` (v0.2 AI Dynamic Pricing RWA) and `docs/tasks.md`. This document is for project design and learning only and does not constitute legal, investment, financing or compliance advice.
 >
-> ⚠️ 模型已升级：早期版本把项目描述成"许可型资金池放贷 + RiskReport 风控"。现在的主线是 **AI 动态定价的 eBL-backed RWA 折价发行**——AI 不只是给风险打分，而是直接决定 RWA 的发行折价、出口商最多能融多少、合约是否暂停发行。本文已对齐新模型。
+> ⚠️ The model has been upgraded: earlier versions described the project as "permissioned pool lending + RiskReport risk control". The current mainline is **AI dynamically priced, discounted issuance of eBL-backed RWA**: the AI does not just score risk, it directly decides the RWA's issue discount, the maximum amount the exporter can raise, and whether the contract pauses issuance. This document has been aligned with the new model.
 
 ---
 
-## 目录
+## Table of Contents
 
-1. [项目一句话](#1-项目一句话)
-2. [国际贸易为什么天然需要融资](#2-国际贸易为什么天然需要融资)
-3. [中小出口商的真实痛点](#3-中小出口商的真实痛点)
-4. [提单是什么，为什么它是本项目核心](#4-提单是什么为什么它是本项目核心)
-5. [电子提单 eBL 不是 PDF，而是可控制、可转让的电子权利凭证](#5-电子提单-ebl-不是-pdf而是可控制可转让的电子权利凭证)
-6. [传统贸易融资流程和它的问题](#6-传统贸易融资流程和它的问题)
-7. [Web3 / RWA 视角下 AgentBL 在做什么](#7-web3--rwa-视角下-agentbl-在做什么)
-8. [Token 到底代表什么，收益从哪里来](#8-token-到底代表什么收益从哪里来)
-9. [风险从哪里来：这不是普通 DeFi 抵押借贷](#9-风险从哪里来这不是普通-defi-抵押借贷)
-10. [AI Risk Agent 应该做什么](#10-ai-risk-agent-应该做什么)
-11. [智能合约状态机和链上动作](#11-智能合约状态机和链上动作)
-12. [黑客松 Demo 怎么讲才有说服力](#12-黑客松-demo-怎么讲才有说服力)
-13. [合规表达边界](#13-合规表达边界)
-14. [产品落地的现实路径](#14-产品落地的现实路径)
-15. [评委可能问的问题](#15-评委可能问的问题)
-16. [术语表](#16-术语表)
-17. [参考资料](#17-参考资料)
+1. [The Project in One Sentence](#1-the-project-in-one-sentence)
+2. [Why International Trade Inherently Needs Financing](#2-why-international-trade-inherently-needs-financing)
+3. [The Real Pain Points of SME Exporters](#3-the-real-pain-points-of-sme-exporters)
+4. [What a Bill of Lading Is, and Why It Is Central to This Project](#4-what-a-bill-of-lading-is-and-why-it-is-central-to-this-project)
+5. [An eBL Is Not a PDF, but a Controllable, Transferable Electronic Title Document](#5-an-ebl-is-not-a-pdf-but-a-controllable-transferable-electronic-title-document)
+6. [The Traditional Trade Finance Process and Its Problems](#6-the-traditional-trade-finance-process-and-its-problems)
+7. [What AgentBL Does from a Web3 / RWA Perspective](#7-what-agentbl-does-from-a-web3--rwa-perspective)
+8. [What the Token Actually Represents, and Where the Returns Come From](#8-what-the-token-actually-represents-and-where-the-returns-come-from)
+9. [Where the Risk Comes From: This Is Not Ordinary DeFi Collateralised Lending](#9-where-the-risk-comes-from-this-is-not-ordinary-defi-collateralised-lending)
+10. [What the AI Pricing & Risk Agent Should Do](#10-what-the-ai-pricing--risk-agent-should-do)
+11. [Smart Contract State Machine and On-Chain Actions](#11-smart-contract-state-machine-and-on-chain-actions)
+12. [How to Make the Hackathon Demo Convincing](#12-how-to-make-the-hackathon-demo-convincing)
+13. [Compliance Messaging Boundaries](#13-compliance-messaging-boundaries)
+14. [A Realistic Path to Product Rollout](#14-a-realistic-path-to-product-rollout)
+15. [Questions the Judges May Ask](#15-questions-the-judges-may-ask)
+16. [Glossary](#16-glossary)
+17. [References](#17-references)
 
 ---
 
-## 1. 项目一句话
+## 1. The Project in One Sentence
 
-**AgentBL Agent 是一个基于电子提单的 AI 动态定价 RWA 贸易融资协议：出口商把电子提单质押进智能合约，系统发行以该批货物价值为支撑的 RWA 凭证；AI Pricing & Risk Agent 根据出口商到账速度偏好、货物估值、运输/天气/战争/港口/保险/地缘/市场价格风险，动态给出 RWA 的折价发行价格、风险折扣解释、可融资额度上限和链上风控动作。**
+**AgentBL Agent is an AI dynamically priced RWA trade finance protocol built on electronic bills of lading: the exporter pledges an electronic bill of lading into a smart contract, and the system issues RWA certificates backed by the value of that cargo; the AI Pricing & Risk Agent, based on the exporter's preferred speed of payment, the cargo valuation, and transport / weather / war / port / insurance / geopolitical / market price risks, dynamically sets the RWA's discounted issue price, an explanation of the risk discount, the maximum financeable amount, and the on-chain risk-control action.**
 
-英文版：
+English version:
 
 > AgentBL turns an electronic bill of lading into a dynamically priced RWA financing pool, where AI prices trade risk before investors buy it.
 
-更适合路演的版本：
+A version better suited to the pitch:
 
 > We turn electronic bills of lading into verifiable RWA collateral, and let an AI agent price the discount, the financing cap and the risk action before investors subscribe.
 
-一句话拆开看：
+Breaking the sentence down:
 
-| 关键词 | 含义 |
+| Keyword | Meaning |
 |---|---|
-| 电子提单 eBL | 代表海运货物权利的电子贸易文件，是 RWA 的底层抵押物 |
-| RWA 折价发行 | 以货值为支撑发行凭证，按 AI 折价（如 0.80 / 0.90 USD）卖给投资者，目标到期兑付 1 USD |
-| AI Pricing & Risk Agent | 把单据、货物、运输、市场、保险、战争/地缘信息，转成结构化的 **PricingQuote**（折价、额度、动作） |
-| 到账速度偏好 | 出口商越想快拿钱，就要给投资者越高折扣，AI 把"速度↔折扣"显式定价 |
-| 智能合约 | 记录质押、定价、发行、认购、改价、暂停、结算、清算等状态 |
+| Electronic bill of lading (eBL) | An electronic trade document representing rights to seaborne cargo; the underlying collateral of the RWA |
+| Discounted RWA issuance | Certificates backed by cargo value are sold to investors at an AI-set discount (e.g. 0.80 / 0.90 USD), with a target redemption of 1 USD at maturity |
+| AI Pricing & Risk Agent | Turns document, cargo, transport, market, insurance and war/geopolitical information into a structured **PricingQuote** (discount, amount, action) |
+| Speed-of-payment preference | The faster the exporter wants the money, the bigger the discount they must give investors; the AI prices the "speed ↔ discount" trade-off explicitly |
+| Smart contract | Records the pledge, pricing, issuance, subscription, repricing, pausing, settlement, liquidation and other states |
 
-项目的本质不是"发一个提单币"，也不只是"给贸易打个风险分"，而是：
+The essence of the project is not "issuing a bill-of-lading coin", nor just "giving trade a risk score", but:
 
-> **让 AI 在投资者认购之前，就把真实贸易风险定价成一个可解释、可上链、可执行的 RWA 折价。**
+> **Letting AI price real trade risk into an explainable, on-chain, enforceable RWA discount before investors subscribe.**
 
-普通 DeFi 只会看 token price 决定清算；AgentBL 让 AI 决定 **RWA 该以什么折价发行**——这才是 AI 真正承担金融功能，而不是当聊天机器人。
-
----
-
-## 2. 国际贸易为什么天然需要融资
-
-国际贸易和普通本地交易最大的区别是：
-
-```text
-货物、买方、卖方、资金、银行、承运人、保险公司，通常不在同一个地方，
-也不在同一个时间点完成交割。
-```
-
-一个典型出口贸易场景：
-
-1. 中国出口商接到欧洲进口商的订单。
-2. 出口商先采购原料、组织生产、订舱、报关、装船。
-3. 货物已经离港，但海上运输可能需要 20-45 天。
-4. 出口商已经花了钱，却还没有收到进口商货款。
-5. 进口商还没收到货，也不愿意提前付全款。
-6. 银行、信用证、提单、保险、保理、押汇等机制被引入，用来解决信用和现金流错位。
-
-所以贸易融资解决的不是“企业有没有利润”，而是：
-
-> **利润在未来回款里，但生产、采购、物流和工资的钱今天就要付。**
-
-亚洲开发银行 ADB 的 Global Trade Finance Gap Survey 显示，全球贸易融资缺口仍约为 2.5 万亿美元。这说明真实贸易里并不缺订单和货物，缺的是能被资金方快速理解和承接的风险基础设施。
-
-### 2.1 一个直观时间线
-
-```text
-T0 接订单
-  出口商要备货、生产、采购、订舱，现金开始流出
-
-T1 装船并取得提单
-  出口商已经履约了一大步，但钱还没有回来
-
-T2 海上运输
-  船舶延误、港口拥堵、货损、保险到期、商品价格波动都可能发生
-
-T3 到港 / 赎单 / 提货
-  进口商付款，提单权利转移，货物被提走
-
-T4 出口商回款
-  出口商才能真正补回现金流
-```
-
-AgentBL 要切入的是 T1 到 T4 之间的现金流缺口。
+Ordinary DeFi only looks at the token price to decide liquidations; AgentBL lets AI decide **at what discount the RWA should be issued**. That is AI genuinely performing a financial function, not acting as a chatbot.
 
 ---
 
-## 3. 中小出口商的真实痛点
+## 2. Why International Trade Inherently Needs Financing
 
-中小出口商不是完全不能做生意，而是会被现金流和信用体系限制住。
+The biggest difference between international trade and an ordinary local transaction is:
 
-| 痛点 | 通俗解释 | 对项目的启发 |
+```text
+The goods, buyer, seller, funds, banks, carrier and insurer are usually not in the same place,
+and delivery is not completed at the same point in time.
+```
+
+A typical export trade scenario:
+
+1. A Chinese exporter receives an order from a European importer.
+2. The exporter first buys raw materials, organises production, books shipping space, clears customs and loads the ship.
+3. The cargo has left port, but the sea voyage may take 20-45 days.
+4. The exporter has already spent money but has not yet received payment from the importer.
+5. The importer has not yet received the goods and is unwilling to pay in full in advance.
+6. Banks, letters of credit, bills of lading, insurance, factoring, export bill financing and similar mechanisms are brought in to resolve the mismatch in credit and cash flow.
+
+So trade finance does not solve "whether the business is profitable"; it solves:
+
+> **The profit is in future receivables, but production, procurement, logistics and wages must be paid today.**
+
+The Asian Development Bank (ADB) Global Trade Finance Gap Survey shows that the global trade finance gap is still around USD 2.5 trillion. This shows that real trade is not short of orders or goods; what is missing is risk infrastructure that capital providers can quickly understand and take on.
+
+### 2.1 An intuitive timeline
+
+```text
+T0 Order received
+  The exporter has to prepare goods, produce, procure and book space; cash starts flowing out
+
+T1 Shipped, bill of lading obtained
+  The exporter has already performed a big part of the contract, but the money has not come back
+
+T2 At sea
+  Vessel delays, port congestion, cargo damage, insurance expiry and commodity price swings can all happen
+
+T3 Arrival / document release / cargo collection
+  The importer pays, the rights under the bill of lading transfer, and the cargo is collected
+
+T4 Exporter gets paid
+  Only now can the exporter actually replenish its cash flow
+```
+
+AgentBL targets the cash-flow gap between T1 and T4.
+
+---
+
+## 3. The Real Pain Points of SME Exporters
+
+SME exporters are not completely unable to do business; they are constrained by cash flow and the credit system.
+
+| Pain point | Plain explanation | Takeaway for the project |
 |---|---|---|
-| 接不了大订单 | 买方愿意下 500 万美元订单，但出口商只能垫 100 万美元现金 | 真实订单不能自动变成融资能力 |
-| 周转慢 | 钱要等进口商付款后才能回来，无法滚动接单 | 需要把“在途货物权利”提前变现 |
-| 银行门槛高 | 银行看企业规模、流水、历史信用、抵押物 | 小企业即使贸易真实，也可能获批慢或被拒 |
-| 融资成本高 | 银行不批时，只能找更贵的资金 | 透明风控可以降低资金方不确定性溢价 |
-| 抗风险弱 | 延误、汇率、商品价格、保险、买方违约都会压垮现金流 | 风险需要动态监控，不是放款时看一次 |
+| Can't take large orders | The buyer is willing to place a USD 5 million order, but the exporter can only front USD 1 million in cash | Real orders don't automatically become financing capacity |
+| Slow turnover | Money only comes back after the importer pays, so orders can't be rolled over | "Rights to goods in transit" need to be monetised early |
+| High bank thresholds | Banks look at company size, turnover, credit history and collateral | Even with genuine trade, small firms may be approved slowly or rejected |
+| High financing costs | When banks say no, the only option is more expensive money | Transparent risk control can reduce capital providers' uncertainty premium |
+| Weak resilience | Delays, FX, commodity prices, insurance and buyer default can all crush cash flow | Risk needs dynamic monitoring, not a one-time check at disbursement |
 
-不要把痛点讲成：
+Don't frame the pain point as:
 
-> 银行不给钱，所以中小出口商完全做不了生意。
+> Banks won't lend, so SME exporters can't do business at all.
 
-更准确的讲法是：
+A more accurate framing is:
 
-> **中小出口商已经有真实贸易、真实货物和真实提单，但传统银行无法高效地把这些贸易凭证转化为可融资、可追踪、可处置的资产。**
+> **SME exporters already have real trade, real goods and real bills of lading, but traditional banks cannot efficiently turn these trade documents into financeable, trackable, disposable assets.**
 
-AgentBL 的价值就在这里：
+This is exactly where AgentBL adds value:
 
 ```text
-真实贸易
-→ 电子提单
-→ 链上质押凭证
-→ AI 估值 + 折价定价
-→ permissioned 投资者按折价认购 RWA
-→ 动态改价 / 暂停 / 风控动作
+Real trade
+→ Electronic bill of lading
+→ On-chain pledge certificate
+→ AI valuation + discount pricing
+→ Permissioned investors subscribe to the RWA at the discount
+→ Dynamic repricing / pausing / risk-control actions
 ```
 
 ---
 
-## 4. 提单是什么，为什么它是本项目核心
+## 4. What a Bill of Lading Is, and Why It Is Central to This Project
 
-提单，英文 **Bill of Lading**，简称 **B/L**。
+A bill of lading, in English **Bill of Lading**, abbreviated **B/L**.
 
-你可以把它理解为国际海运中的“超级凭证”。它通常同时承担三类功能：
+You can think of it as the "super document" of international ocean shipping. It usually performs three functions at once:
 
-| 功能 | 通俗解释 | 对 AgentBL 的意义 |
+| Function | Plain explanation | Significance for AgentBL |
 |---|---|---|
-| 货物收据 | 承运人确认已经收到或装载这批货 | 证明货物真实存在并进入运输流程 |
-| 运输合同证明 | 承运人与托运人之间存在运输安排 | 证明谁负责把货从哪里运到哪里 |
-| 提货 / 物权凭证 | 谁控制可转让提单，谁通常可以主张提货权 | 可以被质押、转让、融资、处置 |
+| Receipt for goods | The carrier confirms it has received or loaded the goods | Proves the goods really exist and have entered the transport process |
+| Evidence of the contract of carriage | A transport arrangement exists between the carrier and the shipper | Proves who is responsible for moving the goods from where to where |
+| Document of title / right to take delivery | Whoever controls a negotiable bill of lading can usually claim delivery | Can be pledged, transferred, financed and disposed of |
 
-### 4.1 为什么不是“货物上链”
+### 4.1 Why it is not "putting the goods on-chain"
 
-现实里的铜、咖啡豆、机械设备不可能真的进入区块链。
+Real copper, coffee beans or machinery can't actually go onto a blockchain.
 
-能上链的是：
+What can go on-chain is:
 
-> **代表这批货物相关权利的电子贸易文件。**
+> **The electronic trade documents representing the rights related to that cargo.**
 
-所以本项目更准确的说法不是：
-
-```text
-把货物上链
-```
-
-而是：
+So a more accurate description of this project is not:
 
 ```text
-把电子提单所代表的货物权利和融资权益映射到链上
+Putting the goods on-chain
 ```
 
-### 4.2 提单也有边界
+but rather:
 
-为了黑客松容易理解，我们常说“提单代表货物权利”。但真实业务里要注意：
+```text
+Mapping the cargo rights and financing interests represented by the electronic bill of lading onto the chain
+```
 
-- 不是所有运输单据都是可转让物权凭证；
-- 海运提单、海运单、不可转让提单、记名提单在法律效果上可能不同；
-- 不同司法辖区对提单“占有”“控制”“背书”“转让”的规则可能不同；
-- 真实落地需要法律文件、质押协议、托管安排、承运人或 eBL 平台支持。
+### 4.2 Bills of lading have limits too
 
-黑客松 MVP 可以简化，但路演时要体现你知道这个边界：
+To keep things simple for the hackathon, we often say "the bill of lading represents rights to the goods". But in real business, note that:
 
-> **我们不是声称任何 PDF 都能变成抵押物，而是以符合法律和平台规则的电子提单作为可验证贸易权利凭证。**
+- not every transport document is a negotiable document of title;
+- ocean bills of lading, sea waybills, non-negotiable bills of lading and straight bills of lading may have different legal effects;
+- different jurisdictions may have different rules on "possession", "control", "endorsement" and "transfer" of bills of lading;
+- real-world rollout needs legal documents, pledge agreements, custody arrangements, and carrier or eBL platform support.
+
+The hackathon MVP can simplify, but the pitch should show that you know these limits:
+
+> **We are not claiming that any PDF can become collateral; we use electronic bills of lading that comply with the law and platform rules as verifiable trade-rights documents.**
 
 ---
 
-## 5. 电子提单 eBL 不是 PDF，而是可控制、可转让的电子权利凭证
+## 5. An eBL Is Not a PDF, but a Controllable, Transferable Electronic Title Document
 
-电子提单，英文 **Electronic Bill of Lading**，简称 **eBL**。
+An electronic bill of lading, in English **Electronic Bill of Lading**, abbreviated **eBL**.
 
-它的价值不是“把纸质提单扫描成 PDF”，而是让贸易文件具备这些能力：
+Its value is not "scanning a paper bill of lading into a PDF", but giving trade documents these capabilities:
 
-- 唯一性：同一份电子提单不能被无限复制后重复质押；
-- 控制权：系统能判断当前谁控制这份电子提单；
-- 完整性：关键字段和签发记录不能被随意篡改；
-- 可追溯：签发、转让、质押、解除质押都有记录；
-- 可互操作：可以和数字身份、智能合约、风控 Agent、资金池结合；
-- 可法律识别：在支持电子可转让记录的司法辖区中，电子记录可以承担纸质单据的功能。
+- Uniqueness: the same eBL cannot be copied endlessly and pledged repeatedly;
+- Control: the system can determine who currently controls the eBL;
+- Integrity: key fields and the issuance record cannot be arbitrarily tampered with;
+- Traceability: issuance, transfer, pledge and release of pledge are all recorded;
+- Interoperability: it can be combined with digital identity, smart contracts, risk-control agents and funding pools;
+- Legal recognition: in jurisdictions that support electronic transferable records, the electronic record can perform the functions of the paper document.
 
-### 5.1 eBL 背后的法律趋势
+### 5.1 The legal trend behind eBLs
 
-电子提单不是空想，而是国际贸易数字化的重要方向。
+Electronic bills of lading are not wishful thinking; they are an important direction in the digitisation of international trade.
 
-| 方向 | 背景 |
+| Direction | Background |
 |---|---|
-| DCSA | 推动成员承运人在 2030 年实现 100% eBL 使用目标 |
-| UNCITRAL MLETR | 为电子可转让记录提供示范法框架，覆盖提单、汇票、本票、仓单等 |
-| 新加坡 ETA | 2021 年修订 Electronic Transactions Act，采用 MLETR 思路 |
-| 英国 ETDA 2023 | 让符合条件的电子贸易文件可以被占有、背书、转让 |
-| TradeTrust 等基础设施 | 提供电子贸易文件验证、转让和跨系统互操作的技术实践 |
+| DCSA | Pushing member carriers towards a target of 100% eBL adoption by 2030 |
+| UNCITRAL MLETR | Provides a model-law framework for electronic transferable records, covering bills of lading, bills of exchange, promissory notes, warehouse receipts, etc. |
+| Singapore ETA | The Electronic Transactions Act was amended in 2021, adopting the MLETR approach |
+| UK ETDA 2023 | Allows qualifying electronic trade documents to be possessed, endorsed and transferred |
+| TradeTrust and similar infrastructure | Provides technical practice for verifying, transferring and interoperating electronic trade documents across systems |
 
-这给 AgentBL 的叙事提供了现实基础：
+This gives AgentBL's narrative a real-world foundation:
 
-> **电子提单已经是数字贸易基础设施的一部分，我们进一步把它连接到 RWA 融资、AI 风控和链上执行。**
+> **Electronic bills of lading are already part of digital trade infrastructure; we go one step further and connect them to RWA financing, AI risk control and on-chain execution.**
 
-### 5.2 eBL 上链时真正要记录什么
+### 5.2 What actually needs to be recorded when an eBL goes on-chain
 
-链上不一定要保存完整商业文件。更合理的做法是保存：
+The chain does not need to store the complete commercial documents. A more sensible approach is to store:
 
-| 链上字段 | 用途 |
+| On-chain field | Purpose |
 |---|---|
-| eBL ID | 标识融资对应哪份电子提单 |
-| document hash | 证明文件版本没有被篡改 |
-| issuer / carrier | 证明签发方 |
-| owner / pledgee | 记录控制权或质押关系 |
-| financing amount | 记录融资金额 |
-| risk status | 记录 AI Agent 输出的风险状态 |
-| evidence hash | 记录风险判断依据的哈希 |
+| eBL ID | Identifies which eBL the financing corresponds to |
+| document hash | Proves the document version has not been tampered with |
+| issuer / carrier | Proves who issued it |
+| owner / pledgee | Records control or the pledge relationship |
+| financing amount | Records the financed amount |
+| risk status | Records the risk status output by the AI agent |
+| evidence hash | Records the hash of the evidence behind the risk judgement |
 
-完整文件、商业合同、保险单、承运人记录可以保存在链下或许可系统中，链上只记录可验证摘要和状态。
+The full documents, commercial contracts, insurance policies and carrier records can be kept off-chain or in a permissioned system; the chain records only verifiable digests and status.
 
 ---
 
-## 6. 传统贸易融资流程和它的问题
+## 6. The Traditional Trade Finance Process and Its Problems
 
-一个极简传统流程：
+A minimal traditional process:
 
 ```text
-出口商发货
-→ 承运人签发提单
-→ 出口商把提单、发票、合同、信用证等提交给银行
-→ 银行审单并决定是否融资
-→ 银行放款给出口商
-→ 进口商付款赎单
-→ 银行收回款项
-→ 进口商提货
+Exporter ships the goods
+→ Carrier issues the bill of lading
+→ Exporter submits the bill of lading, invoice, contract, letter of credit, etc. to the bank
+→ Bank examines the documents and decides whether to finance
+→ Bank disburses funds to the exporter
+→ Importer pays to take up the documents
+→ Bank recovers the funds
+→ Importer collects the goods
 ```
 
-传统模式不是没有价值，而是对中小企业和新型资金方不够友好。
+The traditional model is not without value, but it is not friendly enough to SMEs and new types of capital providers.
 
-| 问题 | 解释 |
+| Problem | Explanation |
 |---|---|
-| 流程慢 | 单据跨境传递和人工审核耗时 |
-| 门槛高 | 银行更偏好规模大、历史信用强、材料规范的客户 |
-| 信息黑盒 | 资金方难以实时知道货物状态、价格变化、保险有效性 |
-| 纸质风险 | 单据可能丢失、伪造、重复质押、难以验证 |
-| 动态风控弱 | 放款后风险变化不能及时转成可执行动作 |
+| Slow process | Cross-border document transfer and manual review take time |
+| High thresholds | Banks prefer large clients with strong credit histories and well-prepared paperwork |
+| Information black box | Capital providers struggle to know cargo status, price changes and insurance validity in real time |
+| Paper risk | Documents can be lost, forged, pledged twice, or be hard to verify |
+| Weak dynamic risk control | Risk changes after disbursement can't be turned into enforceable actions in time |
 
-AgentBL 的替代思路：
+AgentBL's alternative approach:
 
 ```text
-传统：银行人工审单 + 内部风控 + 中心化放款
+Traditional: manual bank document review + internal risk control + centralised disbursement
 
-AgentBL：
-电子提单链上质押
-+ AI Pricing & Risk Agent 估值、折价定价、动态监控
-+ permissioned investor pool 按 AI 折价认购 RWA
-+ 智能合约自动执行发行、改价、暂停、结算、清算
+AgentBL:
+On-chain pledge of the electronic bill of lading
++ AI Pricing & Risk Agent valuation, discount pricing and dynamic monitoring
++ Permissioned investor pool subscribes to the RWA at the AI discount
++ Smart contracts automatically execute issuance, repricing, pausing, settlement and liquidation
 ```
 
 ---
 
-## 7. Web3 / RWA 视角下 AgentBL 在做什么
+## 7. What AgentBL Does from a Web3 / RWA Perspective
 
-RWA = **Real World Assets**，现实世界资产。
+RWA = **Real World Assets**.
 
-通俗理解：
+In plain terms:
 
-> 把现实世界中的资产、现金流或权利，用链上 Token / 凭证 / 状态机表达出来。
+> Representing real-world assets, cash flows or rights on-chain as tokens / certificates / state machines.
 
-常见 RWA 包括：
+Common RWAs include:
 
-- 国债 Token；
-- 房地产收益权 Token；
-- 黄金或大宗商品凭证；
-- 应收账款融资凭证；
-- 仓单 Token；
-- 碳信用；
-- 本项目中的电子提单融资份额。
+- tokenised government bonds;
+- tokenised real-estate income rights;
+- gold or commodity certificates;
+- receivables financing certificates;
+- warehouse-receipt tokens;
+- carbon credits;
+- the electronic bill of lading financing shares in this project.
 
-### 7.1 AgentBL 的核心机制
-
-```text
-出口商获得电子提单
-→ 将电子提单质押进智能合约 / 登记到 eBL Registry
-→ AI Pricing & Risk Agent 审单、估值、评估运输/保险/市场/战争风险
-→ AI 输出 PricingQuote：折价发行价、推荐发行量、可融资上限、风险动作
-→ 合约按 AI 折价创建 RWA 发行池（如 1 RWA 发行价 0.85 USD，目标兑付 1 USD）
-→ 合格投资者按折价认购 RWA，资金到账给出口商
-→ 运输途中 Agent 持续监控，风险变化时 RiskPricingOracle 改价 / 暂停 / 冻结
-→ 进口商付款 → 合约结算 → 投资者按目标兑付价赎回 RWA
-→ 若发生重大风险，合约进入暂停发行 / 冻结 / 清算 / 追偿流程
-```
-
-注意两个关键点：
-
-1. **AI 决定折价，不是事后打分。** 投资者看到的发行价（0.80 / 0.86 / 0.90...）就是 AI 把"到账速度 + 风险"折算出来的结果。
-2. **折价换速度。** 出口商想越快拿钱，AI 给的发行价越低（投资者折扣越大、出口商融资成本越高）；想降低融资成本，就接受慢一点、发行价高一点。
-
-### 7.2 和普通 DeFi 抵押借贷的区别
-
-普通 DeFi 常见逻辑：
+### 7.1 AgentBL's core mechanism
 
 ```text
-ETH / BTC / stablecoin 抵押
-→ 价格预言机更新
-→ 抵押率不足时清算
+Exporter obtains the electronic bill of lading
+→ Pledges the eBL into a smart contract / registers it in the eBL Registry
+→ AI Pricing & Risk Agent reviews the documents, values the cargo, and assesses transport/insurance/market/war risk
+→ AI outputs a PricingQuote: discounted issue price, recommended issuance size, financing cap, risk action
+→ Contract creates an RWA offering pool at the AI discount (e.g. 1 RWA issued at 0.85 USD, target redemption 1 USD)
+→ Qualified investors subscribe to the RWA at the discount; funds are paid to the exporter
+→ The agent keeps monitoring in transit; when risk changes, RiskPricingOracle reprices / pauses / freezes
+→ Importer pays → contract settles → investors redeem the RWA at the target redemption price
+→ If a major risk event occurs, the contract enters the paused issuance / frozen / liquidation / recovery flow
 ```
 
-AgentBL 的逻辑：
+Note two key points:
+
+1. **AI sets the discount; it doesn't score after the fact.** The issue price investors see (0.80 / 0.86 / 0.90...) is the result of the AI converting "speed of payment + risk" into a price.
+2. **Discount buys speed.** The faster the exporter wants the money, the lower the AI's issue price (a bigger discount for investors, a higher financing cost for the exporter); to lower financing costs, accept slower payment and a higher issue price.
+
+### 7.2 How it differs from ordinary DeFi collateralised lending
+
+Typical ordinary DeFi logic:
 
 ```text
-现实贸易资产
-→ 电子提单
-→ 单据真实性、货物估值、运输事件、保险覆盖、市场价格、战争/地缘风险
-→ AI Pricing & Risk Agent 生成 PricingQuote（折价 + 额度 + 动作）
-→ 智能合约按折价发行 RWA，并随风险改价 / 暂停 / 清算
+ETH / BTC / stablecoin as collateral
+→ Price oracle updates
+→ Liquidation when the collateral ratio is too low
 ```
 
-核心差异：
+AgentBL's logic:
 
-| 普通 DeFi | AgentBL |
+```text
+Real trade asset
+→ Electronic bill of lading
+→ Document authenticity, cargo valuation, transport events, insurance coverage, market price, war/geopolitical risk
+→ AI Pricing & Risk Agent generates a PricingQuote (discount + amount + action)
+→ Smart contract issues the RWA at the discount, and reprices / pauses / liquidates as risk changes
+```
+
+Core differences:
+
+| Ordinary DeFi | AgentBL |
 |---|---|
-| 抵押物多为链上资产 | 抵押物来自真实贸易权利（eBL） |
-| 价格预言机喂的是 token 价格 | RiskPricingOracle 喂的是 AI 折价、风险等级和合约动作 |
-| 定价靠 AMM / 市场撮合 | **发行折价由 AI 根据到账速度和风险决定** |
-| 清算主要看 token 价格 | 风险动作来自延误、货损、保险失效、战争、价格波动、违约 |
-| 资产容易自动处置 | 提单和货物处置需要法律、承运人、保险、追偿流程 |
+| Collateral is mostly on-chain assets | Collateral comes from real trade rights (eBL) |
+| Price oracles feed token prices | RiskPricingOracle feeds the AI discount, risk level and contract action |
+| Pricing relies on AMMs / market matching | **The issue discount is set by AI based on speed of payment and risk** |
+| Liquidation mainly depends on token price | Risk actions come from delays, cargo damage, insurance lapses, war, price swings and default |
+| Assets are easy to dispose of automatically | Disposing of bills of lading and cargo requires legal, carrier, insurance and recovery processes |
 
-这就是为什么本项目需要 AI Agent：它要在投资者认购前，把链下风险变成一个可解释的发行折价。
+This is why the project needs an AI agent: it has to turn off-chain risk into an explainable issue discount before investors subscribe.
 
 ---
 
-## 8. Token 到底代表什么，收益从哪里来
+## 8. What the Token Actually Represents, and Where the Returns Come From
 
-这是评委和投资人最容易追问的地方。
+This is where judges and investors are most likely to dig in.
 
-### 8.1 RWA Token 不是"空气币"
+### 8.1 The RWA token is not a "vapour coin"
 
-在合规表述中，AgentBL 的 RWA 凭证不应该被描述成公开交易的投机币。
+In compliant messaging, AgentBL's RWA certificate should not be described as a publicly traded speculative coin.
 
-更稳妥的定位是：
+A safer positioning is:
 
-> **以某批电子提单货权为支撑、折价发行的 RWA 兑付凭证。**
+> **A discounted RWA redemption certificate backed by the cargo rights under a specific electronic bill of lading.**
 
-它代表：
+It represents:
 
-| 权利 | 含义 |
+| Right | Meaning |
 |---|---|
-| 目标兑付权 | 持有人在贸易回款后，按目标兑付价（1 USD / RWA）赎回，**非保本承诺** |
-| 折价认购的上行空间 | 投资者以 0.80 / 0.90 折价买入，回款顺利则赚取折价到 1 USD 的价差 |
-| 质押物受偿权 | 出口商 / 进口商违约时，对提单或货物处置收益按比例受偿 |
-| 链上记账凭证 | 记录谁以什么折价认购、对应哪笔贸易、当前风险和发行状态 |
+| Target redemption right | After the trade proceeds come in, the holder redeems at the target redemption price (1 USD / RWA); **this is not a principal guarantee** |
+| Upside from discounted subscription | Investors buy at a 0.80 / 0.90 discount and, if repayment goes smoothly, earn the spread from the discount up to 1 USD |
+| Claim on the collateral | If the exporter / importer defaults, holders are paid pro rata from the proceeds of disposing of the bill of lading or cargo |
+| On-chain record | Records who subscribed at what discount, which trade it corresponds to, and the current risk and issuance status |
 
-注意：`1 RWA = 1 USD` 是 **目标到期兑付价 / target redemption value**，不是无条件保本。真实兑付取决于进口商付款、货物处置、保险覆盖和清算结果。
+Note: `1 RWA = 1 USD` is the **target redemption value at maturity**, not an unconditional principal guarantee. Actual redemption depends on importer payment, cargo disposal, insurance coverage and liquidation outcomes.
 
-### 8.2 收益从哪里来
+### 8.2 Where the returns come from
 
-收益不是"Token 自己涨出来的"，而是：
+Returns do not come from "the token going up by itself", but from:
 
-> **出口商为了提前、快速拿到现金流，愿意折价发行 RWA 所让渡的那部分价差。**
+> **The spread the exporter is willing to give up by issuing the RWA at a discount, in exchange for getting cash flow early and fast.**
 
-折价发行的例子（对照 PRD §2）：
-
-```text
-货物可验证价值：1,000,000 USD
-出口商希望尽快到账：720,000 USD
-AI 折价发行价：0.80 USD / RWA（出口商选了 FAST 到账）
-发行数量：900,000 RWA
-目标到期兑付总额：900,000 RWA × 1 USD = 900,000 USD
-```
-
-对出口商：
+An example of discounted issuance (compare PRD §2):
 
 ```text
-按 0.80 折价发行 900,000 RWA，立即拿到 720,000 USD
-用这笔钱采购下一批货、付供应商、接新订单
-代价是：到期需要用回款覆盖 900,000 USD 目标兑付，差额 180,000 USD 就是融资成本
+Verifiable cargo value: 1,000,000 USD
+Cash the exporter wants as soon as possible: 720,000 USD
+AI discounted issue price: 0.80 USD / RWA (the exporter chose FAST payment)
+Issuance size: 900,000 RWA
+Total target redemption at maturity: 900,000 RWA × 1 USD = 900,000 USD
 ```
 
-对投资者：
+For the exporter:
 
 ```text
-以 0.80 认购，承担贸易和违约风险
-回款顺利时按目标兑付价 1 USD 赎回，毛上行约 25%
-但折价越大，往往意味着 AI 识别到的风险越高（速度溢价或风险溢价）
+Issues 900,000 RWA at a 0.80 discount and immediately receives 720,000 USD
+Uses the money to buy the next batch of goods, pay suppliers and take new orders
+The cost: at maturity, the proceeds must cover 900,000 USD of target redemption; the 180,000 USD difference is the financing cost
 ```
 
-关键：**同样是融资成本，旧模型表述为"利息"，新模型把它表述为"发行折价"**——因为它直接体现在投资者认购价上，且由 AI 动态决定。
+For the investor:
 
-### 8.3 为什么需要折价 + 兑付覆盖上限（不是简单的 LTV）
+```text
+Subscribes at 0.80 and bears the trade and default risk
+If repayment goes smoothly, redeems at the target redemption price of 1 USD, a gross upside of about 25%
+But a bigger discount often means the AI has identified higher risk (a speed premium or a risk premium)
+```
 
-不能简单写成"货物 100 万、融资 90 万、发行 90 万枚、每枚 0.8"。因为：
+Key point: **it is the same financing cost, but the old model expressed it as "interest" while the new model expresses it as an "issue discount"**, because it shows up directly in the investor's subscription price and is set dynamically by AI.
+
+### 8.3 Why a discount plus a redemption coverage cap is needed (not a simple LTV)
+
+You can't simply write "cargo worth 1 million, financing of 900k, 900k tokens issued, 0.8 each". Because:
 
 ```text
 900,000 RWA × 0.80 = 720,000 USD
 ```
 
-出口商实际只拿到 72 万，而不是 90 万。所以协议必须同时算清三件事：
+The exporter actually receives only 720k, not 900k. So the protocol must get three things right at the same time:
 
 ```text
 token_supply       = target_cash_to_exporter / issue_price
@@ -417,50 +417,50 @@ target_redemption  = token_supply × 1 USD
 target_redemption <= AI_verified_collateral_value × redemption_coverage_limit
 ```
 
-保守估值仍然是地基（防止虚高发行）：
+A conservative valuation is still the foundation (to prevent inflated issuance):
 
 ```text
 AI Verified Collateral Value = min(
-  发票申报价值,
-  数量 × 市场价格（用历史同类成交价校准）,
-  保险覆盖金额
-)  再按市场波动 / 战争溢价做 haircut
+  Declared invoice value,
+  Quantity × market price (calibrated against historical prices for comparable trades),
+  Insured amount
+)  then apply a haircut for market volatility / war premium
 ```
 
-示例：
+Example:
 
 ```text
-发票申报价值：1,000,000 USD
-市场价格估算：920,000 USD
-保险覆盖金额：900,000 USD
+Declared invoice value: 1,000,000 USD
+Estimated market value: 920,000 USD
+Insured amount: 900,000 USD
 
-AI Verified Collateral Value ≈ 900,000 USD（取最小，再视波动 haircut）
+AI Verified Collateral Value ≈ 900,000 USD (take the minimum, then haircut depending on volatility)
 
-若 redemption_coverage_limit = 0.9
-最大目标兑付敞口 = 810,000 USD
-→ 发行价 0.80 时，最多发行 810,000 RWA，出口商最多拿 648,000 USD
+If redemption_coverage_limit = 0.9
+Maximum target redemption exposure = 810,000 USD
+→ At an issue price of 0.80, at most 810,000 RWA can be issued, and the exporter receives at most 648,000 USD
 ```
 
-这套约束能防止：
+These constraints prevent:
 
-- 出口商虚高申报货值；
-- 商品价格下跌后抵押不足；
-- 保险覆盖低于货物申报价值；
-- 货损、延误或战争溢价回吐导致处置价值下降。
+- the exporter overstating the cargo value;
+- under-collateralisation after commodity prices fall;
+- insurance coverage below the declared cargo value;
+- falling disposal value due to cargo damage, delays or the unwinding of a war premium.
 
-这也正是 AI 定价真正的价值：**它决定当前风险下，出口商最多能融多少、投资者该以什么折价买、合约是否该暂停发行。**
+This is exactly the real value of AI pricing: **under current risk, it decides the most the exporter can raise, the discount at which investors should buy, and whether the contract should pause issuance.**
 
-### 8.4 二级转让要谨慎表达
+### 8.4 Be careful how secondary transfers are described
 
-二级转让的合理含义：
+A reasonable meaning of secondary transfer:
 
-> 合格投资者之间，在白名单地址内受限转让融资份额，用于提高流动性。
+> Restricted transfer of financing shares between qualified investors, within whitelisted addresses, to improve liquidity.
 
-不应该说：
+You should not say:
 
-> 提单 Token 可以全球自由交易，人人可买，像 Meme Coin 一样炒。
+> Bill-of-lading tokens can be traded freely worldwide, anyone can buy them, and they can be speculated on like a meme coin.
 
-更合适的表达：
+A more appropriate phrasing:
 
 ```text
 Token transfer is permissioned, whitelisted, and limited to eligible investors.
@@ -468,91 +468,91 @@ Token transfer is permissioned, whitelisted, and limited to eligible investors.
 
 ---
 
-## 9. 风险从哪里来：这不是普通 DeFi 抵押借贷
+## 9. Where the Risk Comes From: This Is Not Ordinary DeFi Collateralised Lending
 
-电子提单 RWA 的核心风险在链下。
+The core risks of eBL-backed RWA are off-chain.
 
-### 9.1 单据风险
+### 9.1 Document risk
 
-| 风险 | 示例 |
+| Risk | Example |
 |---|---|
-| 提单伪造 | eBL ID 不存在，签发方不可信 |
-| 字段不一致 | 发票数量、提单数量、保险数量不一致 |
-| 重复质押 | 同一份 eBL 被拿去多处融资 |
-| 权利不清 | 当前控制人不是出口商，或已被质押给其他资金方 |
+| Forged bill of lading | The eBL ID doesn't exist, or the issuer is not trustworthy |
+| Inconsistent fields | Quantities on the invoice, bill of lading and insurance policy don't match |
+| Double pledging | The same eBL is used to raise financing in several places |
+| Unclear rights | The current controller is not the exporter, or it has already been pledged to another capital provider |
 
-### 9.2 货物和运输风险
+### 9.2 Cargo and transport risk
 
-| 风险 | 示例 |
+| Risk | Example |
 |---|---|
-| 延误 | ETA 延后 5 天，影响进口商付款和保险期限 |
-| 偏航 | 船舶偏离正常路线 |
-| 港口事件 | 罢工、拥堵、扣押、制裁风险 |
-| 货损 | 恶劣天气、温控失败、集装箱破损 |
-| 保险异常 | 保险金额不足、保险即将到期、风险不在承保范围内 |
+| Delay | ETA slips by 5 days, affecting importer payment and the insurance period |
+| Route deviation | The vessel deviates from its normal route |
+| Port events | Strikes, congestion, detention, sanctions risk |
+| Cargo damage | Severe weather, temperature-control failure, damaged containers |
+| Insurance anomalies | Insufficient sum insured, insurance about to expire, risk not within the scope of cover |
 
-### 9.3 市场风险
+### 9.3 Market risk
 
-| 风险 | 示例 |
+| Risk | Example |
 |---|---|
-| 商品价格下跌 | 铜价下跌 12%，抵押物安全垫变薄 |
-| 汇率波动 | 出口商成本和回款币种不一致 |
-| 利率变化 | 投资者要求的风险补偿上升 |
-| 流动性折价 | 出问题时提单或货物不容易快速处置 |
+| Commodity price falls | Copper falls 12% and the collateral cushion thins |
+| FX swings | The exporter's cost currency and receipt currency differ |
+| Interest-rate changes | The risk compensation investors demand goes up |
+| Liquidity discount | When things go wrong, the bill of lading or cargo is hard to dispose of quickly |
 
-### 9.4 信用和法律风险
+### 9.4 Credit and legal risk
 
-| 风险 | 示例 |
+| Risk | Example |
 |---|---|
-| 出口商违约 | 融资后不按约还款 |
-| 进口商违约 | 拒收、拖延付款、破产 |
-| 承运人纠纷 | 货物交付或提单转让出现争议 |
-| 司法辖区不确定 | eBL、质押、Token 权益在当地法律下不确定 |
-| 合规风险 | 面向公众募资、承诺收益、无牌销售证券型 Token |
+| Exporter default | Fails to repay as agreed after financing |
+| Importer default | Rejects the goods, delays payment or goes bankrupt |
+| Carrier disputes | Disputes over cargo delivery or bill of lading transfer |
+| Jurisdictional uncertainty | The eBL, pledge and token rights are uncertain under local law |
+| Compliance risk | Raising money from the public, promising returns, unlicensed sale of security tokens |
 
-所以，AgentBL 的风控不是“看一个价格”，而是：
+So AgentBL's risk control is not "looking at one price", but:
 
 ```text
-单据真实性
-+ 货物估值
-+ 运输状态
-+ 保险覆盖
-+ 市场价格
-+ 交易对手信用
-+ 法律和合规边界
+Document authenticity
++ Cargo valuation
++ Transport status
++ Insurance coverage
++ Market price
++ Counterparty credit
++ Legal and compliance boundaries
 ```
 
 ---
 
-## 10. AI Pricing & Risk Agent 应该做什么
+## 10. What the AI Pricing & Risk Agent Should Do
 
-黑客松 MVP 不建议做很多 Agent。建议只做一个核心 Agent：
+For the hackathon MVP we don't recommend building many agents. We recommend building just one core agent:
 
-> **AI Pricing & Risk Agent：电子提单货物估值 + 风险定价 Agent。**
+> **AI Pricing & Risk Agent: an eBL cargo valuation + risk pricing agent.**
 
-它的目标不是"写一段风险解释"，而是产出一个可被后端、前端和合约直接消费的 **PricingQuote**：当前风险下 RWA 该以什么折价发行、出口商最多能融多少、合约该开盘 / 改价 / 暂停。内部可以拆成五个能力模块：审单 → 估值 → 运输健康度 → **折价定价** → 输出结构化 PricingQuote。
+Its goal is not to "write a paragraph of risk explanation", but to produce a **PricingQuote** that the backend, frontend and contracts can consume directly: at what discount the RWA should be issued under current risk, how much the exporter can raise at most, and whether the contract should open / reprice / pause. Internally it can be split into five capability modules: document review → valuation → cargo health → **discount pricing** → structured PricingQuote output.
 
-### 10.1 Document Verification：审单
+### 10.1 Document Verification
 
-目标：判断贸易文件是否完整、一致、可信。
+Goal: determine whether the trade documents are complete, consistent and credible.
 
-重点字段：
+Key fields:
 
-- Shipper / 出口商；
-- Consignee / 进口商；
-- Carrier / 承运人；
-- Vessel / 船名；
-- Port of Loading / 装货港；
-- Port of Discharge / 卸货港；
-- Cargo Description / 货物描述；
-- Quantity / 数量；
-- Issue Date / 签发日期；
-- ETA / 预计到港；
-- Insurance Coverage / 保险金额和期限；
-- Document Hash / 文件哈希；
-- eBL Registry Status / 电子提单登记状态。
+- Shipper / exporter;
+- Consignee / importer;
+- Carrier;
+- Vessel / vessel name;
+- Port of Loading;
+- Port of Discharge;
+- Cargo Description;
+- Quantity;
+- Issue Date;
+- ETA / estimated time of arrival;
+- Insurance Coverage / sum insured and period;
+- Document Hash;
+- eBL Registry Status.
 
-输出示例：
+Example output:
 
 ```json
 {
@@ -563,21 +563,21 @@ Token transfer is permissioned, whitelisted, and limited to eligible investors.
 }
 ```
 
-### 10.2 Valuation：估值与可融资上限
+### 10.2 Valuation and financing cap
 
-目标：防止虚高估值和过度发行。这一步是 RWA 折价定价的地基。
+Goal: prevent inflated valuation and over-issuance. This step is the foundation of RWA discount pricing.
 
-Agent 通过工具调用（tool calling）拉取并比较：
+Through tool calling, the agent pulls and compares:
 
-- 发票申报价值（来自商业发票）；
-- 数量 × 实时市场价格（如 LME 铜、ICE Brent）；
-- 历史同类成交价（如 UN Comtrade 按 HS 编码的进出口单价）；
-- 保险金额；
-- 价格波动 / 战争溢价区间（价格在高位 + 高波动时要 haircut）。
+- the declared invoice value (from the commercial invoice);
+- quantity × real-time market price (e.g. LME copper, ICE Brent);
+- historical prices for comparable trades (e.g. UN Comtrade import/export unit prices by HS code);
+- the sum insured;
+- the price-volatility / war-premium range (when prices are high and volatile, apply a haircut).
 
-> 本仓库已实现一个可运行的估值 tool-calling 例子，见 `src/agent/` 与 `docs/ai-valuation-tooling.md`：AI 调用「实时铜价 / 历史同类成交价 / 本地估值」三个工具，产出下面的结构。
+> This repo already implements a runnable valuation tool-calling example; see `src/agent/` and `docs/ai-valuation-tooling.md`: the AI calls three tools, "real-time copper price / historical comparable trade prices / local valuation", and produces the structure below.
 
-输出示例：
+Example output:
 
 ```json
 {
@@ -590,57 +590,57 @@ Agent 通过工具调用（tool calling）拉取并比较：
 }
 ```
 
-### 10.3 Cargo Health：运输健康度
+### 10.3 Cargo Health
 
-目标：把运输事件转成可理解的健康分数。
+Goal: turn transport events into an understandable health score.
 
 ```text
 Cargo Health Score = 100
-- 运输事件扣分
-- 延误扣分
-- 保险异常扣分
-- 市场价格波动扣分
-- 重大合规或制裁事件扣分
+- deductions for transport events
+- deductions for delays
+- deductions for insurance anomalies
+- deductions for market price volatility
+- deductions for major compliance or sanctions events
 ```
 
-示例规则：
+Example rules:
 
-| 事件 | 扣分 |
+| Event | Deduction |
 |---|---:|
-| 正常航行 | 0 |
-| 延误 3 天 | -5 |
-| 恶劣天气 | -10 |
-| 航线偏离 | -12 |
-| 港口罢工 | -15 |
-| 商品价格下跌超过 10% | -15 |
-| 部分货损 | -30 |
-| 保险失效 | -40 |
+| Normal voyage | 0 |
+| 3-day delay | -5 |
+| Severe weather | -10 |
+| Route deviation | -12 |
+| Port strike | -15 |
+| Commodity price falls more than 10% | -15 |
+| Partial cargo damage | -30 |
+| Insurance lapse | -40 |
 
-### 10.4 Pricing & Risk Action：输出折价和链上动作
+### 10.4 Pricing & Risk Action: output the discount and the on-chain action
 
-Agent 不应该只生成自然语言报告。它必须把"速度 + 风险"折算成发行价，并输出结构化动作，让合约直接消费。
+The agent should not only generate a natural-language report. It must convert "speed + risk" into an issue price and output a structured action that the contract can consume directly.
 
-折价拆解（可解释、可审计）：
+Discount breakdown (explainable and auditable):
 
 ```text
 final_issue_price = base_issue_price − urgency_discount − risk_discount
-base_issue_price  ← 由到账速度档位决定（FAST 0.80 / BALANCED 0.86 / LOW_COST 0.90）
-urgency_discount  ← 出口商越急，折扣越大
-risk_discount     ← 天气 / 战争 / 港口 / 保险 / 价格波动越高，折扣越大
+base_issue_price  ← set by the speed-of-payment tier (FAST 0.80 / BALANCED 0.86 / LOW_COST 0.90)
+urgency_discount  ← the more urgent the exporter, the bigger the discount
+risk_discount     ← the higher the weather / war / port / insurance / price-volatility risk, the bigger the discount
 ```
 
-定价动作：
+Pricing actions:
 
-| Agent 输出 pricing_action | 链上动作 |
+| Agent output pricing_action | On-chain action |
 |---|---|
-| OPEN_OFFERING | 按 final price 开盘发行 |
-| OPEN_WITH_WARNING | 开盘但展示风险提示 |
-| REPRICE_DOWN | 风险上升，下调发行价 / 缩减额度 |
-| PAUSE_OFFERING | 暂停认购 |
-| FREEZE_POOL | 冻结发行、转让或赎回 |
-| TRIGGER_LIQUIDATION | 进入清算 / 处置 / 追偿流程 |
+| OPEN_OFFERING | Open the offering at the final price |
+| OPEN_WITH_WARNING | Open, but show a risk warning |
+| REPRICE_DOWN | Risk has risen; lower the issue price / reduce the amount |
+| PAUSE_OFFERING | Pause subscriptions |
+| FREEZE_POOL | Freeze issuance, transfers or redemptions |
+| TRIGGER_LIQUIDATION | Enter the liquidation / disposal / recovery flow |
 
-最小结构化输出就是 PRD §8.4 的 **PricingQuote**（节选）：
+The minimal structured output is the **PricingQuote** from PRD §8.4 (excerpt):
 
 ```ts
 type PricingQuote = {
@@ -664,324 +664,324 @@ type PricingQuote = {
 };
 ```
 
-> 注：当前仓库 `riskEngine.js` 仍输出旧版 `RiskReport`（`contract_action`）。把它升级成 `PricingQuote` 是 `tasks.md` 里 AI-1 / BE-2 的工作；本文描述的是目标结构。
+> Note: the current repo's `riskEngine.js` still outputs the old `RiskReport` (`contract_action`). Upgrading it to `PricingQuote` is the AI-1 / BE-2 work in `tasks.md`; this document describes the target structure.
 
-### 10.5 Agent 的关键定位
+### 10.5 The agent's key positioning
 
-路演时不要把 Agent 说成：
+In the pitch, don't describe the agent as:
 
-> 它会聊天、会总结、会写报告。
+> It can chat, summarise and write reports.
 
-要说成：
+Describe it as:
 
-> **它在投资者认购之前，把链下贸易风险定价成一个可解释、可上链的 RWA 折价。**
+> **Before investors subscribe, it prices off-chain trade risk into an explainable, on-chain RWA discount.**
 
-这才是 AI + Web3 的结合点：AI 不是装饰，而是承担"定价 + 额度 + 风控动作"这个核心金融功能。
+This is where AI and Web3 meet: the AI is not decoration; it performs the core financial function of "pricing + amount + risk-control action".
 
 ---
 
-## 11. 智能合约状态机和链上动作
+## 11. Smart Contract State Machine and On-Chain Actions
 
-AgentBL 的链上逻辑可以先用 JS mock，后续再替换成 Solidity 合约（`RWAOfferingPool` + `RiskPricingOracle`，见 PRD §9.3）。
+AgentBL's on-chain logic can first be mocked in JS and later replaced with Solidity contracts (`RWAOfferingPool` + `RiskPricingOracle`, see PRD §9.3).
 
-### 11.1 正常路径
+### 11.1 Happy path
 
 ```text
 Created
-→ Priced      （AI 给出 PricingQuote，确定发行价和发行量）
-→ Open        （按折价开盘，投资者可认购）
-→ Subscribed  （认购达到目标）
-→ Funded      （资金到账给出口商）
-→ InTransit   （运输中，Agent 持续监控）
-→ Repaid      （进口商把货款付给出口商，出口商再还款到资金池）
-→ Redeemed    （投资者按目标兑付价赎回 RWA）
+→ Priced      (AI produces a PricingQuote, fixing the issue price and issuance size)
+→ Open        (offering opens at the discount; investors can subscribe)
+→ Subscribed  (subscriptions reach the target)
+→ Funded      (funds are paid to the exporter)
+→ InTransit   (in transit; the agent keeps monitoring)
+→ Repaid      (the importer pays the exporter, and the exporter repays the pool)
+→ Redeemed    (investors redeem the RWA at the target redemption price)
 ```
 
-含义：
+Meaning:
 
-| 状态 | 含义 |
+| State | Meaning |
 |---|---|
-| Created | 出口商质押 eBL、提交融资请求和到账速度偏好 |
-| Priced | AI Pricing Agent 输出 PricingQuote，写入 RiskPricingOracle |
-| Open | 按 final issue price 开盘，permissioned 投资者可认购 |
-| Subscribed | 认购达到目标发行量 |
-| Funded | 资金按发行折价到账给出口商 |
-| InTransit | 货物运输中，Agent 持续监控风险 |
-| Repaid | 进口商把货款付给出口商；出口商还款到资金池，pool 收到回款（无 L/C、非银行，我们只持有质押的 eBL） |
-| Redeemed | 投资者按目标兑付价赎回 |
+| Created | The exporter pledges the eBL and submits the financing request and speed-of-payment preference |
+| Priced | The AI Pricing Agent outputs a PricingQuote and writes it to RiskPricingOracle |
+| Open | The offering opens at the final issue price; permissioned investors can subscribe |
+| Subscribed | Subscriptions reach the target issuance size |
+| Funded | Funds are paid to the exporter at the issue discount |
+| InTransit | The cargo is in transit; the agent keeps monitoring risk |
+| Repaid | The importer pays the exporter; the exporter repays the pool, and the pool receives the proceeds (no L/C, not a bank; we only hold the pledged eBL) |
+| Redeemed | Investors redeem at the target redemption price |
 
-### 11.2 异常路径
+### 11.2 Exception paths
 
 ```text
 Open / InTransit → Repriced → Paused → Frozen → Liquidation / Defaulted
 Created / Open   → Cancelled
 ```
 
-含义：
+Meaning:
 
-| 状态 | 触发原因 |
+| State | Trigger |
 |---|---|
-| Repriced | 风险上升，AI 下调发行价 / 缩减额度（REPRICE_DOWN） |
-| Paused | 风险升高，暂停新认购（PAUSE_OFFERING） |
-| Frozen | 冻结发行、转让或赎回（FREEZE_POOL） |
-| Liquidation | 启动提单、货物、保险或追偿处置（TRIGGER_LIQUIDATION） |
-| Defaulted | 进口商拒付 / 出口商重大违约 |
-| Cancelled | 未开盘或未达认购，退回 |
+| Repriced | Risk rises; the AI lowers the issue price / reduces the amount (REPRICE_DOWN) |
+| Paused | Risk rises; new subscriptions are paused (PAUSE_OFFERING) |
+| Frozen | Issuance, transfers or redemptions are frozen (FREEZE_POOL) |
+| Liquidation | Disposal of the bill of lading, cargo or insurance, or recovery, is started (TRIGGER_LIQUIDATION) |
+| Defaulted | The importer refuses to pay / the exporter commits a material default |
+| Cancelled | Not opened or subscriptions not reached; funds returned |
 
-### 11.3 合约应该记录什么
+### 11.3 What the contract should record
 
-MVP 中可以先记录：
+In the MVP you can start by recording:
 
-- eBL metadata hash；
-- pricing quote hash / evidence hash；
-- final issue price 和 target redemption value；
-- recommended token supply 和 subscribed amount；
-- risk level 和 pricing action；
-- offering state。
+- eBL metadata hash;
+- pricing quote hash / evidence hash;
+- final issue price and target redemption value;
+- recommended token supply and subscribed amount;
+- risk level and pricing action;
+- offering state.
 
-真实合约不需要一开始就很复杂。黑客松最重要的是让评委看到：
+The real contract does not need to be complex from the start. The most important thing at the hackathon is for the judges to see:
 
 ```text
-Agent 给出折价定价
-→ 写入 RiskPricingOracle（issue price + risk + action + evidence hash）
-→ RWAOfferingPool 状态随之 Open / Repriced / Paused / Frozen
-→ 投资者能看到价格、目标兑付价、风险来源和证据哈希
+The agent produces the discount pricing
+→ Writes it to RiskPricingOracle (issue price + risk + action + evidence hash)
+→ RWAOfferingPool state moves accordingly: Open / Repriced / Paused / Frozen
+→ Investors can see the price, the target redemption price, the risk sources and the evidence hash
 ```
 
 ---
 
-## 12. 黑客松 Demo 怎么讲才有说服力
+## 12. How to Make the Hackathon Demo Convincing
 
-推荐 Demo 剧情（对齐 `data/uploads/` 的新数据）：
-
-```text
-1. 出口商（新加坡铜贸易商 Strait Resources）上传 eBL + 商业发票
-2. 货物：LME Grade A 铜阴极板 500 吨，路线 Singapore → Shanghai
-3. AI Pricing & Risk Agent 调用工具：实时 LME 铜价 + 历史同类成交价 + 估值
-4. AI 给出 PricingQuote：verified collateral、推荐发行量、发行折价
-5. 出口商选 FAST 到账 → AI 给出发行价 0.85，开盘发行 RWA
-6. 投资者按 0.85 折价认购，资金到账给出口商
-7. 运输途中：霍尔木兹海峡战争升级、铜价剧烈波动、保险接近到期
-8. AI 重新定价：risk discount 拉大，发行价从 0.85 压到 0.78
-9. RiskPricingOracle 写入新价 + 证据哈希，RWAOfferingPool 进入 Repriced / Paused
-10. 投资者界面展示：发行价、目标兑付价、隐含收益、风险来源、证据哈希
-```
-
-评委应该看到四件事：
+Recommended demo storyline (aligned with the new data in `data/uploads/`):
 
 ```text
-AI 不是聊天机器人
-AI 调用工具拉了真实价格和历史成交价
-AI 把风险定成了一个具体的发行折价（0.85 → 0.78）
-区块链透明记录了定价、改价和证据哈希
+1. The exporter (Singapore copper trader Strait Resources) uploads the eBL + commercial invoice
+2. Cargo: 500 tonnes of LME Grade A copper cathodes, route Singapore → Shanghai
+3. The AI Pricing & Risk Agent calls tools: real-time LME copper price + historical comparable trade prices + valuation
+4. The AI produces a PricingQuote: verified collateral, recommended issuance size, issue discount
+5. The exporter chooses FAST payment → the AI sets an issue price of 0.85 and opens the RWA offering
+6. Investors subscribe at the 0.85 discount; funds are paid to the exporter
+7. In transit: war escalates in the Strait of Hormuz, copper prices swing sharply, insurance nears expiry
+8. The AI reprices: the risk discount widens, and the issue price drops from 0.85 to 0.78
+9. RiskPricingOracle records the new price + evidence hash; RWAOfferingPool enters Repriced / Paused
+10. The investor view shows: issue price, target redemption price, implied return, risk sources, evidence hash
 ```
 
-### 12.1 15 秒路演版本
+The judges should see four things:
 
-> AgentBL 把一张电子提单变成一个由 AI 动态定价的 RWA 折价发行池：出口商质押 eBL，AI 根据到账速度和贸易风险给出发行折价，投资者在认购前就看到价格、目标兑付价和风险来源。
+```text
+The AI is not a chatbot
+The AI called tools to pull real prices and historical trade prices
+The AI turned the risk into a concrete issue discount (0.85 → 0.78)
+The blockchain transparently recorded the pricing, the repricing and the evidence hash
+```
 
-### 12.2 30 秒路演版本
+### 12.1 15-second pitch version
 
-> 全球贸易融资缺口仍然巨大，中小出口商即使有真实订单和货物，也经常拿不到快速、透明定价的融资。AgentBL 把电子提单作为 RWA 抵押物，让 AI Pricing & Risk Agent 调用实时行情和历史成交价完成估值，再把"到账速度 + 战争/天气/保险/价格风险"折算成一个可解释的 RWA 发行折价，写入链上 RiskPricingOracle。出口商越想快拿钱、风险越高，折价就越大。我们不做公开众筹，而是面向合格投资者的、AI 定价的 permissioned 贸易融资基础设施。
+> AgentBL turns an electronic bill of lading into an AI dynamically priced, discounted RWA offering pool: the exporter pledges the eBL, the AI sets the issue discount based on speed of payment and trade risk, and investors see the price, the target redemption price and the risk sources before they subscribe.
 
-### 12.3 最强收束句
+### 12.2 30-second pitch version
 
-> **普通 DeFi 让市场猜价格；AgentBL 让 AI 在投资者下单前，就把贸易风险定成 RWA 的折价。**
+> The global trade finance gap is still huge, and SME exporters, even with real orders and goods, often can't get fast, transparently priced financing. AgentBL uses the electronic bill of lading as RWA collateral and lets the AI Pricing & Risk Agent call real-time market data and historical trade prices to value the cargo, then converts "speed of payment + war/weather/insurance/price risk" into an explainable RWA issue discount, written to the on-chain RiskPricingOracle. The faster the exporter wants the money and the higher the risk, the bigger the discount. We don't do public crowdfunding; we are AI-priced, permissioned trade finance infrastructure for qualified investors.
+
+### 12.3 Strongest closing line
+
+> **Ordinary DeFi lets the market guess the price; AgentBL lets AI price trade risk into the RWA discount before investors place their orders.**
 
 ---
 
-## 13. 合规表达边界
+## 13. Compliance Messaging Boundaries
 
-这个项目最容易被误解成：
-
-```text
-面向公众卖一个有收益的提单 Token
-```
-
-这会引发证券、基金、放贷、支付、众筹、非法集资、虚拟资产交易等风险。
-
-### 13.1 不建议说
-
-- 全球开放众筹；
-- 人人可投；
-- 保本保收益；
-- 固定年化；
-- 低风险高收益；
-- 提单 Token 可以自由炒；
-- 无需 KYC；
-- 面向大陆公众募资；
-- 用智能合约绕过监管；
-- 真实资金马上可以进来投。
-
-### 13.2 推荐说
-
-- 技术 Demo，不进行真实募资；
-- 面向合格投资者；
-- permissioned pool；
-- 许可型资金池；
-- Token 是融资份额凭证；
-- 白名单地址之间受限转让；
-- KYC / AML / sanctions screening 是真实落地前提；
-- 与持牌机构、电子提单平台、贸易金融机构合作；
-- 风险定价，不承诺收益；
-- 合规司法辖区下的机构级 RWA 贸易融资基础设施。
-
-### 13.3 为什么智能合约不能消除监管风险
-
-法律看的是经济实质，不是技术形式。
+The project is most easily misunderstood as:
 
 ```text
-纸质合同承诺还本付息
-≈ 可能构成融资或投资产品
-
-智能合约承诺还本付息
-≈ 仍然可能构成融资或投资产品
+Selling a yield-bearing bill-of-lading token to the public
 ```
 
-如果未经许可，向不特定公众募集资金，并通过 Token 承诺投资回报，就可能落入非法集资、证券发行、基金份额销售或虚拟资产监管范围。
+That would trigger risks around securities, funds, lending, payments, crowdfunding, illegal fundraising and virtual-asset trading.
 
-安全叙事不是“去监管”，而是：
+### 13.1 Avoid saying
 
-> **把真实贸易融资资产做成可审计、可解释、可合规接入的技术基础设施。**
+- open global crowdfunding;
+- anyone can invest;
+- guaranteed principal and returns;
+- fixed annual yield;
+- low risk, high return;
+- bill-of-lading tokens can be freely speculated on;
+- no KYC required;
+- raising funds from the public in mainland China;
+- using smart contracts to bypass regulation;
+- real money can come in and invest right away.
+
+### 13.2 Say instead
+
+- a technical demo, with no real fundraising;
+- for qualified investors;
+- permissioned pool;
+- permissioned funding pool;
+- the token is a certificate of a financing share;
+- restricted transfer between whitelisted addresses;
+- KYC / AML / sanctions screening is a prerequisite for real-world rollout;
+- partnering with licensed institutions, eBL platforms and trade finance institutions;
+- pricing risk, not promising returns;
+- institutional-grade RWA trade finance infrastructure in compliant jurisdictions.
+
+### 13.3 Why smart contracts cannot eliminate regulatory risk
+
+The law looks at economic substance, not technical form.
+
+```text
+A paper contract promising repayment of principal and interest
+≈ may constitute a financing or investment product
+
+A smart contract promising repayment of principal and interest
+≈ may still constitute a financing or investment product
+```
+
+Raising funds from the general public without a licence and promising investment returns through a token may fall within the scope of illegal fundraising, securities issuance, sale of fund units or virtual-asset regulation.
+
+The safe narrative is not "deregulation", but:
+
+> **Turning real trade finance assets into technical infrastructure that is auditable, explainable and can be connected to compliantly.**
 
 ---
 
-## 14. 产品落地的现实路径
+## 14. A Realistic Path to Product Rollout
 
-黑客松阶段不用真的落地金融业务，但要讲清楚现实路径。
+At the hackathon stage we don't need to actually launch a financial business, but we do need to explain the realistic path.
 
-### 14.1 推荐阶段
+### 14.1 Recommended phases
 
 ```text
-Phase 0：Hackathon
+Phase 0: Hackathon
 Mock eBL + mock risk data + JS workflow + clear compliance boundary
 
-Phase 1：Pilot
-与电子提单平台、贸易金融机构、持牌合作方、合格投资者做小规模试点
+Phase 1: Pilot
+Small-scale pilots with eBL platforms, trade finance institutions, licensed partners and qualified investors
 
-Phase 2：Permissioned Protocol
-接入真实 eBL registry、KYC、AML、风险预言机、托管和法律文件
+Phase 2: Permissioned Protocol
+Connect a real eBL registry, KYC, AML, risk oracle, custody and legal documents
 
-Phase 3：Network
-连接更多承运人、港口、保险公司、贸易商、资金方和跨境司法辖区
+Phase 3: Network
+Connect more carriers, ports, insurers, traders, capital providers and cross-border jurisdictions
 ```
 
-### 14.2 哪些地方相对适合叙事
+### 14.2 Which locations suit the narrative better
 
-从材料和公开资料看，更稳妥的叙事顺序是：
+Based on our materials and public information, a safer narrative order is:
 
-| 地区 | 适合点 | 风险 |
+| Region | Strengths | Risks |
 |---|---|---|
-| 新加坡 | eBL 法律基础、贸易金融、资产 Tokenization 生态较强 | 仍需持牌合作、KYC/AML、合格投资者限制 |
-| 香港 | 连接中国出口商和国际资本方便，Tokenised securities 监管框架明确 | 电子贸易文件法律改革仍需关注进展 |
-| ADGM / 阿布扎比 | Web3、数字资产和电子可转让记录框架友好 | 与东亚出口商场景连接需要设计 |
-| 英国 | Electronic Trade Documents Act 2023 提供强法律基础 | 金融产品落地监管成本不低 |
-| 韩国 | 有 STO / security token 路径 | 大概率需走证券型监管，早期较重 |
+| Singapore | Strong eBL legal foundation, trade finance and asset tokenisation ecosystem | Still requires licensed partners, KYC/AML and qualified-investor restrictions |
+| Hong Kong | Convenient for connecting Chinese exporters with international capital; clear regulatory framework for tokenised securities | Progress on electronic trade document law reform still needs watching |
+| ADGM / Abu Dhabi | Friendly frameworks for Web3, digital assets and electronic transferable records | Connecting to East Asian exporter scenarios needs design work |
+| UK | The Electronic Trade Documents Act 2023 provides a strong legal foundation | The regulatory cost of launching financial products is not low |
+| South Korea | Has an STO / security token path | Will most likely need to go the securities-regulation route, which is heavy early on |
 
-黑客松建议定位：
+Recommended positioning for the hackathon:
 
-> **新加坡 / 香港 / ADGM 风格的 permissioned eBL-backed trade finance infrastructure，而不是无牌公开发行的收益型 Token。**
+> **Singapore / Hong Kong / ADGM-style permissioned eBL-backed trade finance infrastructure, not an unlicensed public offering of a yield-bearing token.**
 
 ---
 
-## 15. 评委可能问的问题
+## 15. Questions the Judges May Ask
 
-### Q1：为什么投资者相信这个 RWA 有价值？
+### Q1: Why would investors believe this RWA has value?
 
-因为它不是空气币，而是某批电子提单货权支撑、折价发行的兑付凭证。底层有真实贸易、电子提单、货物、保险和回款安排。投资者以折价（如 0.85）认购，回款顺利时按目标兑付价 1 USD 赎回——`1 RWA = 1 USD` 是目标兑付价，**不是保本承诺**。AI Pricing & Risk Agent 会审查单据真实性、估值合理性、运输和市场风险，并据此决定这个折价该是多少。
+Because it is not a vapour coin, but a discounted redemption certificate backed by the cargo rights under a specific electronic bill of lading. Underneath are real trade, an electronic bill of lading, the cargo, insurance and repayment arrangements. Investors subscribe at a discount (e.g. 0.85) and, if repayment goes smoothly, redeem at the target redemption price of 1 USD. `1 RWA = 1 USD` is the target redemption price, **not a principal guarantee**. The AI Pricing & Risk Agent reviews document authenticity, the reasonableness of the valuation, and transport and market risk, and uses them to decide what the discount should be.
 
-### Q2：如果出口商不还钱怎么办？
+### Q2: What if the exporter doesn't repay?
 
-进入 Default / Liquidation 流程。真实落地时可能通过转让或处置提单权利、保险理赔、货物处置、法律追偿来回收资金。Demo 中展示的是状态机和风险触发，不声称已经解决所有真实司法执行问题。
+The deal enters the Default / Liquidation flow. In a real rollout, funds might be recovered by transferring or disposing of the rights under the bill of lading, insurance claims, cargo disposal and legal recovery. The demo shows the state machine and the risk triggers; it does not claim to have solved every real-world judicial enforcement problem.
 
-### Q3：数据从哪里来？
+### Q3: Where does the data come from?
 
-Demo 阶段使用 mock 数据。真实落地可接入电子提单平台、承运人、港口、保险公司、AIS 船舶数据、IoT 设备、商品价格源、KYC/AML 服务和 TradeTrust 类基础设施。
+The demo stage uses mock data. A real rollout could connect to eBL platforms, carriers, ports, insurers, AIS vessel data, IoT devices, commodity price feeds, KYC/AML services and TradeTrust-type infrastructure.
 
-### Q4：为什么不用普通 DeFi 预言机？
+### Q4: Why not use an ordinary DeFi oracle?
 
-普通价格预言机只能喂 token 或商品价格，不能判断提单是否真实、保险是否覆盖、船是否延误、货是否损坏、战争是否影响航线、进口商是否可能拒付——更不能据此给出一个发行折价。AgentBL 的 RiskPricingOracle 喂的是 AI 综合多源链下风险后算出的 issue price、风险等级和合约动作。
+An ordinary price oracle can only feed token or commodity prices. It cannot judge whether the bill of lading is genuine, whether insurance covers the cargo, whether the ship is delayed, whether the goods are damaged, whether war affects the route, or whether the importer might refuse to pay, let alone set an issue discount based on all that. AgentBL's RiskPricingOracle feeds the issue price, risk level and contract action calculated by AI after combining multiple off-chain risk sources.
 
-### Q5：这是不是非法集资？
+### Q5: Isn't this illegal fundraising?
 
-我们的 MVP 是技术 Demo，不进行真实募资。产品设计上也不是开放众筹，而是面向合格投资者和受监管机构的许可型资金池，Token 仅作为白名单地址之间受限转让的融资份额凭证，不承诺保本保收益。
+Our MVP is a technical demo with no real fundraising. By design, the product is not open crowdfunding either, but a permissioned funding pool for qualified investors and regulated institutions; the token is only a financing-share certificate with restricted transfer between whitelisted addresses, and it does not promise guaranteed principal or returns.
 
-### Q6：为什么需要区块链？
+### Q6: Why do you need a blockchain?
 
-区块链不是为了炫技，而是为了：
+The blockchain is not there to show off, but to:
 
-- 记录 eBL 质押和融资状态；
-- 让投资者份额和资金流透明可审计；
-- 让 Agent 风险结论变成可执行状态；
-- 记录证据哈希，便于追溯；
-- 支持白名单份额转让和自动分配。
+- record the eBL pledge and financing status;
+- make investor shares and fund flows transparent and auditable;
+- turn the agent's risk conclusions into enforceable states;
+- record evidence hashes for traceability;
+- support whitelisted share transfers and automatic distribution.
 
-### Q7：为什么需要 AI？
+### Q7: Why do you need AI?
 
-因为关键风险在链下，而且这些风险最终要变成一个**数字**——发行折价。AI Agent 从单据、运输事件、保险、实时行情、历史成交价和战争/地缘背景中提取结构化信号，把"到账速度 + 风险"折算成 RWA 的发行价（base − urgency discount − risk discount），并解释为什么合约应该开盘、改价、暂停或清算。
+Because the key risks are off-chain, and these risks ultimately have to become a **number**: the issue discount. The AI agent extracts structured signals from documents, transport events, insurance, real-time market data, historical trade prices and war/geopolitical context, converts "speed of payment + risk" into the RWA issue price (base − urgency discount − risk discount), and explains why the contract should open, reprice, pause or liquidate.
 
 ---
 
-## 16. 术语表
+## 16. Glossary
 
-### 16.1 国际贸易
+### 16.1 International trade
 
-| 词 | 中文 | 快速理解 |
-|---|---|---|
-| Exporter | 出口商 | 卖货并发货的人 |
-| Importer | 进口商 | 买货并付款的人 |
-| Carrier | 承运人 | 船公司或运输方 |
-| Shipper | 托运人 | 委托运输的一方，通常是出口商或其代理 |
-| Consignee | 收货人 | 目的港提货的人 |
-| Bill of Lading / B/L | 提单 | 货物收据、运输合同证明、提货权凭证 |
-| eBL | 电子提单 | 电子形式的提单 |
-| Letter of Credit / L/C | 信用证 | 银行信用支持的付款工具 |
-| Incoterms | 国际贸易术语 | 规定买卖双方费用、风险、保险责任的规则 |
+| Term | Quick meaning |
+|---|---|
+| Exporter | The party that sells and ships the goods |
+| Importer | The party that buys and pays for the goods |
+| Carrier | The shipping line or transport provider |
+| Shipper | The party that arranges the shipment, usually the exporter or its agent |
+| Consignee | The party that collects the goods at the destination port |
+| Bill of Lading / B/L | Receipt for goods, evidence of the contract of carriage, and document of title for delivery |
+| eBL | A bill of lading in electronic form |
+| Letter of Credit / L/C | A payment instrument backed by bank credit |
+| Incoterms | Rules setting out the costs, risks and insurance responsibilities of buyer and seller |
 
-### 16.2 贸易融资
+### 16.2 Trade finance
 
-| 词 | 中文 | 快速理解 |
-|---|---|---|
-| Trade Finance | 贸易融资 | 围绕进出口贸易的融资 |
-| Supply Chain Finance | 供应链金融 | 围绕供应链上下游的融资 |
-| Collateral | 抵押物 / 质押物 | 借钱时提供的保障 |
-| Pledge | 质押 | 把权利凭证交给资金方作为担保 |
-| LTV | 贷款价值比 | 融资金额 / 抵押物价值 |
-| Default | 违约 | 借款人不还钱或违反关键义务 |
-| Recovery | 追偿 | 出问题后追回损失 |
-| Factoring | 保理 | 把应收账款转让给金融机构融资 |
-| Documentary Collection | 跟单托收 | 银行根据单据协助收款 |
+| Term | Quick meaning |
+|---|---|
+| Trade Finance | Financing around import and export trade |
+| Supply Chain Finance | Financing around the upstream and downstream of a supply chain |
+| Collateral | Security provided when borrowing |
+| Pledge | Handing a title document to a capital provider as security |
+| LTV | Loan-to-value ratio: financed amount / collateral value |
+| Default | The borrower doesn't repay or breaches a key obligation |
+| Recovery | Recouping losses after something goes wrong |
+| Factoring | Raising finance by assigning receivables to a financial institution |
+| Documentary Collection | A bank helps collect payment against documents |
 
 ### 16.3 Web3 / RWA
 
-| 词 | 中文 | 快速理解 |
-|---|---|---|
-| RWA | 现实世界资产上链 | 把现实资产或权益映射为链上凭证 |
-| Tokenization | Token 化 | 把资产或权益拆成链上份额 |
-| Smart Contract | 智能合约 | 自动执行规则的链上程序 |
-| Oracle | 预言机 | 把链下数据传给链上 |
-| DeFi | 去中心化金融 | 不依赖传统银行的链上金融系统 |
-| Liquidity Pool | 流动性池 / 资金池 | 投资者共同出资的池子 |
-| Permissioned Pool | 许可型资金池 | 只有白名单投资者能参与 |
-| Whitelisted Transfer | 白名单转让 | Token 只能在合格地址之间流转 |
-| Evidence Hash | 证据哈希 | 对链下证据做哈希后上链留痕 |
-| Risk Oracle | 风险预言机 | 把 Agent 风险评分和动作推送给合约 |
+| Term | Quick meaning |
+|---|---|
+| RWA | Real-world assets on-chain: mapping real assets or rights to on-chain certificates |
+| Tokenization | Splitting an asset or right into on-chain shares |
+| Smart Contract | An on-chain program that executes rules automatically |
+| Oracle | Brings off-chain data on-chain |
+| DeFi | Decentralised finance: an on-chain financial system that does not rely on traditional banks |
+| Liquidity Pool | A pool funded jointly by investors |
+| Permissioned Pool | Only whitelisted investors can participate |
+| Whitelisted Transfer | Tokens can only move between qualified addresses |
+| Evidence Hash | Off-chain evidence is hashed and the hash is recorded on-chain |
+| Risk Oracle | Pushes the agent's risk score and action to the contract |
 
 ---
 
-## 17. 参考资料
+## 17. References
 
-### 17.1 项目内部材料
+### 17.1 Internal project materials
 
 - `Materials/web3_trade_finance_consolidated/web3_trade_finance_consolidated.md`
-- `Materials/20260602会议.md`
-- `docs/PRD.md`（当前主线：v0.2 AI Dynamic Pricing RWA）
-- `docs/tasks.md`（任务拆分）
-- `data/uploads/`（拟真提单 + 商业发票样例：新加坡铜 / 原油）
-- `data/demo-case.json`（旧 RiskReport harness 数据，迁移中）
-- `docs/ai-valuation-tooling.md`（AI 估值与历史成交价 tool calling）
+- 2026-06-02 meeting notes in `Materials/` (file not tracked in this repo; its file name is in Chinese)
+- `docs/PRD.md` (current mainline: v0.2 AI Dynamic Pricing RWA)
+- `docs/tasks.md` (task breakdown)
+- `data/uploads/` (realistic bill of lading + commercial invoice samples: Singapore copper / crude oil)
+- `data/demo-case.json` (old RiskReport harness data, being migrated)
+- `docs/ai-valuation-tooling.md` (AI valuation and historical trade price tool calling)
 
-### 17.2 国际贸易与电子提单
+### 17.2 International trade and electronic bills of lading
 
 - ADB, Global Trade Finance Gap Survey: <https://www.adb.org/publications/adb-global-trade-finance-gap-survey>
 - DCSA, 100% eBL by 2030: <https://dcsa.org/100-percent-ebl>
@@ -991,29 +991,29 @@ Demo 阶段使用 mock 数据。真实落地可接入电子提单平台、承运
 - Singapore Electronic Transactions (Amendment) Act 2021: <https://sso.agc.gov.sg/Acts-Supp/5-2021>
 - UK Electronic Trade Documents Act 2023: <https://www.legislation.gov.uk/ukpga/2023/38/contents>
 
-### 17.3 RWA、Tokenization 与合规边界
+### 17.3 RWA, tokenisation and compliance boundaries
 
 - MAS, Project Guardian: <https://www.mas.gov.sg/schemes-and-initiatives/project-guardian>
 - MAS, Guide on Tokenisation of Capital Markets Products: <https://www.mas.gov.sg/regulation/guidelines/guide-on-tokenisation-of-cmps>
 - Hong Kong SFC, Circular on intermediaries engaging in tokenised securities-related activities: <https://apps.sfc.hk/edistributionWeb/api/circular/list-content?refNo=23EC52&lang=EN>
-- 中国政府网，《防范和处置非法集资条例》：<https://app.www.gov.cn/govdata/gov/202102/10/468255/article.html>
+- Chinese Government Portal (gov.cn), Regulations on Preventing and Disposing of Illegal Fundraising: <https://app.www.gov.cn/govdata/gov/202102/10/468255/article.html>
 
 ---
 
-## 附录：本项目最小心智模型
+## Appendix: The Minimal Mental Model of This Project
 
 ```text
-电子提单 = 代表货物权利的电子贸易文件
+Electronic bill of lading = an electronic trade document representing rights to the cargo
 
-RWA = 以这批货权为支撑、折价发行、目标兑付 1 USD 的链上凭证
+RWA = an on-chain certificate backed by those cargo rights, issued at a discount, with a target redemption of 1 USD
 
-贸易融资 = 出口商用提单质押 + 折价发行 RWA，提前拿到现金流
+Trade finance = the exporter pledges the bill of lading + issues the RWA at a discount to get cash flow early
 
-AI Pricing & Risk Agent = 把"到账速度 + 链下风险"折算成 RWA 发行折价和合约动作
+AI Pricing & Risk Agent = converts "speed of payment + off-chain risk" into the RWA issue discount and the contract action
 
-智能合约 = 记录定价、发行、认购、改价、暂停、结算和清算
+Smart contract = records pricing, issuance, subscription, repricing, pausing, settlement and liquidation
 ```
 
-最终要让评委记住：
+What the judges should ultimately remember:
 
-> **AgentBL 不是把贸易文件变成炒作 Token，而是让 AI 在投资者认购前，把电子提单背后的真实贸易风险定价成一个透明、可解释、可上链的 RWA 折价。**
+> **AgentBL does not turn trade documents into speculative tokens; it lets AI, before investors subscribe, price the real trade risk behind an electronic bill of lading into a transparent, explainable, on-chain RWA discount.**

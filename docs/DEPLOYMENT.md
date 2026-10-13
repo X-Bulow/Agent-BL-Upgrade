@@ -1,70 +1,70 @@
-# 🚀 AgentBL 部署指南
+# 🚀 AgentBL Deployment Guide
 
-AgentBL 的后端是一个**常驻的 Node.js HTTP 服务**（[`src/app/server.js`](../src/app/server.js)），同一个进程既提供 `/api/*` 接口，也托管 [`public/`](../public/) 下的前端页面。因此它需要部署在能**长期运行进程**的环境里（本机、Docker、VPS、Railway 等）。
+The AgentBL backend is a **long-running Node.js HTTP server** ([`src/app/server.js`](../src/app/server.js)). A single process serves both the `/api/*` endpoints and the frontend pages under [`public/`](../public/). It therefore has to be deployed somewhere that can **keep a process running** (a local machine, Docker, a VPS, Railway, etc.).
 
-> ⚠️ **不支持 Vercel / Netlify 这类纯静态 + Serverless 平台。** 项目没有拆成 serverless 函数，池子状态也保存在进程内存里，部署到这些平台后前端能打开，但 `/api/*` 会全部失效。
+> ⚠️ **Static + serverless platforms such as Vercel / Netlify are not supported.** The project is not split into serverless functions and pool state lives in process memory. If you deploy to one of these platforms the frontend will load, but every `/api/*` call will fail.
 
 ---
 
-## 📋 部署前检查
+## 📋 Pre-deployment Checklist
 
-- [ ] Node.js ≥ 20（`node -v`）
-- [ ] 本地可以正常运行：`npm run dev`，打开 http://localhost:3000
-- [ ] 测试通过：`npm test`
-- [ ] 赛前自检通过：`npm run preflight`
-- [ ] `.env` 已准备好，且**没有**提交到 Git
+- [ ] Node.js ≥ 20 (`node -v`)
+- [ ] Runs locally: `npm run dev`, then open http://localhost:3000
+- [ ] Tests pass: `npm test`
+- [ ] Pre-demo self-check passes: `npm run preflight`
+- [ ] `.env` is prepared and **not** committed to Git
 
-### 环境变量
+### Environment Variables
 
-复制模板后按需填写：
+Copy the template and fill in what you need:
 
 ```bash
 cp .env.example .env
 ```
 
-**所有 key 都是可选的。** 不填时，AI 估值、行情、世界风险情报都会回退到确定性的离线数据，演示照样可用。各变量的说明见 [`.env.example`](../.env.example)，常用的有：
+**Every key is optional.** When a key is missing, AI valuation, market prices and world-risk intelligence fall back to deterministic offline data, so the demo still works. Each variable is described in [`.env.example`](../.env.example); the common ones are:
 
-| 变量 | 用途 |
+| Variable | Purpose |
 |---|---|
-| `PORT` | 监听端口，默认 `3000` |
-| `DEEPSEEK_API_KEY` / `DASHSCOPE_API_KEY` / `Tencent_API_KEY` | 任选一个 LLM 提供方，用于 AI 估值与解说 |
-| `AZURE_OPENAI_ENDPOINT` / `AZURE_OPENAI_DEPLOYMENT` / `AZURE_OPENAI_API_KEY` | 也可改用 Azure OpenAI 作为 LLM 提供方 |
-| `METALPRICE_API_KEY` / `ALPHAVANTAGE_API_KEY` | 实时铜价 |
-| `COMTRADE_PRIMARY_KEY` | UN Comtrade 历史成交价 |
-| `XAPI_KEY` | 世界风险情报（新闻 / 社交 / 预测市场） |
-| `DEMO_MODE` | 运行模式，默认 Demo；Live 模式不会静默回退到模拟交易 |
-| `INJECTIVE_RPC_URL` | Injective 测试网 RPC（有默认值） |
-| `X402_*`、`WHITE_AGENT_PRIVATE_KEY` | x402 付费情报，详见 [x402-integration.md](./x402-integration.md) |
+| `PORT` | Listening port, default `3000` |
+| `DEEPSEEK_API_KEY` / `DASHSCOPE_API_KEY` / `Tencent_API_KEY` | Any one LLM provider, used for AI valuation and commentary |
+| `AZURE_OPENAI_ENDPOINT` / `AZURE_OPENAI_DEPLOYMENT` / `AZURE_OPENAI_API_KEY` | Azure OpenAI can be used as the LLM provider instead |
+| `METALPRICE_API_KEY` / `ALPHAVANTAGE_API_KEY` | Live copper price |
+| `COMTRADE_PRIMARY_KEY` | UN Comtrade historical trade prices |
+| `XAPI_KEY` | World-risk intelligence (news / social / prediction markets) |
+| `DEMO_MODE` | Run mode, Demo by default; Live mode never silently falls back to simulated trading |
+| `INJECTIVE_RPC_URL` | Injective testnet RPC (has a default) |
+| `X402_*`, `WHITE_AGENT_PRIVATE_KEY` | x402 paid intelligence, see [x402-integration.md](./x402-integration.md) |
 
-前端连接的合约地址**不走环境变量**，而是读取 [`public/chain-config.json`](../public/chain-config.json)。重新部署合约后，需要更新这个文件（见 `npm run migrate:chain-config`）。
+The contract addresses the frontend connects to **do not come from environment variables**; they are read from [`public/chain-config.json`](../public/chain-config.json). After redeploying the contracts you need to update this file (see `npm run migrate:chain-config`).
 
-### 运行时数据
+### Runtime Data
 
-服务会把 x402 收据、Agent 决策日志、Mystery Voyage 揭晓记录写入 `data/runtime/`（已在 `.gitignore` 中忽略）。生产环境要保证这个目录**可写且持久**，否则重启后这些记录会丢失。池子 / 认购数据只在内存里，重启即清空。
+The server writes x402 receipts, Agent decision logs and Mystery Voyage reveal records to `data/runtime/` (ignored in `.gitignore`). In production this directory must be **writable and persistent**, otherwise these records are lost on restart. Pool / subscription data is held only in memory and is cleared on restart.
 
 ---
 
-## 方案 1：直接用 Node 运行（本地 / 演示）
+## Option 1: Run Directly with Node (local / demo)
 
 ```bash
 npm install
-npm start          # 等价于 node src/app/server.js
+npm start          # equivalent to node src/app/server.js
 ```
 
-## 方案 2：Docker（推荐）
+## Option 2: Docker (recommended)
 
 ```bash
-# docker compose：自动读取 .env，映射 3000 端口，并挂载 data/
+# docker compose: reads .env automatically, maps port 3000 and mounts data/
 docker compose up -d --build
 
-# 或手动
+# or manually
 docker build -t agentbl .
 docker run -p 3000:3000 --env-file .env -v "$PWD/data/runtime:/app/data/runtime" agentbl
 ```
 
-[`docker-compose.yml`](../docker-compose.yml) 以只读方式挂载 `data/`，另外单独把 `data/runtime/` 挂成可写目录。镜像自带健康检查（`GET /api/health`）。
+[`docker-compose.yml`](../docker-compose.yml) mounts `data/` read-only and separately mounts `data/runtime/` as a writable directory. The image ships with a health check (`GET /api/health`).
 
-## 方案 3：VPS / 云服务器（PM2 + Nginx）
+## Option 3: VPS / Cloud Server (PM2 + Nginx)
 
 ```bash
 npm ci --omit=dev
@@ -73,7 +73,7 @@ pm2 start src/app/server.js --name agentbl
 pm2 save && pm2 startup
 ```
 
-Nginx 反向代理：
+Nginx reverse proxy:
 
 ```nginx
 server {
@@ -88,69 +88,69 @@ server {
 }
 ```
 
-HTTPS：`sudo certbot --nginx -d your-domain.com`
+HTTPS: `sudo certbot --nginx -d your-domain.com`
 
-## 方案 4：Railway 等容器托管平台
+## Option 4: Railway and Other Container Hosting Platforms
 
-在 [railway.app](https://railway.app) 选择 *Deploy from GitHub*，平台会识别 Dockerfile 或 Node 项目。启动命令用 `npm start`，在平台面板中填写环境变量。如需保留 `data/runtime/`，挂载一个持久卷到 `/app/data/runtime`。
+On [railway.app](https://railway.app) choose *Deploy from GitHub*; the platform detects the Dockerfile or the Node project. Use `npm start` as the start command and fill in the environment variables in the platform dashboard. To keep `data/runtime/`, mount a persistent volume at `/app/data/runtime`.
 
 ---
 
-## ⛓️ 上链发行：让市场页可以真实认购
+## ⛓️ On-chain Offerings: Enabling Real Subscriptions on the Market Page
 
-市场页的认购默认是模拟的。要让投资者用 MetaMask 在 Injective 测试网上真实认购，平台运营者需要先部署完整协议，再为案例创建链上发行。只有协议 owner 能登记提单、创建发行，所以这一步由运营者在本机执行，私钥不经过网站后端。
+Subscriptions on the market page are simulated by default. To let investors subscribe for real with MetaMask on the Injective testnet, the platform operator must first deploy the full protocol and then create on-chain offerings for the cases. Only the protocol owner can register bills of lading and create offerings, so the operator runs this step on their own machine and the private key never passes through the website backend.
 
-前提：根目录 `.env` 中配置了 `DEPLOYER_PRIVATE_KEY`，并且该地址有测试 INJ（[水龙头](https://testnet.faucet.injective.network/)）。
+Prerequisites: `DEPLOYER_PRIVATE_KEY` is set in the root `.env`, and that address holds testnet INJ ([faucet](https://testnet.faucet.injective.network/)).
 
 ```bash
 npm --prefix hardhat install
-npm run deploy:protocol                 # 部署 EBLRegistry / RWAToken / MockUSDC / RWAOfferingPool / RiskPricingOracle
-npm run protocol:op -- seed             # 为 data/cases 的每个案例登记提单、按 AI 推荐报价创建发行
-npm run protocol:op -- status           # 查看各发行的链上状态
+npm run deploy:protocol                 # deploy EBLRegistry / RWAToken / MockUSDC / RWAOfferingPool / RiskPricingOracle
+npm run protocol:op -- seed             # register a bill of lading for each case in data/cases and create an offering at the AI-recommended quote
+npm run protocol:op -- status           # show the on-chain status of each offering
 ```
 
-`seed` 会把"案例 → 池子编号"的对应关系写入 `public/chain-config.json` 的 `offerings` 字段（每个案例 4 笔交易，可用 `--cases ID1,ID2` 只处理部分案例，重复执行会跳过已创建的）。提交并重新部署网站后，市场页就会显示"链上发行"面板：投资者连接 MetaMask，领取测试 mUSDC，即可链上认购。重新部署合约后旧的对应关系自动失效，需要重新 `seed`。
+`seed` writes the "case → pool ID" mapping into the `offerings` field of `public/chain-config.json` (4 transactions per case; use `--cases ID1,ID2` to process only some cases; re-running skips offerings that already exist). After committing and redeploying the website, the market page shows an "On-chain Offering" panel: investors connect MetaMask, claim test mUSDC and can then subscribe on-chain. Redeploying the contracts automatically invalidates the old mapping, so you need to run `seed` again.
 
-演示时可以用运营命令推进生命周期：
+During a demo you can advance the lifecycle with operator commands:
 
-| 命令 | 作用 |
+| Command | Effect |
 |---|---|
-| `npm run protocol:op -- fill <caseId>` | 运营者买下剩余份额，认满并放款给出口商 |
-| `npm run protocol:op -- transit <caseId>` | 标记货物出港 |
-| `npm run protocol:op -- settle <caseId> [--ratio 1]` | 存入还款（按目标兑付价的比例）、记录到港并结算，投资者随后可兑付 |
-| `npm run protocol:op -- cancel <caseId>` | 取消尚未放款的发行，投资者可退款 |
-| `npm run protocol:op -- liquidate <caseId> [--ratio 0.6]` | AI 触发清算并存入清算款，投资者按比例兑付 |
+| `npm run protocol:op -- fill <caseId>` | Operator buys the remaining units, filling the offering and disbursing funds to the exporter |
+| `npm run protocol:op -- transit <caseId>` | Mark the cargo as departed |
+| `npm run protocol:op -- settle <caseId> [--ratio 1]` | Deposit the repayment (as a ratio of the target redemption price), record arrival and settle; investors can then redeem |
+| `npm run protocol:op -- cancel <caseId>` | Cancel an offering that has not yet disbursed; investors can claim refunds |
+| `npm run protocol:op -- liquidate <caseId> [--ratio 0.6]` | AI triggers liquidation and deposits the liquidation proceeds; investors redeem pro rata |
 
-## ✅ 部署后验证
+## ✅ Post-deployment Verification
 
 ```bash
-BASE=https://your-domain.com     # 本地为 http://localhost:3000
+BASE=https://your-domain.com     # locally use http://localhost:3000
 
-curl $BASE/api/health                         # 健康检查
-curl $BASE/api/cases                          # 贸易案例列表
+curl $BASE/api/health                         # health check
+curl $BASE/api/cases                          # list of trade cases
 curl -X POST $BASE/api/pricing/quote \
-  -H "Content-Type: application/json" -d '{}' # 用默认演示案例生成定价报价
+  -H "Content-Type: application/json" -d '{}' # generate a pricing quote for the default demo case
 ```
 
-页面上再确认：
+Then confirm in the browser:
 
-- [ ] 首页、样式、图片正常加载，控制台无报错
-- [ ] 可以切换贸易案例并看到 AI 定价结果
-- [ ] 钱包（MetaMask / Keplr）可以连接，并切换到 Injective 测试网（chainId 1439）
+- [ ] The home page, styles and images load, with no console errors
+- [ ] You can switch trade cases and see the AI pricing result
+- [ ] A wallet (MetaMask / Keplr) can connect and switch to the Injective testnet (chainId 1439)
 
 ---
 
-## 🐛 常见问题
+## 🐛 Troubleshooting
 
-| 症状 | 排查 |
+| Symptom | What to check |
 |---|---|
-| AI 结果是固定数值 | 没有配置 LLM / 行情 key，正在使用离线回退数据，属正常行为 |
-| 环境变量不生效 | 确认 `.env` 在项目根目录，或已通过 `--env-file` / 平台面板传入；变量名区分大小写 |
-| Docker 中写 `data/runtime` 报只读错误 | 确认 `data/runtime` 单独挂载为可写卷 |
-| 钱包交易失败 | 确认钱包在 Injective 测试网、账户有测试 INJ（[水龙头](https://testnet.faucet.injective.network/)），且 `chain-config.json` 中的合约地址是最新部署 |
+| AI results are fixed values | No LLM / market-data key is configured, so offline fallback data is being used; this is expected |
+| Environment variables have no effect | Make sure `.env` is in the project root, or is passed via `--env-file` / the platform dashboard; variable names are case-sensitive |
+| Read-only error when writing `data/runtime` in Docker | Make sure `data/runtime` is mounted separately as a writable volume |
+| Wallet transaction fails | Make sure the wallet is on the Injective testnet, the account has testnet INJ ([faucet](https://testnet.faucet.injective.network/)), and the contract addresses in `chain-config.json` are from the latest deployment |
 
-## 🔒 安全建议
+## 🔒 Security Recommendations
 
-- 永远不要提交 `.env`，私钥只放在部署平台的密钥管理里
-- 测试网私钥与主网私钥严格分开
-- 对外公开部署时，考虑在 Nginx 层加上请求频率限制
+- Never commit `.env`; keep private keys only in the deployment platform's secret manager
+- Keep testnet and mainnet private keys strictly separate
+- For public deployments, consider adding rate limiting at the Nginx layer

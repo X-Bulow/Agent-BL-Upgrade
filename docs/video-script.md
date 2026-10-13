@@ -1,22 +1,22 @@
-# 🎬 AgentBL · 项目视频脚本（AI Agent × Blockchain · 安全 / Risk Agent）
+# 🎬 AgentBL · Project Video Script (AI Agent × Blockchain · Security / Risk Agent)
 
-> **用途**：黑客松提交视频的口播脚本，主线是 **「我们的想法 + AI 亮点」**，并刻意对齐
-> 主赛道 **AI Agent × Blockchain** 与特别单项奖 **安全 / Risk Agent（Security / Risk Agent）**。
-> **与 [`demo-script.md`](./demo-script.md) 的区别**：`demo-script.md` 是「投资者会不会亏」的
-> 金融论证型 Demo 讲稿；**本文是面向评委的产品 pitch 视频**，把 AI 当成一个承担安全风控职责的
-> Agent 来讲。两份可以二选一，也可以拼用（用本文做 pitch、用 demo-script 的「三种结算」做高潮）。
-> **配套**：`npm run dev`（网页）、`npm run agent:value`（AI 工具调用轨迹）、`npm run demo:default`
-> （三种结算）、`npm run qa`（评委问答）。**所有数字均为定价引擎实测值，可照念。**
+> **Purpose**: Voice-over script for the hackathon submission video. The main thread is **"our idea + the AI highlights"**, deliberately aligned with
+> the main track **AI Agent × Blockchain** and the special award **Security / Risk Agent**.
+> **How it differs from [`demo-script.md`](./demo-script.md)**: `demo-script.md` is a financial-argument demo script about "can investors lose money";
+> **this document is a product pitch video aimed at the judges**, presenting the AI as an Agent that carries security and risk-control
+> responsibilities. Use either one, or combine them (use this one for the pitch and the "three settlements" from demo-script as the climax).
+> **Companion commands**: `npm run dev` (web page), `npm run agent:value` (AI tool-call trace), `npm run demo:default`
+> (three settlements), `npm run qa` (judge Q&A). **All numbers are measured outputs of the pricing engine and can be read out as-is.**
 
 ---
 
-## 🎯 一句话定位（整支视频的「赢点」）
+## 🎯 One-Line Positioning (the "winning point" of the whole video)
 
-> **大多数 Web3 项目里的「AI Agent」只是套了个聊天框；AgentBL 的 AI 是一个真正干脏活、
-> 担责任的「安全与风控 Agent」——它在投资者下单【之前】，替他们识别贸易欺诈、给真实世界风险
-> 定价，并把每一个决策写上链、由智能合约强制执行。AI 定价，链上执行。**
+> **In most Web3 projects the "AI Agent" is just a chat box bolted on; AgentBL's AI is a real "Security & Risk Agent" that does the dirty work
+> and takes responsibility — [before] investors place an order, it identifies trade fraud for them, prices real-world risk,
+> and writes every decision on-chain to be enforced by smart contracts. The AI prices; the chain executes.**
 
-英文 pitch（片头/片尾字幕）：
+English pitch (opening/closing subtitles):
 
 > **AgentBL's AI isn't a chatbot — it's a Security & Risk Agent that prices real-world
 > trade risk into an on-chain decision before investors are ever exposed.**
@@ -24,13 +24,13 @@
 
 ---
 
-## ⏱️ 30 秒电梯版（开场或单独投稿用）
+## ⏱️ 30-Second Elevator Version (for the opening or a standalone submission)
 
-> 国际贸易里，货一装船，钱要等一个多月才回来。出口商把代表货权的**电子提单**质押上链、发行
-> 以货值为支撑的 RWA，资本方折价认购、目标兑付 1 美元。但链下的世界全是欺诈和风险——
-> **谁在投资者下单前替他们看住这些？** AgentBL 的答案是一个 **AI 安全与风控 Agent**：
-> 它审单反欺诈、调用工具估值、给战争和保险风险定价，把「该不该开盘、发行价多少」写进链上合约。
-> 普通 DeFi 让市场猜价格；**我们让 AI 在认购前就把风险定成一个可解释、可上链的折价。**
+> In international trade, once the goods are loaded onto the ship, the money takes more than a month to come back. The exporter pledges the **electronic bill of lading** that represents title to the goods on-chain and issues
+> an RWA backed by the cargo value; capital providers subscribe at a discount, with a target redemption of 1 US dollar. But the off-chain world is full of fraud and risk —
+> **who watches over all this for investors before they place an order?** AgentBL's answer is an **AI Security & Risk Agent**:
+> it reviews documents for fraud, calls tools to value the cargo, prices war and insurance risk, and writes "whether to open the offering and at what issue price" into an on-chain contract.
+> Ordinary DeFi lets the market guess the price; **we let AI set the risk as an explainable, on-chain discount before subscription.**
 
 🇬🇧 *Goods ship, cash is locked for 45 days. We turn an electronic bill of lading into an
 RWA, and let an AI Security & Risk Agent detect fraud and price real-world risk into the
@@ -38,140 +38,140 @@ on-chain issue price — before investors buy. The AI prices the risk; the chain
 
 ---
 
-## ⏱️ 90 秒精简版（想法 → 安全亮点 → 战争 → 收束）
+## ⏱️ 90-Second Short Version (idea → security highlight → war → close)
 
-**【0:00–0:20 想法】**
-> 这是 AgentBL。痛点很简单：货已装船、钱还要 45 天才回。出口商质押电子提单、发行 RWA 融资，
-> 投资者折价认购。但真正难的是——链下的欺诈和风险，谁来把关？我们的答案是一个 **AI 风控 Agent**。
+**[0:00–0:20 Idea]**
+> This is AgentBL. The pain point is simple: the goods are loaded, but the money takes another 45 days to come back. The exporter pledges the electronic bill of lading and issues RWA to raise financing,
+> and investors subscribe at a discount. But the really hard part is — who guards against off-chain fraud and risk? Our answer is an **AI Risk Agent**.
 
-**【0:20–0:50 安全亮点：反欺诈审单】**
-> 在给 RWA 定任何价之前，Agent 先做**反欺诈审单**：把同一批货的电子提单、商业发票、保险单三份
-> 文件交叉核验——数量对不对得上、发票单价有没有偏离市场（高开/低开发票）、保险够不够覆盖货值、
-> 保单会不会在到港前就过期。每一个疑点都折算成风险基点，直接压低发行价。这是价格预言机永远做不到的。
+**[0:20–0:50 Security highlight: anti-fraud document review]**
+> Before putting any price on the RWA, the Agent first performs an **anti-fraud document review**: it cross-checks the three documents for the same cargo — the electronic bill of lading, the commercial invoice and the insurance policy —
+> do the quantities match, does the invoice unit price deviate from the market (over- or under-invoicing), does the insurance cover the cargo value,
+> and will the policy expire before arrival at port. Every red flag is converted into risk basis points that directly push down the issue price. This is something a price oracle can never do.
 
-**【0:50–1:15 战争：看穿欺骗性信号】**
-> 最硬核的一手：战争爆发时铜价**上涨**，只看价格的预言机会以为「抵押更值钱、更安全」——完全看反。
-> 我们的 Agent 知道这是脆弱的战争溢价，违约↑、保险因战争除外失效↓、回收↓，于是反向操作：货值
-> haircut 21%、风险打到 1410 个基点、直接**暂停发行**，把投资者拦在爆雷之外。
+**[0:50–1:15 War: seeing through the deceptive signal]**
+> The most hard-core move: when war breaks out, copper prices **rise**, and an oracle that only looks at price thinks "the collateral is worth more, so it's safer" — completely backwards.
+> Our Agent knows this is a fragile war premium: default↑, insurance void because of the war exclusion↓, recovery↓, so it does the opposite: a 21% haircut
+> on the cargo value, risk pushed to 1410 basis points, and the offering is **paused** outright, keeping investors out of the blow-up.
 
-**【1:15–1:30 上链 + 收束】**
-> 每个决策连同**证据哈希**写进链上 RiskPricingOracle，可审计、防篡改。
-> **普通 DeFi 让市场猜价格；AgentBL 让 AI 在投资者下单前，把贸易风险定成可上链的折价。**
-> AI 定价，链上执行。
+**[1:15–1:30 On-chain + close]**
+> Every decision, together with its **evidence hash**, is written to the on-chain RiskPricingOracle — auditable and tamper-proof.
+> **Ordinary DeFi lets the market guess the price; AgentBL lets AI price trade risk into an on-chain discount before investors place an order.**
+> The AI prices; the chain executes.
 
 ---
 
-## 🎥 完整版（约 3 分 40 秒）
+## 🎥 Full Version (about 3 min 40 s)
 
-> 录制语言建议：**中文口播 + 英文字幕**（关键句给了 🇬🇧 英文，可直接做字幕或录英文版）。
-> 镜头在 **网页两个界面** + 必要时 **终端** 之间切，所有数字照念即可。
+> Recording language suggestion: **voice-over + English subtitles** (key lines come with a condensed 🇬🇧 English version that can be used directly as subtitles or for a shorter English recording).
+> The camera switches between **the two web interfaces** and, when needed, **the terminal**; all numbers can simply be read out as written.
 
-### 片头字幕（3 秒）
+### Opening Title Caption (3 seconds)
 ```
-AgentBL · AI 动态定价的 eBL-backed RWA 贸易融资协议
+AgentBL · AI dynamically priced, eBL-backed RWA trade finance protocol
 The AI prices the risk. The chain enforces it.
-ETH Beijing 2026 · 主赛道 AI Agent × Blockchain · 单项奖 Security / Risk Agent
+ETH Beijing 2026 · Main track AI Agent × Blockchain · Special award Security / Risk Agent
 ```
 
-### [0:00–0:30] 开场：我们的想法 & 那个该被问的问题
-**【画面】** 网页首页 / Logo（界面①顶部）
-**【口播】**
-> 大家好，这是 AgentBL。先看痛点：国际贸易里，货物一装船，出口商的钱要 30 到 45 天才回得来；
-> 而全球贸易融资缺口高达 **2.5 万亿美元**。我们让出口商把代表在途货权的**电子提单**质押上链，
-> 发行以这批货价值为支撑的 **RWA**，投资者折价认购、目标兑付 1 美元。
-> 但真正的难题不是发个币——是**链下的世界全是欺诈和风险**：单据可能造假、保险可能不足额、
-> 战争可能让一切归零。**谁在投资者下单之前，替他们把这些风险看准、定价？**
-> 这就是 AgentBL 的全部答案：一个 **AI 安全与风控 Agent**。
+### [0:00–0:30] Opening: Our Idea & the Question That Should Be Asked
+**[Visual]** Web home page / logo (top of interface ①)
+**[Voice-over]**
+> Hi everyone, this is AgentBL. First the pain point: in international trade, once the goods are loaded onto the ship, it takes 30 to 45 days for the exporter's money to come back;
+> and the global trade finance gap is as high as **2.5 trillion US dollars**. We let exporters pledge the **electronic bill of lading** representing title to the in-transit goods on-chain,
+> and issue an **RWA** backed by the value of that cargo; investors subscribe at a discount, with a target redemption of 1 US dollar.
+> But the real challenge isn't issuing a token — it's that **the off-chain world is full of fraud and risk**: documents may be forged, insurance may be insufficient,
+> and war could wipe everything out. **Who assesses and prices these risks correctly for investors before they place an order?**
+> That is AgentBL's whole answer: an **AI Security & Risk Agent**.
 
 🇬🇧 *The hard part isn't tokenizing a bill of lading — it's that the off-chain world is full of
 fraud and risk. Who prices that for the investor, before they buy? That's our AI Risk Agent.*
 
-### [0:30–1:00] 定位：这才是「AI Agent × Blockchain」该有的样子
-**【画面】** README 架构图 / 简笔架构：`AI 引擎 → API → 智能合约`
-**【口播】**
-> AgentBL 是一个 **AI 动态定价的 RWA 贸易融资协议**。请记住一点：我们的 AI **不是聊天机器人**，
-> 而是一个承担真实金融职责的 Agent——它**审单、估值、给风险定价、决定能融多少、该不该开盘**，
-> 然后把每一个决策写上链，由智能合约强制执行。
-> 这正是「AI Agent × Blockchain」最该有的分工：**AI 负责判断，区块链负责执行和存证。**
-> 接下来用三个 AI 亮点，告诉你这个 Agent 到底厉害在哪。
+### [0:30–1:00] Positioning: This Is What "AI Agent × Blockchain" Should Look Like
+**[Visual]** README architecture diagram / simple sketch: `AI engine → API → smart contracts`
+**[Voice-over]**
+> AgentBL is an **AI dynamically priced RWA trade finance protocol**. Remember one thing: our AI is **not a chatbot**,
+> but an Agent that carries real financial responsibilities — it **reviews documents, values cargo, prices risk, decides how much can be financed and whether to open the offering**,
+> and then writes every decision on-chain, to be enforced by smart contracts.
+> This is exactly the division of labour "AI Agent × Blockchain" should have: **AI makes the judgement; the blockchain handles execution and record-keeping.**
+> Next, three AI highlights will show you what makes this Agent so capable.
 
 🇬🇧 *The AI doesn't chat — it underwrites. It values cargo, prices risk, sets the financing cap
 and the on-chain action. AI makes the call; the chain enforces and records it.*
 
-### [1:00–1:45] ⭐ AI 亮点 ①｜安全：反欺诈审单（冲击单项奖的核心）
-**【画面】** 界面① 顶部选 **「Copper · Shanghai → Hamburg (insurance gap)」** → 看「AI 货值估算 & 航线风险」卡，单据/保险项飘红 + 数据来源标签
-**【口播】**
-> 第一个亮点，也是我们冲击「安全 / Risk Agent」单项奖的核心：**在给 RWA 定任何价之前，
-> Agent 先做反欺诈审单。** 贸易金融欺诈最常见的形态，就是同一批货的三份文件对不上——
-> 电子提单、商业发票、保险单。我们的 Agent 像审单员一样逐项交叉核验：
-> **数量是否一致**（对不上 +250bps）、**发票单价是否偏离市场价**——识别高开或低开发票（+150bps）、
-> **保险是否覆盖货值**（不足额 +220bps）、**保单是否在到港前就过期**、**Incoterms 是否一致**……
-> 每一个疑点都折算成具体的**风险基点**，直接压进发行价。
-> 你看这个案例，AI 当场抓到：**保险金额低于货值、保单几乎卡在到港当天过期**——
-> 这些都是只看 token 价格的预言机永远看不见的链下风险。**风控，从审单开始。**
+### [1:00–1:45] ⭐ AI Highlight ① | Security: Anti-Fraud Document Review (the core of our special-award bid)
+**[Visual]** In interface ①, select **"Copper · Shanghai → Hamburg (insurance gap)"** at the top → look at the "AI Cargo Valuation & Route Risk" card, with document/insurance items in red + data source tags
+**[Voice-over]**
+> The first highlight, and the core of our bid for the "Security / Risk Agent" special award: **before putting any price on the RWA,
+> the Agent first performs an anti-fraud document review.** The most common form of trade finance fraud is when the three documents for the same cargo don't match —
+> the electronic bill of lading, the commercial invoice and the insurance policy. Our Agent cross-checks them item by item like a document examiner:
+> **do the quantities match** (mismatch +250bps), **does the invoice unit price deviate from the market price** — detecting over- or under-invoicing (+150bps),
+> **does the insurance cover the cargo value** (under-insured +220bps), **does the policy expire before arrival at port**, **are the Incoterms consistent**...
+> Every red flag is converted into specific **risk basis points** and pushed straight into the issue price.
+> Look at this case: the AI catches it on the spot — **the insured amount is below the cargo value, and the policy expires almost exactly on the day of arrival at port** —
+> these are off-chain risks that an oracle looking only at token prices can never see. **Risk control starts with document review.**
 
 🇬🇧 *Trade-finance fraud shows up as mismatches between the eBL, the invoice and the insurance
 policy. The Agent cross-checks them — quantity, mis-invoicing vs market, under-insurance,
 a policy expiring before arrival — and folds each into the price in basis points.*
 
-> 💡 **导演提示**：这一段是单项奖的「题眼」，放慢、咬住「反欺诈 / fraud detection」这个词。
-> 想更硬核可切终端补一刀：审单逻辑在 `src/agent/documentConsistency.js`，7 项交叉核验、最高 600bps 罚分。
+> 💡 **Director's note**: this segment is the "key theme" for the special award — slow down and lean on the words "anti-fraud / fraud detection".
+> For a more hard-core touch, cut to the terminal: the document review logic is in `src/agent/documentConsistency.js`, with 7 cross-checks and a maximum penalty of 600bps.
 
-### [1:45–2:25] ⭐ AI 亮点 ②｜有据可查：工具调用估值 + RAG 风险情报
-**【画面】** 界面① 「AI 货值估算」卡 + 每项**数据来源**标签 + 「AI 定价台」瀑布图；可选切终端跑 `npm run agent:value` 展示 `tool_trace`
-**【口播】**
-> 第二个亮点：**Agent 的每个数字都有据可查，不是凭空生成的。** 估值时它像真人分析师一样**调用工具**——
-> 拉**实时 LME 铜价**、查**目的港区域升水**、调 **UN Comtrade 历史同类成交价**做交叉验证，
-> 最后在战争溢价的高位**主动打一个保守的波动性 haircut**，绝不在高点虚高估值。
-> 与此同时，一个 **RAG 检索器**从风险情报库里拉出最相关的宏观事件，**每条都带信息来源**。
-> 所有这些拼成一张**「证据图」**：发行价为什么从 1 美元一步步折到 0.85、0.80——
-> 每一档折价背后挂的是哪条证据、哪个来源，清清楚楚。
-> **可解释、可审计**——这就是一个负责任的 Agent 和一个黑箱模型的根本区别。
+### [1:45–2:25] ⭐ AI Highlight ② | Evidence-Backed: Tool-Calling Valuation + RAG Risk Intelligence
+**[Visual]** Interface ① "AI Cargo Valuation" card + the **data source** tag on each item + the "AI Pricing Desk" waterfall chart; optionally cut to the terminal and run `npm run agent:value` to show the `tool_trace`
+**[Voice-over]**
+> The second highlight: **every number the Agent produces is backed by evidence, not generated out of thin air.** When valuing, it **calls tools** like a human analyst —
+> pulling the **real-time LME copper price**, checking the **regional premium at the destination port**, and using **UN Comtrade historical comparable trades** for cross-verification,
+> and finally, at the peak of the war premium, it **proactively applies a conservative volatility haircut**, never inflating the valuation at the top.
+> At the same time, a **RAG retriever** pulls the most relevant macro events from the risk intelligence library, **each with its information source**.
+> All of this comes together into an **"evidence graph"**: why the issue price is discounted step by step from 1 US dollar to 0.85 and 0.80 —
+> which piece of evidence and which source sits behind each discount tier, laid out clearly.
+> **Explainable and auditable** — that is the fundamental difference between a responsible Agent and a black-box model.
 
 🇬🇧 *Every number is grounded. The Agent calls tools — live LME price, regional premium,
 UN Comtrade historical comparables — applies a conservative war-premium haircut, and a RAG
 retriever cites macro-risk intel with sources. The result is an auditable evidence graph.*
 
-### [2:25–3:05] ⭐ AI 亮点 ③｜风控直觉：看穿「战争溢价」这个欺骗性信号
-**【画面】** 界面② 航运追踪 → 点 **「⚔ 霍尔木兹冲突升级」**（价格当场下跌、风险飙红、AI 暂停）；或顶部切 **「Hormuz war crisis」** 案例对照（开盘即 CRITICAL / PAUSE）
-**【口播】**
-> 第三个亮点，是这个 Agent 最像「风控专家」的一手。**战争爆发时，铜价其实在涨。**
-> 一个只看价格的预言机会得出致命的错误结论：抵押物更值钱了，这笔贷款更安全——**完全看反。**
-> 而我们的 Agent 知道：这是一把**「相关性双刃剑」**——战争溢价同时意味着进口商违约概率上升、
-> 保险因为「战争除外」条款失效、清算回收率下降，**所有保护一起塌掉。**
-> 所以 Agent 反向操作：把核验货值 **haircut 掉 21%**、风险分打到 **1410 个基点**、
-> 然后直接 **PAUSE 暂停发行**——把投资者拦在这趟注定爆雷的车之外。
-> **这就是一个「风险 Agent」和一个「价格喂价」的本质区别。**
+### [2:25–3:05] ⭐ AI Highlight ③ | Risk Instinct: Seeing Through the Deceptive "War Premium" Signal
+**[Visual]** Interface ② Voyage Tracking → click **"⚔ Hormuz Conflict Escalation"** (price drops on the spot, risk turns red, AI pauses); or switch at the top to the **"Hormuz war crisis"** case for comparison (CRITICAL / PAUSE right at opening)
+**[Voice-over]**
+> The third highlight is where this Agent behaves most like a "risk expert". **When war breaks out, copper prices actually rise.**
+> An oracle that only looks at price reaches a fatally wrong conclusion: the collateral is worth more, so this loan is safer — **completely backwards.**
+> Our Agent knows this is a **"correlated double-edged sword"** — the war premium also means the importer's default probability rises,
+> insurance fails because of the "war exclusion" clause, and the liquidation recovery rate falls; **all the protections collapse together.**
+> So the Agent does the opposite: it applies a **21% haircut** to the verified cargo value, pushes the risk score to **1410 basis points**,
+> and then directly **PAUSES the offering** — keeping investors off a ride that is bound to blow up.
+> **That is the fundamental difference between a "Risk Agent" and a "price feed".**
 
 🇬🇧 *War spikes the copper price. A price oracle thinks the collateral is now safer — exactly
 backwards. The Agent knows war premium is a correlated double-edge: default up, insurance void,
 recovery down. So it does the opposite — haircut 21%, risk 1410bps, and PAUSE.*
 
-> 💡 **可选加强（金融硬度）**：切终端 `npm run demo:default`，让同一笔铜跑三种结算——
-> 还款 **0.80→1.00 赚 25%**、战争尾部违约只回收 **0.698 亏 12.8%**、轻度违约被超额抵押兜回本金。
-> 一句话钉死：**1 美元是目标、不是保本；那 0.20 的折价，正是 AI 为违约尾部预收的保费。**
+> 💡 **Optional reinforcement (financial rigour)**: cut to the terminal and run `npm run demo:default` to run the same copper deal through three settlements —
+> repayment **0.80→1.00 earns 25%**, a war-tail default recovers only **0.698, a 12.8% loss**, and a mild default is made whole on principal by over-collateralisation.
+> Nail it in one sentence: **1 US dollar is a target, not a guarantee; that 0.20 discount is exactly the premium the AI collects up front for the default tail.**
 
-### [3:05–3:30] 安全闭环：上链存证 + 为什么必须「事前」定准
-**【画面】** 界面① 点「⛓ 铸造 RWA 上链」（MetaMask 签名 / Injective 真实交易）→ 结果卡显示 `tx_hash` / `quote_hash` / `evidence_hash`；或合约时间线 `Funded → InTransit`
-**【口播】**
-> 最后，安全闭环落在链上。Agent 的**每一次定价决策，连同它依据的证据哈希**，都写进链上的
-> **RiskPricingOracle**——可审计、防篡改、谁都改不了。
-> 为什么必须在认购**之前**就定准？因为钱在 **Funded** 那一刻就打给出口商了，货还在海上漂着；
-> 之后风险再升级、再怎么改价，**都保护不了已经建仓的老钱**——那笔折价，是投资者唯一的、
-> **预先付清的**风险补偿。
-> 还有一道安全护栏：**我们让 LLM 只负责写解释，最终价格由确定性引擎和 schema 校验**——
-> 就算模型抽风，也乱定不了价。**148 个测试**守着这条不变量。
+### [3:05–3:30] Closing the Security Loop: On-Chain Records + Why It Must Be Priced Right "Up Front"
+**[Visual]** Interface ① click "⛓ Mint RWA On-Chain" (MetaMask signature / real Injective transaction) → the result card shows `tx_hash` / `quote_hash` / `evidence_hash`; or the contract timeline `Funded → InTransit`
+**[Voice-over]**
+> Finally, the security loop closes on-chain. **Every pricing decision the Agent makes, together with the hash of the evidence it relied on**, is written to the on-chain
+> **RiskPricingOracle** — auditable, tamper-proof, and no one can alter it.
+> Why must the price be right **before** subscription? Because the money is sent to the exporter at the moment of **Funded**, while the goods are still at sea;
+> if risk escalates afterwards, no amount of repricing **can protect the money already invested** — that discount is the investor's only,
+> **prepaid** compensation for risk.
+> There is one more safety guardrail: **we let the LLM only write explanations, while the final price is validated by a deterministic engine and schema** —
+> even if the model glitches, it cannot set a wild price. **148 tests** guard this invariant.
 
 🇬🇧 *Every decision, with its evidence hash, is written to an on-chain RiskPricingOracle —
 auditable and tamper-proof. And the LLM never sets the final price alone: a deterministic
 policy and schema guardrail validate it. 148 tests guard that invariant.*
 
-### [3:30–3:50] 收束
-**【画面】** tagline 字幕全屏
-**【口播】**
-> 一句话总结：**普通 DeFi 让市场去猜价格、让清算去善后；AgentBL 让一个 AI 安全与风控 Agent，
-> 在投资者下单之前，就把贸易欺诈和真实世界风险，定成一个可解释、可上链的 RWA 折价。**
-> **AI 定价，链上执行。** 这就是 AgentBL。谢谢。
+### [3:30–3:50] Close
+**[Visual]** Full-screen tagline caption
+**[Voice-over]**
+> To sum up in one sentence: **ordinary DeFi lets the market guess the price and lets liquidation clean up afterwards; AgentBL lets an AI Security & Risk Agent,
+> before investors place an order, price trade fraud and real-world risk into an explainable, on-chain RWA discount.**
+> **The AI prices; the chain executes.** This is AgentBL. Thank you.
 
 🇬🇧 *Ordinary DeFi lets the market guess the price and lets liquidation clean up the mess.
 AgentBL lets an AI Security & Risk Agent price fraud and real-world risk into an explainable,
@@ -179,77 +179,74 @@ on-chain discount — before investors buy. The AI prices the risk. The chain en
 
 ---
 
-## 🏆 为什么这支视频能命中「Security / Risk Agent」单项奖
+## 🏆 Why This Video Can Win the "Security / Risk Agent" Special Award
 
-> 录制前，让全队对齐这 5 个「安全」证据点——评委要的就是这些，每一点视频里都有画面支撑：
+> Before recording, get the whole team aligned on these 5 "security" evidence points — these are exactly what the judges want, and each one has visual support in the video:
 
-| # | 安全 / 风控能力 | 视频段落 | 代码锚点 |
+| # | Security / risk-control capability | Video segment | Code anchor |
 |---|---|---|---|
-| 1 | **反欺诈审单**：eBL / 发票 / 保险三单交叉核验，识别高低开发票、不足额保险、保单过期 | 亮点 ① [1:00] | `src/agent/documentConsistency.js`（7 项核验，最高 600bps） |
-| 2 | **风险定价**：把链下风险打成 bps，直接决定发行价、融资额度、开/暂停 | 亮点 ①②③ | `src/core/pricingEngine.js`（`scoreRisk` / `priceRwaOffering`） |
-| 3 | **看穿欺骗性信号**：战争溢价的「相关性双刃」，反向 haircut + PAUSE | 亮点 ③ [2:25] | warcrisis 案例 → 1410bps / PAUSE |
-| 4 | **链上存证防篡改**：每个决策带 `evidence_hash` / `quote_hash` 写入 RiskPricingOracle | 上链 [3:05] | `RiskPricingOracle.sol` · `oracle.js` |
-| 5 | **AI 安全护栏**：LLM 只解释、不定价；确定性引擎 + schema 校验 + 离线兜底 | 上链 [3:05] | `pricingSchema.js` · `valuationAgent.js`（fallback） |
+| 1 | **Anti-fraud document review**: three-way cross-check of eBL / invoice / insurance, detecting over- and under-invoicing, under-insurance and expired policies | Highlight ① [1:00] | `src/agent/documentConsistency.js` (7 checks, max 600bps) |
+| 2 | **Risk pricing**: turns off-chain risk into bps that directly determine the issue price, financing amount, and open/pause | Highlights ①②③ | `src/core/pricingEngine.js` (`scoreRisk` / `priceRwaOffering`) |
+| 3 | **Seeing through deceptive signals**: the "correlated double edge" of the war premium, with a counter-move haircut + PAUSE | Highlight ③ [2:25] | warcrisis case → 1410bps / PAUSE |
+| 4 | **Tamper-proof on-chain records**: every decision written to RiskPricingOracle with `evidence_hash` / `quote_hash` | On-chain [3:05] | `RiskPricingOracle.sol` · `oracle.js` |
+| 5 | **AI safety guardrails**: the LLM only explains and never prices; deterministic engine + schema validation + offline fallback | On-chain [3:05] | `pricingSchema.js` · `valuationAgent.js` (fallback) |
 
-**一句话给评委**：*Our agent's job is to protect the investor — it detects trade-finance fraud,
+**One line for the judges**: *Our agent's job is to protect the investor — it detects trade-finance fraud,
 prices correlated tail risk, and pauses the deal when the math says stop, with every decision
 anchored on-chain.*
 
 ---
 
-## 🗣️ 录制提示
+## 🗣️ Recording Tips
 
-- **数字念准**（全是引擎实测值）：审单罚分 `+250 / +220 / +150 / +120bps`；战争危机 `1410bps` /
-  货值 `−21%` / `PAUSE`；三种结算 `+25%` / 回收 `0.698` 即 `−12.8%`；三档发行价 `0.80 / 0.85 / 0.89`；
-  测试 `148 passing`。
-- **节奏**：亮点 ①（反欺诈）和亮点 ③（战争）是命中单项奖的两个高潮，**放慢、咬重音**；亮点 ② 可略快。
-- **关键词反复出现**：让「**反欺诈 / fraud detection**」「**风控 Agent / Risk Agent**」「**可解释、可上链**」
-  在口播里至少各出现两次——评委是按单项奖关键词在听的。
-- **英文版**：每段都给了 🇬🇧 句子，可整段录英文，或中文口播 + 英文字幕（推荐，受众更广）。
-- **兜底**：网页若出问题，全程可用终端讲完——
-  `npm run agent:value`（工具调用轨迹）、`npm run price`（一份定价）、`npm run demo:default`（三种结算）、
-  `npm run qa`（评委问答），逻辑不缺一环。
-- **真实上链加分**：若已部署 Injective Testnet（顶栏显示 `● 合约已部署`），亮点上链段落务必现场点 MetaMask 签名，
-  展示真实 `tx_hash` + Etherscan，比模拟交易更有说服力。
+- **Read the numbers accurately** (all are measured engine outputs): document review penalties `+250 / +220 / +150 / +120bps`; war crisis `1410bps` /
+  cargo value `−21%` / `PAUSE`; three settlements `+25%` / recovery `0.698`, i.e. `−12.8%`; three issue price tiers `0.80 / 0.85 / 0.89`;
+  tests `148 passing`.
+- **Pacing**: Highlight ① (anti-fraud) and Highlight ③ (war) are the two climaxes that win the special award — **slow down and stress them**; Highlight ② can be a bit faster.
+- **Repeat the keywords**: make sure "**anti-fraud / fraud detection**", "**Risk Agent**" and "**explainable, on-chain**"
+  each appear at least twice in the voice-over — the judges are listening for the special-award keywords.
+- **English version**: every segment has a 🇬🇧 line; you can record whole segments in English, or use voice-over + English subtitles (recommended, wider audience).
+- **Fallback**: if the web page has problems, the whole thing can be presented from the terminal —
+  `npm run agent:value` (tool-call trace), `npm run price` (one pricing quote), `npm run demo:default` (three settlements),
+  `npm run qa` (judge Q&A), with no gap in the logic.
+- **Bonus for real on-chain transactions**: if Injective Testnet is deployed (the top bar shows `● Contracts deployed`), be sure to click through the MetaMask signature live during the on-chain highlight segment,
+  showing a real `tx_hash` + Etherscan — far more convincing than a simulated transaction.
 
 ---
 
-## 🎬 画面 / 命令对照表
+## 🎬 Visual / Command Reference Table
 
-| 视频段落 | 网页画面 | 终端兜底命令 |
+| Video segment | Web visual | Terminal fallback command |
 |---|---|---|
-| 开场 / 定位 | 界面① 首页 + 架构图 | — |
-| 亮点① 反欺诈审单 | 界面① 选 `Copper · Shanghai → Hamburg (insurance gap)`，看风险维度 + 数据来源 | `npm run price`（看 risk_factors / doc penalty） |
-| 亮点② 工具估值 + RAG | 界面① 货值估算卡 + 数据来源 + 定价瀑布图 | `npm run agent:value`（tool_trace + 来源） |
-| 亮点③ 战争 → 暂停 | 界面② 点「⚔ 霍尔木兹冲突升级」/ 切 `Hormuz war crisis` 案例 | `npm run demo:default`（三种结算损益） |
-| 上链 + 护栏 | 界面① 「⛓ 铸造 RWA 上链」→ tx/quote/evidence hash | `npm run scenarios`（fast/balanced/reprice/pause） |
-| 收束 | tagline 字幕全屏 | — |
+| Opening / positioning | Interface ① home page + architecture diagram | — |
+| Highlight ① anti-fraud document review | Interface ①, select `Copper · Shanghai → Hamburg (insurance gap)`, view risk dimensions + data sources | `npm run price` (see risk_factors / doc penalty) |
+| Highlight ② tool valuation + RAG | Interface ① cargo valuation card + data sources + pricing waterfall chart | `npm run agent:value` (tool_trace + sources) |
+| Highlight ③ war → pause | Interface ② click "⚔ Hormuz Conflict Escalation" / switch to the `Hormuz war crisis` case | `npm run demo:default` (P&L of the three settlements) |
+| On-chain + guardrails | Interface ① "⛓ Mint RWA On-Chain" → tx/quote/evidence hash | `npm run scenarios` (fast/balanced/reprice/pause) |
+| Close | Full-screen tagline caption | — |
 
 ---
 
-## 🔤 双语 tagline & 字幕备选
+## 🔤 Tagline & Subtitle Options
 
-**主 tagline（片头/片尾）**
-- 中：**AI 定价风险，链上强制执行。**
-- EN：**The AI prices the risk. The chain enforces it.**
+**Main tagline (opening/closing)**
+- **The AI prices the risk. The chain enforces it.**
 
-**单项奖定位句（可做副标题）**
-- 中：**不是聊天机器人，是一个上链的安全与风控 Agent。**
-- EN：**Not a chatbot — an on-chain Security & Risk Agent.**
+**Special-award positioning line (can be used as a subtitle)**
+- **Not a chatbot — an on-chain Security & Risk Agent.**
 
-**收束金句**
-- 中：**普通 DeFi 让市场猜价格；AgentBL 让 AI 在你下单前把风险定价。**
-- EN：**Ordinary DeFi lets the market guess. AgentBL lets AI price the risk before you buy.**
+**Closing line**
+- **Ordinary DeFi lets the market guess. AgentBL lets AI price the risk before you buy.**
 
 ---
 
-## 🔗 与其他文档的对应
+## 🔗 Mapping to Other Docs
 
-| 视频内容 | 文档锚点 |
+| Video content | Doc anchor |
 |---|---|
-| 我们的想法 / 定位 | `README.md`「✨ 这是什么」+「🎯 核心逻辑链」 |
-| 亮点① 反欺诈审单 | `src/agent/documentConsistency.js` · `docs/background.md` §9.1 单据风险 |
-| 亮点② 工具调用 + RAG | `docs/ai-valuation-tooling.md` · `src/agent/valuationAgent.js` · `src/agent/riskIntel.js` |
-| 亮点③ 战争 → 暂停 | `docs/PRD.md` §2.4 · `data/cases/copper-sg-shanghai-warcrisis.case.json` |
-| 上链存证 | `README.md`「⛓️ 智能合约」· `hardhat/contracts/RiskPricingOracle.sol` |
-| 金融硬度（三种结算） | `docs/demo-script.md`「三种结算」高潮段 |
+| Our idea / positioning | `README.md` "✨ What is this" + "🎯 Core logic chain" |
+| Highlight ① anti-fraud document review | `src/agent/documentConsistency.js` · `docs/background.md` §9.1 Document risk |
+| Highlight ② tool calling + RAG | `docs/ai-valuation-tooling.md` · `src/agent/valuationAgent.js` · `src/agent/riskIntel.js` |
+| Highlight ③ war → pause | `docs/PRD.md` §2.4 · `data/cases/copper-sg-shanghai-warcrisis.case.json` |
+| On-chain records | `README.md` "⛓️ Smart Contracts" · `hardhat/contracts/RiskPricingOracle.sol` |
+| Financial rigour (three settlements) | `docs/demo-script.md` "three settlements" climax segment |

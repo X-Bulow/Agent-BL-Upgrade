@@ -1,77 +1,77 @@
-# 🎬 AgentBL · 视频 Demo 讲稿
+# 🎬 AgentBL · Video Demo Script
 
-> **用途**：录制 3–4 分钟项目讲解视频时的「口播 + 画面」脚本。
-> **配套**：`npm run dev`（网页 Dashboard）、`npm run demo:default`（违约损益演示）、`npm run price`（定价兜底）。
-> **唯一主线**：每一句都落在 *“为什么这个项目必须有 AI”* 上 —— 对应 README 的「核心逻辑链」。
-> **数字均为定价引擎实测值**，可照着念。
-
----
-
-## ⏱️ 30 秒电梯版（开场或结尾单独用）
-
-> 国际贸易里，货一装船、钱要等一个多月才回来。AgentBL 让出口商质押电子提单，AI 把真实贸易风险定成 RWA 的发行折价，投资者按折价认购、目标兑付 1 美元。
-> 关键是——**1 美元是目标，不是保本：会违约、会亏；那笔折价就是 AI 为违约风险定的价**。普通 DeFi 让市场去猜价格，我们让 AI 在投资者下单之前就把风险定准、并写上链。
+> **Purpose**: the "voiceover + visuals" script for recording a 3-4 minute project walkthrough video.
+> **Companion commands**: `npm run dev` (web dashboard), `npm run demo:default` (credit-default P&L demo), `npm run price` (pricing fallback).
+> **Single through-line**: every sentence lands on *"why this project must have AI"* - matching the "Core Logic Chain" in the README.
+> **All numbers are measured outputs of the pricing engine** and can be read out as written.
 
 ---
 
-## 🎥 完整版（约 3 分 30 秒）
+## ⏱️ 30-Second Elevator Pitch (use on its own at the opening or the close)
 
-### [0:00–0:25] 开场：痛点 + 那个该被问的问题
-**【画面】** 网页首页 / 项目 Logo
-**【口播】**
-> 大家好，这是 AgentBL。先看痛点：国际贸易里，货物一装船，出口商的钱要 30 到 45 天才回得来——他急需现金周转，而市场上有大量资金想要「有抵押、短久期」的收益资产。我们用一个 AI Agent 把两端接起来。
-> 但在演示前，我想先替评委问出最尖锐的那个问题：RWA 是折价发行、目标兑付 1 美元的——**那投资者不就买低卖高、稳赚吗？要 AI 预测风险到底有什么用？** 接下来三分钟，就是对它的正面回答。
-
-### [0:25–1:05] 出口商侧：AI 怎么把风险折成价格
-**【画面】** 顶部选 **Clean copper**，展示 AI Pricing Console 瀑布图 + Exporter Financing Quote 卡片
-**【口播】**
-> 出口商把代表在途铜货物权的电子提单，质押进智能合约。AI 读取货值、单据、和实时宏观风险，把他想要的「到账速度」和这笔交易的「风险」，从 1 美元目标兑付价一步步折下来：base 锚点，减急用折价，减风险折价，得到发行价 **0.80**。
-> 注意这个折价的经济学根基——它**等于出口商的融资成本**，而且只让渡他**可验证毛利**的一部分。要得越急、风险越大，发行价就越低、投资者潜在收益就越高。
-
-### [1:05–2:00] 正面破解：投资者会亏 —— 这才是 AI 的意义 ★高潮
-**【画面】** 终端运行 `npm run demo:default`，镜头依次停在三段结算输出
-**【口播】**
-> 现在回答开头那个问题。我们让**同一笔铜**，跑完三种不同的结局。
-> 第一种，进口商正常付款：投资者按 0.80 买、1.00 赎回，赚 **25%**。看起来确实稳赚。
-> 但第二种——战争让铜价崩盘、进口商弃货、保险又因为「战争除外」条款拒赔，池子清算这批铜只回收到 **0.698**。投资者按 0.80 进场，**亏了 12.8%**。
-> 第三种，进口商只是破产、但货还完好，**超额抵押把投资者兜回了本金**。
-> 所以结论很清楚：**1 美元是「目标」，不是保本；投资者「不是」稳赚。** 而那 0.20 的折价，正是 AI 为「第二种违约尾部」预先收取的保费。没有这个风险定价，折价要么宰了安全的出口商，要么把没被补偿的损失甩给投资者。
-
-### [2:00–2:40] 战争：为什么是 AI，而不是价格预言机
-**【画面】** 网页切到 **Hormuz war crisis** 案例（或点 “Simulate in-transit risk”），风险维度飙红、状态变为 **PAUSE**
-**【口播】**
-> 再看 AI 最硬核的一手。战争爆发时，铜价其实是**上涨**的。一个普通的价格预言机会看到铜价涨，于是以为「抵押更值钱、这笔贷款更安全」——结论完全看反。
-> 而我们的 AI 知道：这是**脆弱的战争溢价**，它同时意味着违约概率上升、保险塌陷、回收下降——所有保护一起失效。所以 AI 反向操作：把核验货值 haircut 掉 **21%**、风险分打到 **1410 个基点**、然后直接 **PAUSE**，根本不让投资者上这趟注定爆雷的车。这是只盯单一价格的预言机永远做不到的。
-
-### [2:40–3:05] 关键洞察：为什么必须在「认购前」定准
-**【画面】** 合约时间线 Created → … → Funded → InTransit
-**【口播】**
-> 为什么 AI 必须在投资者认购**之前**就定准价？因为钱在 **Funded** 这一刻就打给出口商了，而货还在海上漂着。在那之后，风险再升级、AI 再怎么改价，都**保护不了已经建仓的投资者**——折价是他们唯一的、预先付清的补偿。这就是 AI 在这条链上的全部价值所在。
-
-### [3:05–3:30] 上链 + 收束
-**【画面】** 点 “Push to RiskPricingOracle”，展示 `PricingUpdated` 事件 + `quote_hash` / `evidence_hash`
-**【口播】**
-> 最后，每一次定价决策，连同它依据的**证据哈希**，都写进链上的 RiskPricingOracle，可审计、防篡改。
-> 一句话总结：**普通 DeFi 让市场去猜价格；AgentBL 让 AI 在投资者下单之前，就把真实世界的贸易风险，定成一个可解释、可上链的 RWA 折价。AI 定价，链上执行。** 谢谢。
+> In international trade, once the goods are shipped, the money takes more than a month to come back. AgentBL lets exporters pledge an electronic bill of lading; the AI prices real trade risk into the RWA's issuance discount, and investors subscribe at the discount with a target redemption of 1 USD.
+> The key point is: **1 USD is a target, not a guarantee - deals can default and investors can lose; that discount is the price the AI puts on default risk**. Ordinary DeFi lets the market guess the price; we let the AI price the risk correctly and write it on-chain before investors place their orders.
 
 ---
 
-## 🗣️ 录制提示
+## 🎥 Full Version (about 3 min 30 s)
 
-- **数字念准**：`0.80` / `1.00` / `+25%` / `−12.8%`（回收 `0.698`）/ `1410bps` / 货值 `−21%` / `PAUSE`。
-- **节奏**：`1:05–2:00` 的「三种结算」是全片高潮——放慢，咬住「**投资者会亏**」这句；其余段落可略快。
-- **压到 2 分钟版**：只保留 `[0:00 开场那个问题]` + `[1:05 三种结算]` + `[3:05 收束]`，中间略过。
-- **兜底**：网页若出问题，全程可用 `npm run demo:default` 和 `npm run price` 的终端输出讲完，逻辑不缺。
-- **一句话 tagline**（片头/片尾字幕）：*The AI prices the deal. The chain enforces it.*
+### [0:00-0:25] Opening: the pain point + the question that should be asked
+**[Visual]** Web home page / project logo
+**[Voiceover]**
+> Hi everyone, this is AgentBL. First, the pain point: in international trade, once goods are shipped, the exporter waits 30 to 45 days to get paid - they urgently need working capital, while plenty of capital in the market wants "collateralised, short-duration" yield assets. We use an AI Agent to connect the two sides.
+> But before the demo, I want to ask, on the judges' behalf, the sharpest question: the RWA is issued at a discount with a target redemption of 1 USD - **so don't investors just buy low, sell high, and always win? What's the point of having AI predict risk?** The next three minutes are a direct answer to that.
+
+### [0:25-1:05] Exporter side: how the AI turns risk into a price
+**[Visual]** Select **Clean copper** at the top; show the AI Pricing Console waterfall chart + the Exporter Financing Quote card
+**[Voiceover]**
+> The exporter pledges the electronic bill of lading, which represents title to copper in transit, into the smart contract. The AI reads the cargo value, the documents and live macro risk, and discounts the exporter's desired "payout speed" and the deal's "risk" step by step from the 1 USD target redemption price: the base anchor, minus the urgency discount, minus the risk discount, giving an issue price of **0.80**.
+> Note the economic foundation of this discount - it **equals the exporter's financing cost**, and it only gives up part of their **verifiable gross margin**. The more urgent the request and the higher the risk, the lower the issue price and the higher the investor's potential return.
+
+### [1:05-2:00] Head-on rebuttal: investors can lose - that is the point of the AI ★ climax
+**[Visual]** Run `npm run demo:default` in the terminal; the camera stops on each of the three settlement outputs in turn
+**[Voiceover]**
+> Now to answer the opening question. We take **the same copper cargo** and run it through three different outcomes.
+> First, the importer pays normally: investors buy at 0.80 and redeem at 1.00, making **25%**. It really does look like a sure win.
+> But in the second - war crashes the copper price, the importer abandons the cargo, and insurance refuses to pay because of the "war exclusion" clause; the pool liquidates the copper and recovers only **0.698**. Investors who came in at 0.80 **lose 12.8%**.
+> In the third, the importer merely goes bankrupt but the cargo is intact, and **over-collateralisation makes investors whole on their principal**.
+> So the conclusion is clear: **1 USD is a "target", not a guarantee; investors do "not" always win.** And that 0.20 discount is exactly the premium the AI charges up front for "the second, default tail". Without this risk pricing, the discount either fleeces safe exporters or dumps uncompensated losses on investors.
+
+### [2:00-2:40] War: why AI, and not a price oracle
+**[Visual]** Switch the web page to the **Hormuz war crisis** case (or click "Simulate in-transit risk"); the risk dimensions turn red and the status changes to **PAUSE**
+**[Voiceover]**
+> Now look at the AI's most hard-core move. When war breaks out, the copper price actually **rises**. An ordinary price oracle would see copper going up and conclude that "the collateral is worth more, so this loan is safer" - exactly the wrong way round.
+> Our AI knows this is a **fragile war premium**: it simultaneously means higher default probability, collapsing insurance and lower recovery - every protection fails at once. So the AI does the opposite: it haircuts the verified cargo value by **21%**, pushes the risk score to **1410 basis points**, and goes straight to **PAUSE**, never letting investors board a ride that is bound to blow up. A price oracle that watches a single price can never do this.
+
+### [2:40-3:05] Key insight: why the price must be right "before subscription"
+**[Visual]** Contract timeline Created → … → Funded → InTransit
+**[Voiceover]**
+> Why must the AI get the price right **before** investors subscribe? Because the money goes to the exporter at the **Funded** moment, while the goods are still at sea. After that, however much the risk escalates or the AI reprices, it **cannot protect investors who have already taken their positions** - the discount is their only, prepaid compensation. That is the entire value of the AI in this chain.
+
+### [3:05-3:30] On-chain + close
+**[Visual]** Click "Push to RiskPricingOracle"; show the `PricingUpdated` event + `quote_hash` / `evidence_hash`
+**[Voiceover]**
+> Finally, every pricing decision, together with the **evidence hash** it relies on, is written to the on-chain RiskPricingOracle - auditable and tamper-proof.
+> In one sentence: **ordinary DeFi lets the market guess the price; AgentBL lets the AI turn real-world trade risk into an explainable, on-chain RWA discount before investors place their orders. AI prices, the chain executes.** Thank you.
 
 ---
 
-## 🔗 与文档的对应
+## 🗣️ Recording Tips
 
-| 视频段落 | README / 文档锚点 |
+- **Read the numbers accurately**: `0.80` / `1.00` / `+25%` / `−12.8%` (recovery `0.698`) / `1410bps` / cargo value `−21%` / `PAUSE`.
+- **Pacing**: the "three settlements" at `1:05-2:00` is the climax of the whole video - slow down and land the line "**investors can lose**"; the other sections can go a little faster.
+- **Cutting to a 2-minute version**: keep only `[0:00 the opening question]` + `[1:05 three settlements]` + `[3:05 close]`, and skip the middle.
+- **Fallback**: if the web page has problems, the whole talk can be delivered with the terminal output of `npm run demo:default` and `npm run price`; no logic is lost.
+- **One-line tagline** (opening/closing caption): *The AI prices the deal. The chain enforces it.*
+
+---
+
+## 🔗 Mapping to the Docs
+
+| Video section | README / doc anchor |
 |---|---|
-| 开场那个问题 + 三种结算 | README「🎯 核心逻辑链」第 ②–④ 步 |
-| AI 怎么定价（瀑布） | README「🧠 创新点」+ `src/core/pricingEngine.js` |
-| 战争 → PAUSE | 「核心逻辑链」第 ⑧ 步证据表 |
-| 认购前定价的意义 | 「核心逻辑链」第 ⑥ 步 |
-| 上链 | README「⛓️ 智能合约」+ `RiskPricingOracle` |
+| The opening question + three settlements | README "🎯 Core Logic Chain" steps ②-④ |
+| How the AI prices (waterfall) | README "🧠 Innovations" + `src/core/pricingEngine.js` |
+| War → PAUSE | "Core Logic Chain" step ⑧ evidence table |
+| Why pricing before subscription matters | "Core Logic Chain" step ⑥ |
+| On-chain | README "⛓️ Smart Contracts" + `RiskPricingOracle` |

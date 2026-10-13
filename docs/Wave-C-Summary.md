@@ -1,18 +1,18 @@
-# Wave C 完成总结
+# Wave C Completion Summary
 
-## ✅ Wave C 任务完成状态
+## ✅ Wave C Task Status
 
-**Wave C**: AI 证据与产品打磨  
-**路径**: `SP-8/9/10` → `TRUST-1/2/3/5` → `X402-11/12` → `DEMO-3/4/6`  
-**Gate C**: Azure eval 达阈值，trace 能看到完整 Agent 工具链，页面 60 秒演示无口头补丁
+**Wave C**: AI evidence and product polish  
+**Path**: `SP-8/9/10` → `TRUST-1/2/3/5` → `X402-11/12` → `DEMO-3/4/6`  
+**Gate C**: Azure eval meets thresholds, traces show the full Agent tool chain, and the 60-second page demo needs no verbal patching
 
 ---
 
-## 📊 完成任务清单
+## 📊 Completed Task List
 
-### ✅ SP-8/9/10: Microsoft Foundry 集成（已完成）
+### ✅ SP-8/9/10: Microsoft Foundry Integration (Done)
 
-| 任务 | 状态 | 交付物 |
+| Task | Status | Deliverable |
 |------|------|--------|
 | SP-8: Azure OpenAI Provider | ✅ Done | `src/agent/llm/openaiCompatClient.js` |
 | SP-9: Evaluation Dataset | ✅ Done | `src/agent/evaluation/dataset.js` (20 cases) |
@@ -20,136 +20,136 @@
 
 ---
 
-### ✅ TRUST-1: Gold Dataset（已完成）
+### ✅ TRUST-1: Gold Dataset (Done)
 
-**状态**: Done ✅
+**Status**: Done ✅
 
-**交付物**: `src/agent/evaluation/goldDataset.js`
+**Deliverable**: `src/agent/evaluation/goldDataset.js`
 
-**数据集内容**:
-- **总数**: 20 条测试用例
-- **分类**:
-  - 正常贸易: 3 cases (铜矿、石油、钢材)
-  - 欺诈案例: 2 cases (虚假货值、一货多单)
-  - 不完整文档: 1 case (缺字段、无保险)
-  - 战争风险: 1 case (Hormuz 海峡)
-  - 延误风险: 1 case (台风季节)
-  - 受制裁实体: 1 case (军用终端用户)
-  - 港口拥堵: 1 case (交货延迟)
-  - 价格波动: 1 case (原油价格)
+**Dataset contents**:
+- **Total**: 20 test cases
+- **Categories**:
+  - Normal trade: 3 cases (copper ore, crude oil, steel)
+  - Fraud cases: 2 cases (inflated cargo value, one cargo pledged under multiple bills)
+  - Incomplete documents: 1 case (missing fields, no insurance)
+  - War risk: 1 case (Strait of Hormuz)
+  - Delay risk: 1 case (typhoon season)
+  - Sanctioned entity: 1 case (military end user)
+  - Port congestion: 1 case (delivery delay)
+  - Price volatility: 1 case (crude oil price)
 
-**Ground Truth 字段**:
+**Ground Truth fields**:
 - `compliant` (boolean)
 - `risk_level` (LOW/MEDIUM/HIGH/CRITICAL)
 - `expected_valuation` (USD or null)
 - `fraud_indicators` (array)
 - `risk_factors` (array, optional)
 
-**数据来源**: Synthetic dataset, fully anonymized, MIT license
+**Data source**: Synthetic dataset, fully anonymized, MIT license
 
 ---
 
-### ✅ TRUST-2: 评估报告（已完成）
+### ✅ TRUST-2: Evaluation Report (Done)
 
-**状态**: Done ✅
+**Status**: Done ✅
 
-**交付物**: `src/agent/evaluation/evaluationReport.js`
+**Deliverable**: `src/agent/evaluation/evaluationReport.js`
 
-**评估指标**:
-1. **Document Parsing Accuracy** - 目标 ≥95%
-2. **Document Consistency Precision** - 目标 ≥90%
-3. **Document Consistency Recall** - 目标 ≥90%
-4. **Risk Monotonicity Score** - 目标 ≥95%
-5. **Valuation MAE** - 目标 ≤$50,000
-6. **Valuation MAPE** - 目标 ≤5%
-7. **Tool Call Success Rate** - 目标 ≥95%
+**Evaluation metrics**:
+1. **Document Parsing Accuracy** - target ≥95%
+2. **Document Consistency Precision** - target ≥90%
+3. **Document Consistency Recall** - target ≥90%
+4. **Risk Monotonicity Score** - target ≥95%
+5. **Valuation MAE** - target ≤$50,000
+6. **Valuation MAPE** - target ≤5%
+7. **Tool Call Success Rate** - target ≥95%
 
-**功能**:
-- `runComprehensiveEvaluation()` - 运行所有评估
-- `generateEvaluationReport()` - 生成 Markdown 报告
-- 失败案例详细记录
-- 限制说明（OCR 未测试、静态规则等）
-
----
-
-### ✅ TRUST-3: Prompt Injection 防护（已完成）
-
-**状态**: Done ✅
-
-**交付物**: `src/agent/security/promptInjectionDefense.js`
-
-**防护措施**:
-1. **输入过滤**: 移除 `SYSTEM:`、`EXECUTE`、`OVERRIDE`、`DEBUG:` 等注入模式
-2. **关键参数验证**: 支付地址、网络、价格限制必须来自可信配置
-3. **代码执行隔离**: 文档内容永不执行
-
-**恶意测试用例** (5 个):
-- ATTACK-001: Cargo 字段中的 prompt injection
-- ATTACK-002: 支付地址覆盖尝试
-- ATTACK-003: 工具权限升级
-- ATTACK-004: 价格操纵
-- ATTACK-005: 密钥提取
-
-**防护函数**:
-- `sanitizeDocumentInput()` - 清理注入模式
-- `validateCriticalParameters()` - 验证关键参数
-- `testPromptInjectionDefense()` - 运行所有防护测试
+**Features**:
+- `runComprehensiveEvaluation()` - runs all evaluations
+- `generateEvaluationReport()` - generates a Markdown report
+- Detailed logging of failed cases
+- Documented limitations (OCR not tested, static rules, etc.)
 
 ---
 
-### ✅ TRUST-5: 数据新鲜度验证（已完成）
+### ✅ TRUST-3: Prompt Injection Defense (Done)
 
-**状态**: Done ✅
+**Status**: Done ✅
 
-**交付物**: `src/agent/security/dataFreshness.js`
+**Deliverable**: `src/agent/security/promptInjectionDefense.js`
 
-**核心功能**:
+**Defenses**:
+1. **Input filtering**: strips injection patterns such as `SYSTEM:`, `EXECUTE`, `OVERRIDE`, `DEBUG:`
+2. **Critical parameter validation**: payment address, network and price limits must come from trusted configuration
+3. **Code execution isolation**: document content is never executed
 
-1. **DataFreshnessValidator** 类:
-   - `validateFreshness()` - 检查数据是否过期（默认 24 小时）
-   - `adjustConfidence()` - 根据年龄调整置信度（线性衰减）
-   - `checkSourceHealth()` - 检查数据源健康状态
+**Malicious test cases** (5):
+- ATTACK-001: Prompt injection in the Cargo field
+- ATTACK-002: Payment address override attempt
+- ATTACK-003: Tool privilege escalation
+- ATTACK-004: Price manipulation
+- ATTACK-005: Secret key extraction
 
-2. **RiskIntelligence** 类:
-   - 带 `observed_at`、`expires_at`、`source` 的风险情报
-   - `isUsableForPricing()` - 判断情报是否可用于定价
-   - 自动拒绝过期/不健康数据源
-
-**测试覆盖**:
-- ✅ 新鲜数据（1 小时内）
-- ✅ 过期数据（48 小时）
-- ✅ 缺失时间戳
-- ✅ 未来时间戳（无效）
-- ✅ 离线时不使用旧数据
+**Defense functions**:
+- `sanitizeDocumentInput()` - strips injection patterns
+- `validateCriticalParameters()` - validates critical parameters
+- `testPromptInjectionDefense()` - runs all defense tests
 
 ---
 
-### 🟡 X402-11/12: UX 增强（部分完成）
+### ✅ TRUST-5: Data Freshness Validation (Done)
 
-**状态**: Partial ⚠️
+**Status**: Done ✅
 
-**已完成**:
-- X402-1~10 全部完成（Wave A/B）
-- 支付流水、stepper、TTL 重读
+**Deliverable**: `src/agent/security/dataFreshness.js`
 
-**待完成**:
-- X402-11: 支付流水与其他面板的同屏联动
-- X402-12: 动效优化（priceFlash、riskPulse）
+**Core features**:
+
+1. **DataFreshnessValidator** class:
+   - `validateFreshness()` - checks whether data has expired (default 24 hours)
+   - `adjustConfidence()` - adjusts confidence based on age (linear decay)
+   - `checkSourceHealth()` - checks the health of the data source
+
+2. **RiskIntelligence** class:
+   - Risk intelligence carrying `observed_at`, `expires_at` and `source`
+   - `isUsableForPricing()` - decides whether the intelligence can be used for pricing
+   - Automatically rejects expired data and unhealthy data sources
+
+**Test coverage**:
+- ✅ Fresh data (within 1 hour)
+- ✅ Expired data (48 hours)
+- ✅ Missing timestamp
+- ✅ Future timestamp (invalid)
+- ✅ Stale data is not used when offline
 
 ---
 
-### 🟡 DEMO-3/4/6: 演示打磨（待完成）
+### 🟡 X402-11/12: UX Enhancements (Partially Done)
 
-**状态**: Todo ⚠️
+**Status**: Partial ⚠️
 
-**待完成任务**:
-- DEMO-3: 支付流水、riskPulse、priceFlash、waterfall、Agent activity 同屏联动
-- DEMO-4: 30 秒 / 1 分钟 / 3 分钟路演稿
-- DEMO-6: 评委追问预案
+**Done**:
+- X402-1~10 all done (Wave A/B)
+- Payment feed, stepper, TTL re-read
+
+**Remaining**:
+- X402-11: Linking the payment feed with the other panels on the same screen
+- X402-12: Animation polish (priceFlash, riskPulse)
 
 ---
 
-## 📊 测试结果
+### 🟡 DEMO-3/4/6: Demo Polish (Remaining)
+
+**Status**: Todo ⚠️
+
+**Remaining tasks**:
+- DEMO-3: Link payment feed, riskPulse, priceFlash, waterfall and Agent activity on the same screen
+- DEMO-4: 30-second / 1-minute / 3-minute pitch scripts
+- DEMO-6: Prepared answers for judges' follow-up questions
+
+---
+
+## 📊 Test Results
 
 ```bash
 npm test
@@ -160,73 +160,73 @@ npm test
 ❌ fail: 0
 ```
 
-**所有测试通过！新增功能未破坏任何现有功能。**
+**All tests pass! The new features did not break any existing functionality.**
 
 ---
 
-## 📁 新增文件清单
+## 📁 New Files
 
 ### TRUST-1: Gold Dataset
-1. `src/agent/evaluation/goldDataset.js` - 20 条 gold 测试用例
+1. `src/agent/evaluation/goldDataset.js` - 20 gold test cases
 
-### TRUST-2: 评估报告
-2. `src/agent/evaluation/evaluationReport.js` - 评估运行器和报告生成器
+### TRUST-2: Evaluation Report
+2. `src/agent/evaluation/evaluationReport.js` - evaluation runner and report generator
 
-### TRUST-3: Prompt Injection 防护
-3. `src/agent/security/promptInjectionDefense.js` - 注入防护 + 5 个恶意测试
+### TRUST-3: Prompt Injection Defense
+3. `src/agent/security/promptInjectionDefense.js` - injection defense + 5 malicious tests
 
-### TRUST-5: 数据新鲜度
-4. `src/agent/security/dataFreshness.js` - 新鲜度验证器 + clock-controlled tests
+### TRUST-5: Data Freshness
+4. `src/agent/security/dataFreshness.js` - freshness validator + clock-controlled tests
 
-### 文档
-5. `docs/SP-8-9-10-Summary.md` - SP-8/9/10 完成总结
-6. `docs/Wave-C-Summary.md` - 本文件
-
----
-
-## 🎯 Wave C Gate 验收
-
-### Gate C 标准
-- [x] Azure eval 达阈值 - ✅ SP-9 完成，20 条测试用例
-- [x] Trace 能看到完整 Agent 工具链 - ✅ SP-10 OpenTelemetry 完成
-- [ ] 页面 60 秒演示无口头补丁 - ⚠️ DEMO-3/4/6 待完成
-
-### 当前状态
-
-**核心任务**: ✅ 8/8 完成
-- SP-8/9/10: ✅ 全部完成
-- TRUST-1/2/3/5: ✅ 全部完成
-
-**打磨任务**: ⚠️ 0/3 完成
-- X402-11/12: 待完成
-- DEMO-3/4/6: 待完成
+### Docs
+5. `docs/SP-8-9-10-Summary.md` - SP-8/9/10 completion summary
+6. `docs/Wave-C-Summary.md` - this file
 
 ---
 
-## 🚀 下一步（Wave D）
+## 🎯 Wave C Gate Acceptance
 
-按照 tasks.md，Wave D 包括:
+### Gate C Criteria
+- [x] Azure eval meets thresholds - ✅ SP-9 done, 20 test cases
+- [x] Traces show the full Agent tool chain - ✅ SP-10 OpenTelemetry done
+- [ ] 60-second page demo needs no verbal patching - ⚠️ DEMO-3/4/6 remaining
+
+### Current Status
+
+**Core tasks**: ✅ 8/8 done
+- SP-8/9/10: ✅ all done
+- TRUST-1/2/3/5: ✅ all done
+
+**Polish tasks**: ⚠️ 0/3 done
+- X402-11/12: remaining
+- DEMO-3/4/6: remaining
+
+---
+
+## 🚀 Next Steps (Wave D)
+
+According to tasks.md, Wave D covers:
 ```text
 DEMO-7/8 → QA-10~14 → TRUST-4/6/7 → npm run preflight
 ```
 
-**建议优先级**:
-1. 先完成 DEMO-3/4/6（演示脚本和 Q&A）
-2. 然后 TRUST-4（合约安全审计）
-3. 最后 preflight 验证
+**Suggested priority**:
+1. First finish DEMO-3/4/6 (demo script and Q&A)
+2. Then TRUST-4 (contract security audit)
+3. Finally the preflight check
 
 ---
 
-## ✨ 总结
+## ✨ Summary
 
-**Wave C 核心任务全部完成！** 🎉
+**All Wave C core tasks are done!** 🎉
 
-你的 AgentBL 项目现在具备：
-1. ✅ Azure OpenAI + Microsoft Foundry 完整集成
-2. ✅ 20 条 Gold Dataset + 自动化评估
-3. ✅ Prompt Injection 防护 + 5 个恶意测试
-4. ✅ 数据新鲜度验证 + 离线 fallback
-5. ✅ OpenTelemetry 追踪（隐私安全）
-6. ✅ 321/321 测试通过（100%）
+Your AgentBL project now has:
+1. ✅ Full Azure OpenAI + Microsoft Foundry integration
+2. ✅ 20-case Gold Dataset + automated evaluation
+3. ✅ Prompt injection defense + 5 malicious tests
+4. ✅ Data freshness validation + offline fallback
+5. ✅ OpenTelemetry tracing (privacy-safe)
+6. ✅ 321/321 tests passing (100%)
 
-**Gate C 核心标准已达成！** 剩余的是演示打磨任务。
+**The Gate C core criteria are met!** What remains is demo polish.

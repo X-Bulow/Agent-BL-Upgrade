@@ -1,309 +1,309 @@
-# AgentBL 路演演讲稿
+# AgentBL Pitch Script
 
-**目标**：从投资人和评委视角，突出项目创新点和商业价值，赢得黑客松冠军。
+**Goal**: From the perspective of investors and judges, highlight the project's innovations and commercial value, and win the hackathon.
 
-**核心定位**：AI 不是助手，而是承销商；报告不是免费功能，而是可交易商品；风险不是黑盒，而是可验证的链上证据。
-
----
-
-## 版本一：30秒电梯演讲
-
-各位评委好，我是 AgentBL 团队。
-
-**全球贸易中，货物在海上漂 45 天，出口商的钱却被锁死。** 我们用 **AI Agent 把电子提单变成可交易的 RWA**，让投资者直接为出口商提供融资。
-
-**核心创新在于：AI 不是聊天机器人，而是风控定价引擎。** 它审查单据造假、估算货物价值、监控战争和天气风险，然后把风险转化为 **可验证的发行折价**——风险越高，折扣越深，投资者收益越高。
-
-**更重要的是**，我们实现了 **x402 付费 AI 报告市场**：任何人、任何机构、甚至其他 AI Agent，都可以花几美分通过 x402 协议购买我们的风控报告——**这是全球首个将 AI 风控本身变成可交易商品的协议。**
-
-所有定价决策、支付证明、风险证据全部锚定在 **Injective 链上**，300 个测试用例 + 24 个智能合约测试全部通过，真实测试网交易可验证。
-
-**AgentBL：AI 定价风险，链上强制执行。谢谢！**
+**Core positioning**: AI is not an assistant, it is the underwriter; reports are not a free feature, they are tradable products; risk is not a black box, it is verifiable on-chain evidence.
 
 ---
 
-## 版本二：3分钟完整路演
+## Version 1: 30-Second Elevator Pitch
 
-### 开场：痛点（30秒）
+Hello judges, we are the AgentBL team.
 
-各位评委、各位嘉宾，大家好！
+**In global trade, cargo floats at sea for 45 days while the exporter's money is locked up.** We use **an AI Agent to turn electronic bills of lading into tradable RWA**, letting investors finance exporters directly.
 
-想象一下：你是一家中国的铜材出口商，刚把价值 100 万美元的货物装船运往欧洲。货物要在海上漂 45 天，但你的供应商、工人、贷款——**全都等不了 45 天**。
+**The core innovation: the AI is not a chatbot, it is a risk-control pricing engine.** It checks documents for forgery, estimates the cargo's value, monitors war and weather risk, and then turns that risk into a **verifiable issuance discount** — the higher the risk, the deeper the discount and the higher the investor's return.
 
-传统银行？要抵押、要担保、审批慢、费率高。你需要的是：**把在途货物的所有权——也就是电子提单——直接变成现金**。
+**More importantly**, we built an **x402 paid AI report marketplace**: any person, any institution, even other AI Agents can buy our risk reports for a few cents via the x402 protocol — **the world's first protocol that turns AI risk control itself into a tradable product.**
 
-这就是 **AgentBL** 要解决的问题：**让全球资本直接为在途货物融资，让 AI 来承担最危险的部分——风险定价**。
+All pricing decisions, payment proofs and risk evidence are anchored on the **Injective chain**. 300 test cases + 24 smart contract tests all pass, and real testnet transactions can be verified.
 
-### 方案：我们如何解决（1分钟）
+**AgentBL: AI prices the risk. The chain enforces it. Thank you!**
 
-AgentBL 是一个 **AI 动态定价的电子提单 RWA 贸易融资协议**。流程很简单：
+---
 
-1. **出口商质押电子提单（eBL）**：把货物所有权凭证锁进智能合约
-2. **AI Agent 自主定价**：
-   - 审查单据是否造假（发票、保险单、提单三方交叉验证）
-   - 估算货物真实价值（调用伦敦金属交易所 LME 实时价格、联合国贸易数据库）
-   - 监控实时风险（通过 xAPI 拉取 Twitter、Google News、预测市场信号：战争、天气、港口罢工）
-   - 输出一个 **可验证的 RWA 发行价**：比如 1 RWA = $0.85，目标兑付 $1.00
-3. **投资者认购，出口商拿到现金**：投资者按折价买入，等货物到港结算后，可能获得 17% 的年化收益
-4. **风险变化时，AI 自主调整**：如果途中发生战争、货物贬值，AI 会自动重新定价、暂停交易，甚至触发清算——**所有决策都写到链上，带着证据哈希，可审计**
+## Version 2: Full 3-Minute Pitch
 
-### 创新：为什么我们不一样（1分钟）
+### Opening: The Pain Point (30 seconds)
 
-**第一，深度使用 Injective 官方 AI Agent 工具链。**
+Judges, guests, hello everyone!
 
-我们不是简单部署合约，而是充分发挥 Injective AI Agent 生态的独特优势：
-- **Injective Agent SDK**：AI 直接与链交互，实时读取数据、推送风控决策
-- **Injective MCP Server**（全球首创）：AI 通过自然语言操作区块链——我们基于官方 SDK 实现 7 个标准工具，让 AI 用对话完成"获取案例→定价→模拟→上链"全流程
-- **x402 付费协议**（`@injectivelabs/x402`）：真正落地 HTTP 402 + Web3 支付，实现全球首个按次付费的 AI 报告市场
+Imagine this: you're a Chinese copper exporter who has just loaded USD 1 million worth of cargo onto a ship bound for Europe. The cargo will float at sea for 45 days, but your suppliers, your workers, your loans — **none of them can wait 45 days**.
 
-**第二，AI 是真正的金融决策者，不是聊天助手。**
+A traditional bank? It wants collateral, guarantees, slow approvals and high fees. What you need is: **to turn ownership of the in-transit cargo — that is, the electronic bill of lading — directly into cash**.
 
-大多数 RWA 项目的 AI 只是个客服机器人。我们的 AI 决定 **发行价、融资上限、链上操作**——它像一个自主运作的承销商。
+This is the problem **AgentBL** solves: **let global capital finance in-transit cargo directly, and let AI take on the most dangerous part — risk pricing**.
 
-**第三，我们实现了全球首个 x402 付费 AI 报告市场。**
+### Solution: How We Solve It (1 minute)
 
-这是我们最大的创新：**AI 风控报告本身可以作为商品按次交易**。
+AgentBL is an **AI dynamically priced electronic bill of lading RWA trade finance protocol**. The flow is simple:
 
-- 银行想评估一笔贸易的信用风险？花 $0.50 买一份反欺诈审单报告
-- 保险公司想知道一条航线的战争溢价？花 $1 买一份实时风险分析
-- 其他 AI Agent 需要货物估值数据？通过 x402 协议直接调用
+1. **The exporter pledges the electronic bill of lading (eBL)**: locking the title document for the cargo into a smart contract
+2. **The AI Agent prices autonomously**:
+   - Checks whether documents are forged (three-way cross-verification of invoice, insurance policy and bill of lading)
+   - Estimates the cargo's real value (calling London Metal Exchange LME real-time prices and the UN trade database)
+   - Monitors real-time risk (pulling Twitter, Google News and prediction-market signals via xAPI: war, weather, port strikes)
+   - Outputs a **verifiable RWA issue price**: e.g. 1 RWA = $0.85, target redemption $1.00
+3. **Investors subscribe, the exporter gets cash**: investors buy at a discount and, after the cargo arrives at port and settles, may earn an annualised return of 17%
+4. **When risk changes, the AI adjusts autonomously**: if war breaks out en route or the cargo loses value, the AI automatically reprices, pauses trading, or even triggers liquidation — **every decision is written on-chain with an evidence hash, auditable**
 
-**支付通过 Injective 官方的 `@injectivelabs/x402` SDK + USDC 完成，每笔支付都写入 PaymentOracle，报告哈希绑定在链上**——这不是订阅制，不是账号体系，而是 **HTTP 402 + Web3 支付在 Injective 上的首个落地应用**。
+### Innovation: Why We're Different (1 minute)
 
-**第四，标准 MCP Server 实现——AI 用自然语言操作区块链。**
+**First, deep use of Injective's official AI Agent toolchain.**
 
-我们基于 Injective 全球首创的 MCP Server 能力，实现了完全符合官方 `@modelcontextprotocol/sdk` 规范的 stdio lifecycle：
-- 7 个标准工具：获取贸易案例、RAG 检索、定价、模拟发行、推送 Oracle、审单、购买报告
-- 3 个 JSON 资源：案例库、定价场景、风险情报
-- AI 可以用自然语言完成全流程：**"帮我给新加坡到汉堡的铜定个价，然后模拟发行，最后推送到链上 Oracle"**——一句话，全自动
+We don't just deploy contracts; we make full use of the unique strengths of the Injective AI Agent ecosystem:
+- **Injective Agent SDK**: the AI interacts with the chain directly, reading data in real time and pushing risk-control decisions
+- **Injective MCP Server** (a world first): the AI operates the blockchain through natural language — we implemented 7 standard tools on the official SDK, letting the AI complete the full "fetch case → price → simulate → put on-chain" flow through conversation
+- **x402 payment protocol** (`@injectivelabs/x402`): a real deployment of HTTP 402 + Web3 payments, delivering the world's first pay-per-use AI report marketplace
 
-**第五，风险定价有经济学依据，不是黑盒。**
+**Second, the AI is a real financial decision-maker, not a chat assistant.**
 
-我们的折价公式基于出口商的 **可验证贸易利润**：
+In most RWA projects the AI is just a customer service bot. Our AI decides the **issue price, the financing cap and on-chain actions** — it works like an autonomous underwriter.
+
+**Third, we built the world's first x402 paid AI report marketplace.**
+
+This is our biggest innovation: **AI risk reports themselves can be traded per use as products**.
+
+- A bank wants to assess the credit risk of a trade? Spend $0.50 on an anti-fraud document review report
+- An insurer wants to know the war premium on a route? Spend $1 on a real-time risk analysis
+- Another AI Agent needs cargo valuation data? Call it directly via the x402 protocol
+
+**Payments are made through Injective's official `@injectivelabs/x402` SDK + USDC; every payment is written to the PaymentOracle and the report hash is bound on-chain** — this is not a subscription or an account system, but **the first real application of HTTP 402 + Web3 payments on Injective**.
+
+**Fourth, a standard MCP Server implementation — the AI operates the blockchain in natural language.**
+
+Building on Injective's world-first MCP Server capability, we implemented a stdio lifecycle fully compliant with the official `@modelcontextprotocol/sdk` specification:
+- 7 standard tools: fetch trade cases, RAG retrieval, pricing, simulated issuance, push to Oracle, document review, buy reports
+- 3 JSON resources: case library, pricing scenarios, risk intelligence
+- The AI can complete the full flow in natural language: **"Price the copper from Singapore to Hamburg for me, then simulate the issuance, and finally push it to the on-chain Oracle"** — one sentence, fully automatic
+
+**Fifth, risk pricing is grounded in economics, not a black box.**
+
+Our discount formula is based on the exporter's **verifiable trade profit**:
 
 ```
-折价 = 出口商愿意分享的利润比例 × (发票价值 - 成本)
+discount = share of profit the exporter is willing to give up × (invoice value - cost)
 ```
 
-- 想要钱快？多分利润，折价更深
-- 风险高（战争、货物波动性大）？再加风险溢价
+- Want the money fast? Share more profit, deeper discount
+- High risk (war, high cargo volatility)? Add a further risk premium
 
-每个数字都可以追溯到 AI 的工具调用、检索证据和链上存证——**完全可解释、可审计**。
+Every number can be traced back to the AI's tool calls, retrieved evidence and on-chain records — **fully explainable and auditable**.
 
-**第六，我们看穿欺骗性信号。**
+**Sixth, we see through deceptive signals.**
 
-当战争导致铜价飙升，普通价格预言机会认为抵押品更安全。但我们的 AI 知道：战争溢价是 **关联双刃剑**——违约风险上升、保险可能失效、货物难以追回。所以 AI 的决策是相反的：**提高折价 + 暂停发行**。
+When war sends copper prices soaring, an ordinary price oracle thinks the collateral is safer. But our AI knows: the war premium is a **correlated double-edged sword** — default risk rises, insurance may lapse, and the cargo becomes hard to recover. So the AI's decision is the opposite: **increase the discount + pause the offering**.
 
-### 验证：我们做到了什么（30秒）
+### Proof: What We've Built (30 seconds)
 
-这不是 PPT 项目。我们已经：
+This is not a PPT project. We have already:
 
-- ✅ **300 个 Node.js 测试 + 24 个 Solidity 测试全部通过**
-- ✅ **部署在 Injective Testnet**，五个核心合约、真实 USDC 支付、PaymentOracle 存证——所有交易都有 explorer 证据
-- ✅ **实现标准 MCP Server**：7 个 tools + 3 个 resources，完全符合官方 MCP 规范
-- ✅ **x402 付费市场完整闭环**：真实 EIP-3009 支付、报告解锁、链上存证，全流程可验证
-- ✅ **Preflight 总闸门**：54 项检查，50 项通过，4 项 Live 环境警告（不影响 Demo），0 失败
+- ✅ **300 Node.js tests + 24 Solidity tests all passing**
+- ✅ **Deployed on Injective Testnet**: five core contracts, real USDC payments, PaymentOracle records — every transaction has explorer evidence
+- ✅ **A standard MCP Server**: 7 tools + 3 resources, fully compliant with the official MCP specification
+- ✅ **A complete x402 paid marketplace loop**: real EIP-3009 payments, report unlocking and on-chain records, verifiable end to end
+- ✅ **Preflight master gate**: 54 checks, 50 passed, 4 Live-environment warnings (no impact on the demo), 0 failures
 
-你可以在我们的 Demo 中看到：点击支付 → Injective 钱包确认 → 链上交易完成 → 报告解锁 → 所有 tx_hash 都可以在 Blockscout 上查到。
+You can see it in our demo: click pay → Injective wallet confirmation → on-chain transaction completes → report unlocks → every tx_hash can be looked up on Blockscout.
 
-### 商业模式与影响（30秒）
+### Business Model and Impact (30 seconds)
 
-**收入来源：**
+**Revenue streams:**
 
-1. **x402 报告销售**：按次收费，单价 $0.50 - $5，目标客户是银行、保险、物流平台、投资机构、其他 AI Agent
-2. **RWA 协议手续费**：融资金额的 0.5%-1%
-3. **风险监控订阅**：为机构提供持续的货物追踪和风险预警
+1. **x402 report sales**: pay per use, $0.50 - $5 per report; target customers are banks, insurers, logistics platforms, investment institutions and other AI Agents
+2. **RWA protocol fees**: 0.5%-1% of the financing amount
+3. **Risk monitoring subscriptions**: continuous cargo tracking and risk alerts for institutions
 
-**市场规模：**
+**Market size:**
 
-全球贸易融资缺口高达 **$1.7 万亿**（WTO 数据），其中中小企业最难获得融资。AgentBL 用 Web3 + AI 降低了风控成本，让全球投资者可以直接参与贸易融资——**这是一个万亿美元级别的市场**。
+The global trade finance gap is as high as **$1.7 trillion** (WTO data), and SMEs find it hardest to obtain financing. AgentBL uses Web3 + AI to lower the cost of risk control, letting global investors participate in trade finance directly — **this is a trillion-dollar market**.
 
-**生态价值：**
+**Ecosystem value:**
 
-我们深度使用 **Injective + Microsoft** 三方合作提供的全栈能力：
+We make deep use of the full-stack capabilities provided by the **Injective + Microsoft** three-party partnership:
 
-**Injective 层（链上执行 + AI Agent 基础设施）：**
-1. **Injective Agent SDK**：让 AI Agent 直接与链交互，查询价格、发送交易、管理密钥——我们的定价 Agent 用它实时读取链上数据、推送风控决策
-2. **Injective MCP Server**：全球首个让 AI 通过自然语言操作区块链的工具——我们基于官方 MCP SDK 实现了 7 个标准工具，AI 可以用自然语言完成"获取贸易案例→定价→模拟发行→推送 Oracle"全流程
-3. **x402 付费协议**（`@injectivelabs/x402`）：HTTP 402 + EIP-3009 的 Web3 原生支付——我们用它实现了全球首个按次付费的 AI 报告市场，每笔支付都有 PaymentOracle 存证
-4. **Injective EVM**：完整的智能合约能力——我们部署了 5 个核心合约，所有定价决策带 `quote_hash` 和 `evidence_hash` 上链，可审计
-5. **Injective Testnet + Blockscout**：真实的测试网环境——300 个测试 + 真实 USDC 支付 + 所有交易可在 explorer 验证
+**Injective layer (on-chain execution + AI Agent infrastructure):**
+1. **Injective Agent SDK**: lets the AI Agent interact with the chain directly, querying prices, sending transactions and managing keys — our pricing Agent uses it to read on-chain data in real time and push risk-control decisions
+2. **Injective MCP Server**: the world's first tool that lets AI operate a blockchain through natural language — we implemented 7 standard tools on the official MCP SDK, and the AI can complete the full "fetch trade case → price → simulate issuance → push to Oracle" flow in natural language
+3. **x402 payment protocol** (`@injectivelabs/x402`): Web3-native payments with HTTP 402 + EIP-3009 — we used it to build the world's first pay-per-use AI report marketplace, with a PaymentOracle record for every payment
+4. **Injective EVM**: full smart contract capability — we deployed 5 core contracts, and every pricing decision goes on-chain with a `quote_hash` and `evidence_hash`, auditable
+5. **Injective Testnet + Blockscout**: a real testnet environment — 300 tests + real USDC payments + every transaction verifiable in the explorer
 
-**Microsoft 层（企业级 AI 能力）：**
-1. **Azure OpenAI Service**：调用 GPT-4 等前沿模型完成风控决策（structured output + tool calling），确保输出符合严格 JSON Schema
-2. **Azure 算力支持**：为 AI Agent 提供稳定的推理能力，支持实时定价和大规模报告生成
-3. **Azure ML 工具链**（可选）：未来可用于微调定制模型，针对贸易融资场景优化
+**Microsoft layer (enterprise-grade AI capability):**
+1. **Azure OpenAI Service**: calls GPT-4 and other frontier models for risk-control decisions (structured output + tool calling), ensuring output conforms to a strict JSON Schema
+2. **Azure compute support**: provides stable inference capacity for the AI Agent, supporting real-time pricing and large-scale report generation
+3. **Azure ML toolchain** (optional): can be used in future to fine-tune custom models optimised for trade finance scenarios
 
-**这不是"也能在其他链上跑"的通用 dApp，而是充分发挥 Injective × Microsoft 新星计划全栈能力的标杆应用。**
+**This is not a generic dApp that "could run on any other chain too"; it is a flagship application that makes full use of the full-stack capabilities of the Injective × Microsoft Nova Program.**
 
-### 结尾（10秒）
+### Closing (10 seconds)
 
-**AgentBL：AI 定价风险，链上强制执行。**
+**AgentBL: AI prices the risk. The chain enforces it.**
 
-在我们的世界里，**AI 不是助手，而是承销商；报告不是免费功能,而是可交易商品；风险不是黑盒，而是可验证的链上证据。**
+In our world, **AI is not an assistant, it is the underwriter; reports are not a free feature, they are tradable products; risk is not a black box, it is verifiable on-chain evidence.**
 
-谢谢大家！
-
----
-
-## 版本三：1分钟快速版
-
-各位评委好！
-
-**AgentBL 解决什么问题？**  
-全球贸易中，货物在途 45 天，出口商的钱被锁死。我们让出口商把电子提单质押给智能合约，AI 自主定价并发行 RWA，投资者直接提供融资。
-
-**核心创新是什么？**  
-三点：
-1. **AI 是真正的定价引擎**，不是聊天机器人——它审单据、估价值、监控战争天气风险，输出可验证的发行折价
-2. **全球首个 x402 付费 AI 报告市场**——任何人都可以按次购买我们的风控报告，支付和报告哈希全部上链
-3. **风险定价有经济学依据**——基于出口商的可验证贸易利润，完全透明
-
-**技术实力如何？**  
-300 个测试通过，24 个合约测试通过，真实部署在 Injective Testnet，所有交易可在 explorer 验证。标准 MCP Server，x402 完整闭环，Preflight 54 项检查全绿。
-
-**商业模式？**  
-x402 报告按次收费 + RWA 协议手续费 + 风险监控订阅。目标市场是 1.7 万亿美元的全球贸易融资缺口。
-
-**AgentBL：AI 定价风险，链上强制执行。谢谢！**
+Thank you all!
 
 ---
 
-## 评委追问应对话术
+## Version 3: 1-Minute Quick Version
 
-### Q1: "AI 定价不准怎么办？投资者亏了谁负责？"
+Hello judges!
 
-好问题！我们有三层保护：
+**What problem does AgentBL solve?**  
+In global trade, cargo is in transit for 45 days and the exporter's money is locked up. We let exporters pledge electronic bills of lading to a smart contract; the AI prices autonomously and issues RWA, and investors provide financing directly.
 
-1. **AI 不是唯一决策者**：所有 AI 输出都要经过确定性代码验证——schema 校验、逻辑约束、边界检查。300 个测试用例就是在验证这些不变量。
-2. **折价就是风险缓冲**：投资者按 $0.85 买入、目标 $1.00 兑付，这 17% 的空间就是用来吸收风险的——即使货物小幅贬值，投资者仍有利润。
-3. **动态调整 + 保险托底**：AI 监控实时风险，可以暂停发行、触发清算；同时货物有海运保险和信用保险双重覆盖。
+**What is the core innovation?**  
+Three points:
+1. **The AI is a real pricing engine**, not a chatbot — it reviews documents, estimates value, monitors war and weather risk, and outputs a verifiable issuance discount
+2. **The world's first x402 paid AI report marketplace** — anyone can buy our risk reports per use, with payments and report hashes all on-chain
+3. **Risk pricing is grounded in economics** — based on the exporter's verifiable trade profit, fully transparent
 
-而且我们是黑客松原型，刻意不做保本保收益承诺——这是风险投资，不是理财产品。
+**How strong is the technology?**  
+300 tests passing, 24 contract tests passing, really deployed on Injective Testnet, every transaction verifiable in the explorer. A standard MCP Server, a complete x402 loop, and all 54 Preflight checks green.
 
-### Q2: "你们的 AI 会不会被攻击？有人伪造单据怎么办？"
+**Business model?**  
+x402 pay-per-use reports + RWA protocol fees + risk monitoring subscriptions. The target market is the $1.7 trillion global trade finance gap.
 
-这正是我们的核心能力——**反欺诈审单**。
-
-AI Agent 会做三方交叉验证：
-- 提单上的货物数量 vs 发票金额 vs 保险覆盖金额
-- 如果发现不一致（比如保险金额只有发票的 50%），立即标记 `UNDER_INSURED` 并拒绝发行
-- 同时检查保险单有效期、起运港与目的港是否匹配、是否存在虚增货值（mis-invoicing）
-
-所有审查证据都记录在 `evidence_hash` 中，写入链上 Oracle——可审计、可追溯。
-
-如果有人试图通过提示词注入攻击 AI？我们的 LLM 输出必须符合严格的 JSON Schema，任何异常输出都会被拦截。
-
-### Q3: "x402 是什么？为什么要做付费报告？"
-
-x402 是 **HTTP 402 Payment Required + Web3 支付的结合**。
-
-传统 AI API 要么免费（羊毛出在羊身上），要么需要订阅账号（中心化、门槛高）。x402 让 AI 服务可以 **按次收费、无需账号、机器可调用**。
-
-**为什么值得做？**
-
-1. **这是真正的 AI 商品化**：AI 风控报告不再是"页面功能"，而是可以独立交易、机器调用的服务
-2. **拓展收入模式**：除了 RWA 融资，我们还能向银行、保险、物流平台、其他 AI Agent 出售单次报告——**这是一个独立的商业模式**
-3. **Injective 官方支持**：Injective 提供了 `@injectivelabs/x402` SDK 和完整文档，这是 sponsor-native 能力，不是我们自己发明的轮子
-
-你可以在 Demo 里看到：点击"购买报告" → 支付 USDC → PaymentOracle 存证 → 报告解锁 → 所有步骤都有真实链上交易。
-
-### Q4: "你们和其他 RWA 项目有什么区别？"
-
-三个根本性差异：
-
-1. **AI 的角色不同**：别人的 AI 是聊天助手或推荐引擎，我们的 AI 是 **自主的风控定价引擎**——它决定发行价、融资上限、是否暂停，承担真实的金融功能。
-
-2. **定价逻辑不同**：别人用固定 LTV 和固定利率（比如"抵押品价值的 60%，年化 8%"），我们的折价 **基于出口商的可验证贸易利润**，是动态的、有经济学依据的、可解释的。
-
-3. **x402 付费市场**：我们是唯一一个把 AI 风控报告本身变成可交易商品的协议——这不是 RWA 项目的常规做法，而是 **AI + Web3 的新范式**。
-
-简单说：别人在做"带 AI 功能的 RWA 平台"，我们在做"AI 驱动的、报告可交易的、风险可验证的 RWA 协议"。
-
-### Q5: "你们的技术栈复杂吗？会不会难以维护？"
-
-复杂但不混乱——我们用的都是行业标准：
-
-- **前端**：Next.js + TypeScript + Tailwind
-- **后端**：Node.js + Express，标准 REST API
-- **AI**：OpenAI structured output + tool calling，符合 JSON Schema
-- **MCP**：官方 `@modelcontextprotocol/sdk`，标准 stdio lifecycle
-- **智能合约**：Solidity + Hardhat，部署在 Injective EVM
-- **Web3 支付**：Injective 官方 `@injectivelabs/x402` + EIP-3009
-
-所有依赖都是锁定版本，所有模块都有单元测试和集成测试。我们的 **Preflight 检查系统**（54 项总闸门）可以在任何时候验证整个系统的健康状态。
-
-而且我们提供了 **Demo Mode**：没有 Live 配置时，系统会用离线数据跑通全流程，不会伪造链上交易——这对评委测试和新成员上手都很友好。
+**AgentBL: AI prices the risk. The chain enforces it. Thank you!**
 
 ---
 
-## 路演技巧建议
+## Responses to Judges' Follow-Up Questions
 
-### 1. 开场前 5 秒决定成败
-- 不要用"大家好我是某某"浪费时间
-- 直接抛出痛点："货在海上漂，钱等不了 45 天"——让评委立刻共情
+### Q1: "What if the AI misprices? Who is responsible if investors lose money?"
 
-### 2. 用数字和对比建立冲击
-- ❌ "我们解决了贸易融资问题"（太虚）
-- ✅ "全球 $1.7 万亿融资缺口，45 天回款周期，中小企业拿不到贷款"（具体）
+Great question! We have three layers of protection:
 
-### 3. 明确你的创新，不要让评委猜
-- 评委每天看几十个项目，如果你不说"我们是第一个 x402 付费 AI 报告市场"，他们会以为你只是"又一个 RWA 项目"
+1. **The AI is not the sole decision-maker**: all AI output must pass deterministic code validation — schema checks, logical constraints, boundary checks. The 300 test cases exist to verify these invariants.
+2. **The discount is the risk buffer**: investors buy at $0.85 with a $1.00 redemption target, and that 17% of room is there to absorb risk — even if the cargo loses a little value, investors still make a profit.
+3. **Dynamic adjustment + insurance backstop**: the AI monitors real-time risk and can pause the offering or trigger liquidation; at the same time the cargo has double coverage from marine insurance and credit insurance.
 
-### 4. 技术展示要有视觉冲击
-- 不要只说"我们部署了合约"
-- 要展示：点击支付 → 钱包弹窗 → 交易确认 → explorer 页面打开 → tx_hash 高亮
-- **让评委看到真实的链上交易，而不是听你描述**
+Also, this is a hackathon prototype and we deliberately make no principal or return guarantees — this is a risk investment, not a wealth-management product.
 
-### 5. 回答追问时，先肯定问题，再给方案
-- ❌ "这个不是问题，因为……"（防御性，减分）
-- ✅ "好问题！我们考虑过这个风险，所以做了三层保护……"（自信且周全，加分）
+### Q2: "Can your AI be attacked? What if someone forges documents?"
 
-### 6. 结尾要有记忆点
-- ❌ "谢谢大家，请多指教"（平淡）
-- ✅ "AI 定价风险,链上强制执行——AgentBL,谢谢！"（口号式，易记忆）
+That is exactly our core capability — **anti-fraud document review**.
 
-### 7. 肢体语言和语速
-- 不要读稿，要像在和朋友解释一个很酷的想法
-- 关键数字放慢语速："一点七万亿美元的市场"
-- 手势指向大屏幕上的 Demo："你们可以看到这里，真实的交易哈希"
+The AI Agent performs three-way cross-verification:
+- Cargo quantity on the bill of lading vs invoice amount vs insured amount
+- If it finds an inconsistency (e.g. the insured amount is only 50% of the invoice), it immediately flags `UNDER_INSURED` and refuses the issuance
+- It also checks the insurance policy's validity period, whether the port of loading and port of destination match, and whether the cargo value is inflated (mis-invoicing)
+
+All review evidence is recorded in the `evidence_hash` and written to the on-chain Oracle — auditable and traceable.
+
+What if someone tries to attack the AI with prompt injection? Our LLM output must conform to a strict JSON Schema, and any abnormal output is blocked.
+
+### Q3: "What is x402? Why build paid reports?"
+
+x402 is **the combination of HTTP 402 Payment Required + Web3 payments**.
+
+Traditional AI APIs are either free (with the cost recovered somewhere else) or require a subscription account (centralised, high barrier to entry). x402 lets AI services be **charged per use, with no account needed, and callable by machines**.
+
+**Why is it worth doing?**
+
+1. **This is real AI productisation**: AI risk reports are no longer a "page feature" but a service that can be traded independently and called by machines
+2. **It expands the revenue model**: beyond RWA financing, we can sell single reports to banks, insurers, logistics platforms and other AI Agents — **this is an independent business model**
+3. **Official Injective support**: Injective provides the `@injectivelabs/x402` SDK and full documentation; this is a sponsor-native capability, not a wheel we reinvented ourselves
+
+You can see it in the demo: click "Buy report" → pay USDC → PaymentOracle record → report unlocks → every step has a real on-chain transaction.
+
+### Q4: "How are you different from other RWA projects?"
+
+Three fundamental differences:
+
+1. **The AI plays a different role**: other projects' AI is a chat assistant or recommendation engine; our AI is an **autonomous risk-control pricing engine** — it decides the issue price, the financing cap and whether to pause, carrying real financial functions.
+
+2. **The pricing logic is different**: others use a fixed LTV and fixed interest rate (e.g. "60% of collateral value, 8% annualised"); our discount is **based on the exporter's verifiable trade profit** — dynamic, grounded in economics and explainable.
+
+3. **The x402 paid marketplace**: we are the only protocol that turns AI risk reports themselves into tradable products — this is not standard practice for RWA projects but **a new AI + Web3 paradigm**.
+
+Put simply: others are building "RWA platforms with AI features"; we are building "an AI-driven RWA protocol with tradable reports and verifiable risk".
+
+### Q5: "Is your tech stack complex? Will it be hard to maintain?"
+
+Complex but not messy — everything we use is an industry standard:
+
+- **Frontend**: Next.js + TypeScript + Tailwind
+- **Backend**: Node.js + Express, standard REST API
+- **AI**: OpenAI structured output + tool calling, conforming to JSON Schema
+- **MCP**: the official `@modelcontextprotocol/sdk`, standard stdio lifecycle
+- **Smart contracts**: Solidity + Hardhat, deployed on Injective EVM
+- **Web3 payments**: Injective's official `@injectivelabs/x402` + EIP-3009
+
+All dependencies are pinned, and every module has unit and integration tests. Our **Preflight check system** (a 54-item master gate) can verify the health of the whole system at any time.
+
+We also provide a **Demo Mode**: without a Live configuration, the system runs the full flow on offline data and never fakes on-chain transactions — which is friendly both for judges testing it and for new team members getting started.
 
 ---
 
-## 评委最想看到的五个要素
+## Pitching Tips
 
-作为投资人和评委，最想看到的是：
+### 1. The first 5 seconds decide everything
+- Don't waste time with "Hello everyone, I'm so-and-so"
+- Open straight with the pain point: "The cargo is floating at sea, and the money can't wait 45 days" — get the judges to empathise immediately
 
-1. **真实的痛点**（不是伪需求）✅ 45 天回款周期 + $1.7T 融资缺口
-2. **技术创新**（不是堆砌概念）✅ x402 + AI 定价 + 可验证风控
-3. **可验证的实现**（不是 PPT）✅ 300 测试 + 真实链上交易
-4. **清晰的商业模式**（不是"先做用户再说"）✅ x402 按次收费 + 协议手续费
-5. **生态契合度**（不是什么链都能用）✅ 深度使用 Injective 原生能力
+### 2. Use numbers and contrasts for impact
+- ❌ "We solved the trade finance problem" (too vague)
+- ✅ "A $1.7 trillion global financing gap, a 45-day payment cycle, SMEs can't get loans" (specific)
+
+### 3. State your innovation clearly; don't make the judges guess
+- Judges see dozens of projects a day; if you don't say "we are the first x402 paid AI report marketplace", they'll assume you're "just another RWA project"
+
+### 4. The technical demo needs visual impact
+- Don't just say "we deployed contracts"
+- Show it: click pay → wallet pop-up → transaction confirmed → explorer page opens → tx_hash highlighted
+- **Let the judges see a real on-chain transaction instead of hearing you describe it**
+
+### 5. When answering follow-ups, acknowledge the question first, then give the solution
+- ❌ "That's not a problem, because…" (defensive, loses points)
+- ✅ "Great question! We considered this risk, so we built three layers of protection…" (confident and thorough, gains points)
+
+### 6. End with something memorable
+- ❌ "Thank you all, we welcome your feedback" (flat)
+- ✅ "AI prices the risk, the chain enforces it — AgentBL, thank you!" (slogan-style, easy to remember)
+
+### 7. Body language and pace
+- Don't read from the script; talk as if you're explaining a cool idea to a friend
+- Slow down on key numbers: "a one-point-seven-trillion-dollar market"
+- Gesture at the demo on the big screen: "You can see right here, the real transaction hash"
 
 ---
 
-## 关键记忆点
+## The Five Things Judges Most Want to See
 
-**一句话定位**：AI 不是助手，而是承销商；报告不是免费功能，而是可交易商品；风险不是黑盒，而是可验证的链上证据。
+As investors and judges, what they most want to see is:
 
-**核心口号**：AgentBL：AI 定价风险，链上强制执行。
+1. **A real pain point** (not a fake need) ✅ 45-day payment cycle + $1.7T financing gap
+2. **Technical innovation** (not a pile of buzzwords) ✅ x402 + AI pricing + verifiable risk control
+3. **A verifiable implementation** (not a PPT) ✅ 300 tests + real on-chain transactions
+4. **A clear business model** (not "get users first and figure it out later") ✅ x402 pay-per-use + protocol fees
+5. **Ecosystem fit** (not something that works on any chain) ✅ Deep use of Injective-native capabilities
 
-**三大创新**：
-1. AI 是金融决策者（定价引擎，不是聊天机器人）
-2. x402 付费 AI 报告市场（全球首个）
-3. 风险定价有经济学依据（基于可验证贸易利润）
+---
 
-**技术证明**：
-- 300 Node.js 测试 + 24 Solidity 测试
-- Injective Testnet 真实部署
-- x402 完整闭环 + PaymentOracle 存证
-- Preflight 54 项检查全绿
+## Key Takeaways
 
-**商业模式**：
-- x402 报告按次收费（$0.50-$5）
-- RWA 协议手续费（0.5%-1%）
-- 目标市场：$1.7T 贸易融资缺口
+**One-line positioning**: AI is not an assistant, it is the underwriter; reports are not a free feature, they are tradable products; risk is not a black box, it is verifiable on-chain evidence.
 
-**路演时记住**：自信、简洁、有证据。
+**Core slogan**: AgentBL: AI prices the risk. The chain enforces it.
 
-祝夺冠！🏆
+**Three major innovations**:
+1. The AI is a financial decision-maker (a pricing engine, not a chatbot)
+2. x402 paid AI report marketplace (a world first)
+3. Risk pricing grounded in economics (based on verifiable trade profit)
+
+**Technical proof**:
+- 300 Node.js tests + 24 Solidity tests
+- Real deployment on Injective Testnet
+- Complete x402 loop + PaymentOracle records
+- All 54 Preflight checks green
+
+**Business model**:
+- x402 pay-per-use reports ($0.50-$5)
+- RWA protocol fees (0.5%-1%)
+- Target market: $1.7T trade finance gap
+
+**Remember when pitching**: confident, concise, evidence-backed.
+
+Good luck winning! 🏆

@@ -1,197 +1,197 @@
-# AgentBL — AI 动态定价的 eBL-backed RWA 贸易融资协议
+# AgentBL — An eBL-backed RWA Trade Finance Protocol with AI Dynamic Pricing
 
-> 🎯 **5 秒理解：你的货在海上漂，钱还要等 45 天。谁来替你盯风险？AgentBL 的 AI 风控 Agent——在投资者下单之前就把风险定准价。**
-
----
-
-## 一句话简介（推荐直接用）
-
-AgentBL 是一个 AI 驱动的 eBL（电子提单）RWA 折价发行协议：出口商质押电子提单 → AI 审单/估值/风控/定价 → 投资者折价认购 → 链上强制执行。让 AI 承担真正的金融职责——不是聊天，是承保。
+> 🎯 **Understand it in 5 seconds: your goods are drifting at sea, and the money is still 45 days away. Who watches the risk for you? AgentBL's AI risk Agent prices the risk correctly before investors place their orders.**
 
 ---
 
-## 1. 背境与痛点
+## One-Line Pitch (recommended as-is)
 
-### 一个真实场景
-
-新加坡港，500 吨铜阴极板装船发往上海。发票货值 450 万美元。出口商急需现金周转采购下一批原料——但按传统贸易融资，钱要 30-45 天才到账。
-
-**全球贸易融资缺口高达 2.5 万亿美元。** 问题不是没钱——是风险看不准、定价不透明。
-
-### 三个要命的链下风险
-
-1. **单据欺诈**：eBL 写 500 吨、发票写 480 吨、保险只保了 300 万——三份文件对不上
-2. **保险陷阱**：保单在到港前 3 天过期，战争除外条款让一切归零
-3. **欺骗性信号**：战争爆发铜价涨了 → 只看价格的预言机以为"更安全"——完全看反
-
-**谁在投资者下单之前，替他们把这些风险看准、定价？** 这就是 AgentBL 的全部答案。
+AgentBL is an AI-driven eBL (electronic bill of lading) RWA discounted issuance protocol: the exporter pledges an electronic bill of lading → AI reviews documents/values/manages risk/prices → investors subscribe at a discount → on-chain enforcement. It gives AI a real financial responsibility: not chatting, but underwriting.
 
 ---
 
-## 2. 产品愿景与解决方案
+## 1. Background and Pain Points
 
-### 主流程（白话版）
+### A Real Scenario
 
-```
-出口商质押电子提单
-    → AI 审单反欺诈（交叉核验 eBL/发票/保险）
-    → AI 估值（实时 LME 铜价 + UN Comtrade 历史成交 + 波动性 haircut）
-    → AI 风险打分（战争/天气/港口/保险/价格波动 五维）
-    → AI 定发行折价（要钱越急 + 风险越大 = 折价越深）
-    → 投资者折价认购（如 $0.80 买，目标兑付 $1.00）
-    → 链上 RiskPricingOracle 锚定决策 + 证据哈希
-    → 航运途中风险升级 → AI 实时改价/暂停/清算
-```
+At the Port of Singapore, 500 tonnes of copper cathode plates are loaded for Shanghai. The invoice value is USD 4.5 million. The exporter urgently needs cash to buy the next batch of raw materials, but under traditional trade finance the money takes 30-45 days to arrive.
 
-### 核心定价公式
+**The global trade finance gap is as large as USD 2.5 trillion.** The problem is not a lack of money; it is that risk is hard to read and pricing is opaque.
 
-```
-出口商毛利 P = 发票货值 − 进货成本
-融资成本   = share × P                                        ← 投资者赚的 = 出口商付出的
-发行价     = 现金 / (现金 + share × P)                         ← $0.80 到 $0.89
-share      = 到账速度份额 + 风险份额                           ← 两个杠杆驱动折价
-```
+### Three Deadly Off-Chain Risks
 
-### 为什么非有 AI 不可？
+1. **Document fraud**: the eBL says 500 tonnes, the invoice says 480 tonnes, and the insurance only covers 3 million: the three documents do not match
+2. **Insurance traps**: the policy expires 3 days before arrival, and the war exclusion clause wipes everything out
+3. **Deceptive signals**: war breaks out and copper prices rise → a price-only oracle thinks it is "safer", which is exactly backwards
 
-**钱在 Funded 那一刻就打给出口商了，货还在海上漂。事后改价保护不了已建仓的钱。** 那笔折价，是投资者唯一的、预付的风险补偿。而谁定这笔折价？AI——**在投资者认购之前。**
-
-$1.00 是**目标兑付价，不是保本承诺。** 同一笔铜三种结局：
-- ✅ 还款：$0.80 → $1.00，赚 25%
-- ❌ 战争尾部违约：$0.80 → 只回收 $0.698，亏 12.8%
-- 🟡 轻度违约：被超额抵押兜回本金
-
-**那 $0.20 折价 = AI 为违约尾部预收的保费。**
+**Who reads these risks correctly and prices them for investors before they place their orders?** That is the whole answer AgentBL provides.
 
 ---
 
-## 3. 与赛题匹配及创新点
+## 2. Product Vision and Solution
 
-| 评判标准 | AgentBL 如何命中 |
+### Main Flow (plain-language version)
+
+```
+Exporter pledges the electronic bill of lading
+    → AI document review and anti-fraud (cross-check eBL/invoice/insurance)
+    → AI valuation (live LME copper price + UN Comtrade historical trades + volatility haircut)
+    → AI risk scoring (war/weather/port/insurance/price volatility, five dimensions)
+    → AI sets the issuance discount (more urgent need for cash + higher risk = deeper discount)
+    → Investors subscribe at a discount (e.g. buy at $0.80, target redemption $1.00)
+    → On-chain RiskPricingOracle anchors the decision + evidence hash
+    → Risk escalates during shipping → AI reprices/pauses/liquidates in real time
+```
+
+### Core Pricing Formula
+
+```
+Exporter gross profit P = invoice value − purchase cost
+Financing cost          = share × P                            ← what investors earn = what the exporter pays
+Issue price             = cash / (cash + share × P)            ← $0.80 to $0.89
+share                   = payout-speed share + risk share      ← two levers drive the discount
+```
+
+### Why Does It Have to Be AI?
+
+**The money is paid to the exporter the moment the offering is Funded, while the goods are still at sea. Repricing after the fact cannot protect money that is already committed.** That discount is the investor's only, prepaid risk compensation. And who sets that discount? AI, **before investors subscribe.**
+
+$1.00 is the **target redemption price, not a principal guarantee.** The same copper shipment has three possible outcomes:
+- ✅ Repayment: $0.80 → $1.00, a 25% gain
+- ❌ War tail default: $0.80 → only $0.698 recovered, a 12.8% loss
+- 🟡 Mild default: principal recovered thanks to overcollateralisation
+
+**That $0.20 discount = the premium AI collects in advance for the default tail.**
+
+---
+
+## 3. Fit with the Challenge and Innovations
+
+| Judging Criterion | How AgentBL Hits It |
 |---------|----------------|
-| **AI Agent × Blockchain** | AI 决定发行价/额度/链上动作——真正的金融 Agent，不是聊天框 |
-| **安全 / Risk Agent** | 反欺诈审单（7 项交叉核验）+ 五维风险打分 + 战争溢价陷阱识别 |
-| **可审计/可解释** | 每个折价挂证据来源 + 决策哈希上链 RiskPricingOracle |
-| **链上存证** | Injective Testnet 已部署 AgentBLRWA + RiskPricingOracle + PaymentOracle |
-| **x402 付费情报** | AI 自动支付解锁高级数据（HTTP 402 → EIP-3009 → 链上结算） |
-| **MCP Server** | 7 个工具 + 3 个资源，可被 Claude Code / Cursor 直接接入 |
-| **真实用例** | 铜/原油/铁矿石/橡胶/铝 9 个结构化案例，含 warcrisis 极端场景 |
-| **测试覆盖** | 154 个 JS 测试 + 11 个 Solidity 测试 + preflight 赛前检查 |
+| **AI Agent × Blockchain** | AI decides the issue price/amount/on-chain actions: a real financial Agent, not a chat box |
+| **Security / Risk Agent** | Anti-fraud document review (7 cross-checks) + five-dimension risk scoring + war premium trap detection |
+| **Auditable / Explainable** | Every discount is tied to evidence sources + decision hash recorded on-chain in RiskPricingOracle |
+| **On-chain attestation** | AgentBLRWA + RiskPricingOracle + PaymentOracle deployed on Injective Testnet |
+| **x402 paid intelligence** | AI automatically pays to unlock premium data (HTTP 402 → EIP-3009 → on-chain settlement) |
+| **MCP Server** | 7 tools + 3 resources, plugs directly into Claude Code / Cursor |
+| **Real use cases** | 9 structured cases across copper/crude oil/iron ore/rubber/aluminium, including the warcrisis extreme scenario |
+| **Test coverage** | 154 JS tests + 11 Solidity tests + preflight pre-competition check |
 
 ---
 
-## 4. 技术创新亮点
+## 4. Technical Innovation Highlights
 
-### 🤖 AI 审单反欺诈——价格预言机做不到的事
+### 🤖 AI Document Review and Anti-Fraud: What Price Oracles Cannot Do
 
-在定价前，AI 先做审单员的工作：**eBL / 商业发票 / 保险单三单交叉核验**：
-- 数量是否一致（对不上 +250bps）
-- 发票单价是否偏离市场（高开/低开发票 +150bps）
-- 保险是否覆盖货值（不足额 +220bps）
-- 保单是否在到港前过期（+120bps）
-- Incoterms 是否一致
+Before pricing, AI first does the job of a document checker: **three-way cross-check of eBL / commercial invoice / insurance policy**:
+- Are the quantities consistent (mismatch +250bps)
+- Does the invoice unit price deviate from the market (over-/under-invoicing +150bps)
+- Does the insurance cover the cargo value (underinsured +220bps)
+- Does the policy expire before arrival (+120bps)
+- Are the Incoterms consistent
 
-**每一个疑点折成风险基点，直接压低发行价。**
+**Every red flag is converted into risk basis points and directly lowers the issue price.**
 
-### 🔭 看穿欺骗性信号——战争溢价的"相关性双刃剑"
+### 🔭 Seeing Through Deceptive Signals: The "Double-Edged Correlation" of the War Premium
 
-战争爆发时铜价上涨 → 价格预言机认为"抵押物更值钱" → **完全看反。**
+When war breaks out, copper prices rise → a price oracle thinks "the collateral is worth more" → **exactly backwards.**
 
-AgentBL 的 AI 知道：
-- 违约概率 ↑（进口商弃货）
-- 保险失效（战争除外条款）
-- 清算回收率 ↓
-- **所有保护一起塌掉**
+AgentBL's AI knows:
+- Default probability ↑ (the importer abandons the cargo)
+- Insurance becomes void (war exclusion clause)
+- Liquidation recovery rate ↓
+- **All protections collapse together**
 
-于是反向操作：货值 haircut 21%、风险 1410bps、**直接 PAUSE 暂停发行。**
+So it acts in the opposite direction: a 21% cargo value haircut, 1410bps of risk, and **an immediate PAUSE of the issuance.**
 
-### 💎 x402 付费情报——AI 为情报付费，链上存证
+### 💎 x402 Paid Intelligence: AI Pays for Intelligence, with On-Chain Attestation
 
-免费情报不够用时，AI 通过 x402 协议自动购买高级数据：
-1. 请求付费端点 → HTTP 402 Payment Required
-2. AI 自动签名 EIP-3009 TransferWithAuthorization
-3. 链上结算 → PaymentOracle 记录支付证据
-4. 高级情报解锁 → 流入定价引擎 → 价格可能因此改变
+When free intelligence is not enough, AI automatically buys premium data via the x402 protocol:
+1. Request the paid endpoint → HTTP 402 Payment Required
+2. AI automatically signs an EIP-3009 TransferWithAuthorization
+3. On-chain settlement → PaymentOracle records the payment evidence
+4. Premium intelligence unlocked → flows into the pricing engine → the price may change as a result
 
-**完整闭环：付费→结算→存证→定价变化，每一步都可审计。**
+**A complete loop: pay → settle → attest → price change, every step auditable.**
 
-### 🔗 MCP Server——AI Agent 的原生接口
+### 🔗 MCP Server: The Native Interface for AI Agents
 
-7 个 MCP 工具（get_trade_case / generate_pricing_quote / simulate_offering / push_pricing_to_oracle / search_knowledge_base / assess_world_risk / fetch_premium_x402_intel）+ 3 个 Resources，可直接接入 Claude Code / Cursor。Agent 自然语言驱动机器支付——不需要人类按按钮。
+7 MCP tools (get_trade_case / generate_pricing_quote / simulate_offering / push_pricing_to_oracle / search_knowledge_base / assess_world_risk / fetch_premium_x402_intel) + 3 Resources, plugging directly into Claude Code / Cursor. The Agent drives machine payments in natural language, with no human needed to press a button.
 
 ---
 
-## 5. 系统架构
+## 5. System Architecture
 
 ```
-前端 Dashboard (SPA)
+Frontend Dashboard (SPA)
     ↕ fetch (PricingQuote)
 API Server (Node.js http)
     ↕
 ┌──────────────────────┬──────────────────────┐
-│ AI 定价引擎           │ MCP / x402 / RAG      │
+│ AI pricing engine    │ MCP / x402 / RAG      │
 │ pricingEngine        │ 7 tools + 3 resources │
-│ scoreRisk            │ HTTP 402 付费情报     │
-│ offeringSimulator    │ 5 维风险情报检索      │
+│ scoreRisk            │ HTTP 402 paid intel   │
+│ offeringSimulator    │ 5-dim risk intel RAG  │
 └──────────────────────┴──────────────────────┘
     ↕ quote_hash / evidence_hash
-Injective Testnet 合约
-├── AgentBLRWA (RWA 铸造)
-├── RiskPricingOracle (定价存证)
-├── PaymentOracle (x402 支付证据)
-├── RWAOfferingPool (发行/认购/结算)
-└── EBLRegistry (提单注册)
+Injective Testnet contracts
+├── AgentBLRWA (RWA minting)
+├── RiskPricingOracle (pricing attestation)
+├── PaymentOracle (x402 payment evidence)
+├── RWAOfferingPool (issuance/subscription/settlement)
+└── EBLRegistry (bill of lading registry)
 ```
 
 ---
 
-## 6. 快速开始
+## 6. Quick Start
 
 ```bash
-# 1. 安装
+# 1. Install
 npm install
 
-# 2. 启动
+# 2. Start
 npm run dev
 # → http://localhost:3000
 
-# 3. 一键演示
+# 3. One-click demo
 npm run demo:once
 
-# 4. 赛前全量检查
+# 4. Full pre-competition check
 npm run preflight
 ```
 
-**环境要求**：Node.js ≥ 18.18.0 · 现代浏览器 · **无需 API Key（离线 fallback 保证 demo 永远能跑）**
+**Requirements**: Node.js ≥ 18.18.0 · a modern browser · **no API key needed (the offline fallback guarantees the demo always runs)**
 
 ---
 
-## 7. 演示命令清单
+## 7. Demo Command List
 
-| 命令 | 什么效果 |
+| Command | What It Does |
 |------|---------|
-| `npm run demo:once` | 🔥 一键 1 分钟完整闭环演示 |
-| `npm run dev` | Web Dashboard（评委可互动） |
-| `npm run demo:default` | 三种结算结局对比（赚/亏/回本） |
-| `npm run agent:value` | AI 估值工具调用轨迹 |
-| `npm run qa` | 评委 Q&A 彩排 |
-| `npm run smoke:x402` | x402 付费情报全链路 |
-| `npm run preflight` | 赛前全量检查（对标 hermes-pay） |
+| `npm run demo:once` | 🔥 One-click, 1-minute full end-to-end demo |
+| `npm run dev` | Web Dashboard (interactive for judges) |
+| `npm run demo:default` | Comparison of three settlement outcomes (gain/loss/break-even) |
+| `npm run agent:value` | AI valuation tool-call trace |
+| `npm run qa` | Judges' Q&A rehearsal |
+| `npm run smoke:x402` | x402 paid intelligence full chain |
+| `npm run preflight` | Full pre-competition check (benchmarked against hermes-pay) |
 
 ---
 
-## 8. 合约地址（Injective Testnet）
+## 8. Contract Addresses (Injective Testnet)
 
-| 合约 | 地址 |
+| Contract | Address |
 |------|------|
 | AgentBLRWA | `0x4a03B5707eEBFc88f56f6E6a99b5D98466B31c94` |
-| RiskPricingOracle | 待部署 |
-| PaymentOracle | 待部署 |
+| RiskPricingOracle | To be deployed |
+| PaymentOracle | To be deployed |
 
 ---
 
-## 9. 一句话收束
+## 9. Closing Line
 
-> **普通 DeFi 让市场猜价格、让清算善后。AgentBL 让 AI 在投资者下单之前，把贸易欺诈和真实世界风险，定成一个可解释、可上链的 RWA 折价。**
+> **Ordinary DeFi lets the market guess the price and leaves liquidation to clean up afterwards. AgentBL lets AI turn trade fraud and real-world risk into an explainable, on-chain RWA discount before investors place their orders.**
 >
-> **AI 定价风险，链上强制执行。**
+> **AI prices the risk; the chain enforces it.**

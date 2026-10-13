@@ -1,112 +1,112 @@
-# AgentBL Agent 拿奖路线与能力规划
+# AgentBL Agent Award Roadmap and Capability Plan
 
-这份文档回答一个问题：如果 AgentBL 不只是准备仓库，而是要在黑客松里冲奖，下一步应该补哪些任务、给 AI 什么能力、合约做到什么程度，以及 Harness 如何保证所有人没有跑偏。
+This document answers one question: if AgentBL is not just preparing a repository but competing for a hackathon prize, which tasks should be added next, what capabilities should the AI get, how far should the contracts go, and how does the Harness keep everyone from drifting off course.
 
-当前主线：**AI 动态定价的 eBL-backed RWA 折价发行协议**（见 `docs/PRD.md` v0.2）。本文已对齐该模型——早期版本把项目讲成"RiskReport 风控 + 资金池放贷"，现在的核心是 **AI 决定 RWA 的发行折价**。
+Current main line: **an eBL-backed RWA discounted-issuance protocol with AI dynamic pricing** (see `docs/PRD.md` v0.2). This document is aligned with that model. Earlier versions framed the project as "RiskReport risk control + pool lending"; the core now is **AI deciding the RWA issue discount**.
 
-## 1. 最有竞争力的项目定位
+## 1. Most Competitive Project Positioning
 
-推荐主叙事：
+Recommended main narrative:
 
-> AgentBL 把电子提单变成一个由 AI 动态定价的 RWA 折价发行池：AI Pricing & Risk Agent 把"出口商到账速度 + 货物估值 + 运输/天气/战争/保险/市场风险"折算成一个 RWA 发行折价，写入链上 RiskPricingOracle，RWAOfferingPool 据此开盘、改价、暂停或清算。
+> AgentBL turns the electronic bill of lading into an RWA discounted-issuance pool dynamically priced by AI: the AI Pricing & Risk Agent converts "exporter payout speed + cargo valuation + shipping/weather/war/insurance/market risk" into an RWA issue discount and writes it to the on-chain RiskPricingOracle, and RWAOfferingPool opens, reprices, pauses or liquidates accordingly.
 
-不要把项目讲成"又一个 RWA 融资 dApp"，也不要讲成"AI 写风险报告"。评委更想看到：
+Do not pitch the project as "yet another RWA financing dApp", and do not pitch it as "AI writes risk reports". What judges want to see:
 
-1. **AI 真正承担金融功能**：它不是打分或解释，而是决定发行价、发行额度和合约动作。
-2. **折价可解释、可审计**：`final = base − urgency_discount − risk_discount`，每个折扣都有证据。
-3. **合约不是摆设**：用 PricingQuote 改变真实状态机（Open → Repriced → Paused）。
-4. **eBL 是核心 collateral primitive**：可转让单据 / 货权凭证，不是泛泛提法。
-5. **知道合规边界**：permissioned、合格投资者、不公开募资、`1 RWA = 1 USD` 是目标兑付价而非保本。
+1. **AI genuinely performs a financial function**: it does not just score or explain; it decides the issue price, issuance size and contract action.
+2. **The discount is explainable and auditable**: `final = base − urgency_discount − risk_discount`, with evidence for every discount.
+3. **The contract is not decoration**: a PricingQuote changes a real state machine (Open → Repriced → Paused).
+4. **The eBL is the core collateral primitive**: a transferable document / document of title, not a vague mention.
+5. **Awareness of compliance boundaries**: permissioned, qualified investors, no public offering, `1 RWA = 1 USD` is a target redemption price, not a capital guarantee.
 
-## 2. 必须新增的任务
+## 2. Tasks That Must Be Added
 
-### P0：拿奖主链路
+### P0: Main Award Path
 
-| ID | 任务 | 产物 | 验证 |
+| ID | Task | Deliverable | Verification |
 |---|---|---|---|
-| P0-1 | 固定 `TradeCase` / `PricingQuote` / `OfferingState` schema | `src/core/schema.js` | `npm run check` / `npm run test` |
-| P0-2 | 实现定价引擎：base price（按到账速度）+ urgency/risk discount | `src/core/pricingEngine.js` | pricing unit test |
-| P0-3 | 实现 collateral coverage guardrail（兑付敞口 ≤ 安全覆盖） | pricing invariant test | `npm run test` |
-| P0-4 | 增加定价多场景 fixtures（fast / balanced / high-risk reprice） | `data/scenarios/*.json` | `npm run scenarios` |
-| P0-5 | 打通 `/api/pricing/quote` 和 `/api/offering/simulate` | `src/app/server.js` | `npm run smoke` |
-| P0-6 | 实现 Solidity 两件套：`RWAOfferingPool` / `RiskPricingOracle` | contracts | `hardhat test` |
-| P0-7 | PricingQuote `quote_hash` / `evidence_hash` 写入 RiskPricingOracle | contract event + ABI | `hardhat test` |
-| P0-8 | 前端展示"AI 折价定价 → 链上改价"（Investor RWA Offering 页面） | timeline + event | 手动演示 |
+| P0-1 | Freeze the `TradeCase` / `PricingQuote` / `OfferingState` schemas | `src/core/schema.js` | `npm run check` / `npm run test` |
+| P0-2 | Implement the pricing engine: base price (by payout speed) + urgency/risk discount | `src/core/pricingEngine.js` | pricing unit test |
+| P0-3 | Implement the collateral coverage guardrail (redemption exposure ≤ safe coverage) | pricing invariant test | `npm run test` |
+| P0-4 | Add multi-scenario pricing fixtures (fast / balanced / high-risk reprice) | `data/scenarios/*.json` | `npm run scenarios` |
+| P0-5 | Wire up `/api/pricing/quote` and `/api/offering/simulate` | `src/app/server.js` | `npm run smoke` |
+| P0-6 | Implement the two Solidity contracts: `RWAOfferingPool` / `RiskPricingOracle` | contracts | `hardhat test` |
+| P0-7 | Write PricingQuote `quote_hash` / `evidence_hash` to RiskPricingOracle | contract event + ABI | `hardhat test` |
+| P0-8 | Frontend shows "AI discount pricing → on-chain repricing" (Investor RWA Offering page) | timeline + event | manual demo |
 
-### P1：AI Agent 能力
+### P1: AI Agent Capabilities
 
-| ID | 任务 | 说明 | 验证 |
+| ID | Task | Description | Verification |
 |---|---|---|---|
-| AI-A | 估值 tool calling（实时行情 + 历史同类成交价 + 本地估值） | 已有示例 `src/agent/`，见 `docs/ai-valuation-tooling.md` | `npm run agent:value` |
-| AI-B | Document consistency checker | eBL、商业发票、保险、融资请求字段一致性 | fixture test |
-| AI-C | Pricing explanation generator | LLM 只生成投资者可读解释，不决定折价数字 | schema test |
-| AI-D | Pricing policy guardrail | LLM 输出必须符合 PricingQuote schema，失败回退 deterministic 引擎 | provider fallback test |
-| AI-E | RAG evidence retriever | 从团队文档、规则、合约 ABI、宏观风险 mock 中检索定价依据 | retrieval eval |
-| AI-F | Judge Q&A assistant | 回答合规、eBL、定价模型、合约状态机问题 | demo rehearsal |
+| AI-A | Valuation tool calling (live market data + historical comparable trade prices + local valuation) | Example already in `src/agent/`, see `docs/ai-valuation-tooling.md` | `npm run agent:value` |
+| AI-B | Document consistency checker | Field consistency across eBL, commercial invoice, insurance and financing request | fixture test |
+| AI-C | Pricing explanation generator | The LLM only generates investor-readable explanations and does not decide the discount figures | schema test |
+| AI-D | Pricing policy guardrail | LLM output must conform to the PricingQuote schema; on failure fall back to the deterministic engine | provider fallback test |
+| AI-E | RAG evidence retriever | Retrieve pricing evidence from team docs, rules, contract ABIs and macro-risk mocks | retrieval eval |
+| AI-F | Judge Q&A assistant | Answer questions on compliance, eBL, the pricing model and the contract state machine | demo rehearsal |
 
-### P2：MCP / Skill
+### P2: MCP / Skill
 
-建议做一个轻量 MCP server，而不是为了"用了 MCP"而做。MCP 工具应该服务定价主链路：
+Build a lightweight MCP server, but not just for the sake of "using MCP". The MCP tools should serve the main pricing path:
 
-| Tool | 输入 | 输出 | 用途 |
+| Tool | Input | Output | Purpose |
 |---|---|---|---|
-| `get_trade_case` | `case_id` | TradeCase JSON | 让 Agent 获取标准 case |
-| `verify_document_bundle` | TradeCase | consistency findings | eBL / invoice / insurance 一致性 |
-| `value_cargo` | TradeCase | 市场估值 + 历史同类成交价 | 估值地基（已有 tool calling 示例） |
-| `generate_pricing_quote` | TradeCase + payout_speed | PricingQuote | 统一定价结果 |
-| `simulate_offering` | PricingQuote | offering state result | 展示发行 / 改价 / 暂停 |
-| `push_pricing_to_oracle` | PricingQuote | tx hash / mock receipt | 连接 RiskPricingOracle |
-| `retrieve_trade_policy` | query | cited snippets | RAG 依据检索 |
+| `get_trade_case` | `case_id` | TradeCase JSON | Lets the Agent fetch a standard case |
+| `verify_document_bundle` | TradeCase | consistency findings | eBL / invoice / insurance consistency |
+| `value_cargo` | TradeCase | market valuation + historical comparable trade prices | Valuation foundation (tool calling example already exists) |
+| `generate_pricing_quote` | TradeCase + payout_speed | PricingQuote | Unified pricing result |
+| `simulate_offering` | PricingQuote | offering state result | Show issuance / repricing / pausing |
+| `push_pricing_to_oracle` | PricingQuote | tx hash / mock receipt | Connect to RiskPricingOracle |
+| `retrieve_trade_policy` | query | cited snippets | RAG evidence retrieval |
 
-Skill 建议只做 2 个：
+Build only 2 Skills:
 
-1. `agentbl-pricing-analyst`：固定审单 → 估值 → 折价定价 → 投资者解释的输出流程。
-2. `agentbl-demo-operator`：演示时按剧本运行 scenario、合约交易、Q&A。
+1. `agentbl-pricing-analyst`: a fixed output flow of document review → valuation → discount pricing → investor explanation.
+2. `agentbl-demo-operator`: runs scenarios, contract transactions and Q&A according to the script during the demo.
 
-### P3：RAG
+### P3: RAG
 
-RAG 的价值不是让 Agent 胡乱查资料，而是让它在评委追问时能引用团队规则和行业背景。
+The value of RAG is not letting the Agent dig through material at random, but letting it cite team rules and industry background when judges ask follow-up questions.
 
-建议知识库只放：
+The knowledge base should contain only:
 
 1. `docs/background.md`
 2. `docs/PRD.md`
 3. `docs/award-roadmap.md`
 4. `docs/ai-valuation-tooling.md`
-5. 合约 ABI / NatSpec
-6. 定价规则说明（base price / urgency / risk discount / coverage limit）
-7. eBL / MLETR / DCSA / ICC DSI 的精简背景笔记
+5. Contract ABI / NatSpec
+6. Pricing rule notes (base price / urgency / risk discount / coverage limit)
+7. Condensed background notes on eBL / MLETR / DCSA / ICC DSI
 
-RAG 评测要小而硬：
+The RAG evaluation should be small but rigorous:
 
-| Query | 期望 |
+| Query | Expected |
 |---|---|
-| 为什么 eBL 可以作为 RWA 抵押物？ | 能解释可转让单据 / 货权凭证逻辑 |
-| 为什么发行价是 0.85 不是 0.95？ | 能拆出 base / urgency / risk discount |
-| 为什么 AI 输出能触发合约改价？ | 能指出 PricingQuote schema 和 RiskPricingOracle |
-| 战争 / 保险快过期怎么影响价格？ | 能映射到 risk_discount 和 pricing_action |
+| Why can an eBL serve as RWA collateral? | Can explain the transferable document / document of title logic |
+| Why is the issue price 0.85 and not 0.95? | Can break it down into base / urgency / risk discount |
+| Why can AI output trigger contract repricing? | Can point to the PricingQuote schema and RiskPricingOracle |
+| How do war / soon-to-expire insurance affect the price? | Can map them to risk_discount and pricing_action |
 
-## 3. 最小合约两件套
+## 3. The Minimal Two-Contract Set
 
-聚焦"AI 折价 → 链上发行"，不要一开始做复杂 NFT 市场或 AMM。
+Focus on "AI discount → on-chain issuance"; do not start with a complex NFT marketplace or AMM.
 
 ### 3.1 RiskPricingOracle
 
-目的：让 AI 的 PricingQuote 变成链上可审计事件。
+Purpose: turn the AI's PricingQuote into an auditable on-chain event.
 
-最小函数：
+Minimal function:
 
 ```solidity
 function updatePricing(
     uint256 poolId,
-    uint256 issuePriceE6,        // final issue price，6 位精度（0.85 = 850000）
+    uint256 issuePriceE6,        // final issue price, 6-decimal precision (0.85 = 850000)
     uint8   riskLevel,           // 0=LOW 1=MEDIUM 2=WARNING 3=CRITICAL
     uint8   pricingAction,       // 0=OPEN 1=OPEN_WITH_WARNING 2=REPRICE_DOWN 3=PAUSE 4=FREEZE 5=LIQUIDATION
     bytes32 evidenceHash
 ) external;
 ```
 
-必须 emit：
+Must emit:
 
 ```solidity
 event PricingUpdated(uint256 indexed poolId, uint256 issuePriceE6, uint8 riskLevel, uint8 pricingAction, bytes32 evidenceHash);
@@ -114,36 +114,36 @@ event PricingUpdated(uint256 indexed poolId, uint256 issuePriceE6, uint8 riskLev
 
 ### 3.2 RWAOfferingPool
 
-目的：把折价发行状态机跑通。
+Purpose: get the discounted-issuance state machine working end to end.
 
-最小状态：
+Minimal states:
 
 ```solidity
 Created -> Priced -> Open -> Subscribed -> Funded -> InTransit -> Repaid/Redeemed
                       └-> Repriced -> Paused -> Frozen -> Liquidation/Defaulted
 ```
 
-最小函数：
+Minimal functions:
 
 ```solidity
 function createOffering(uint256 eblId, uint256 tokenSupply, uint256 issuePriceE6, uint256 targetRedemptionE6) external returns (uint256 poolId);
 function subscribe(uint256 poolId, uint256 rwaAmount) external;
-function reprice(uint256 poolId, uint256 newIssuePriceE6) external;   // 由 oracle / 治理触发
+function reprice(uint256 poolId, uint256 newIssuePriceE6) external;   // triggered by oracle / governance
 function pauseOffering(uint256 poolId) external;
-function settle(uint256 poolId) external;                            // 进口商付款后结算
+function settle(uint256 poolId) external;                            // settle after the importer pays
 ```
 
-（可选）`EBLRegistry`：`mintEBL` / `pledge` / `releasePledge` / `holderOf`；`RWAToken`：代表投资者认购份额。这两个是加分，不阻塞主 demo。
+(Optional) `EBLRegistry`: `mintEBL` / `pledge` / `releasePledge` / `holderOf`; `RWAToken`: represents investor subscription shares. These two are bonus points and do not block the main demo.
 
-## 4. 测试链部署建议
+## 4. Testnet Deployment Recommendations
 
-不要一开始追求复杂多链。优先：
+Do not chase a complex multi-chain setup from the start. Priorities:
 
-1. 本地 Hardhat：保证合约测试稳定。
-2. Injective Testnet：部署 `RiskPricingOracle` + `RWAOfferingPool`。
-3. 前端只需展示合约地址、交易 hash、`PricingUpdated` event（issue price 从 0.85 改到 0.78）。
+1. Local Hardhat: keep contract tests stable.
+2. Injective Testnet: deploy `RiskPricingOracle` + `RWAOfferingPool`.
+3. The frontend only needs to show the contract address, transaction hash and `PricingUpdated` event (issue price changed from 0.85 to 0.78).
 
-目录可借鉴常见 Hardhat + Next.js 结构：
+The directory layout can borrow from the common Hardhat + Next.js structure:
 
 ```text
 packages/hardhat/contracts
@@ -152,19 +152,19 @@ packages/hardhat/test
 packages/nextjs/contracts
 ```
 
-但业务上不要照搬众筹逻辑。AgentBL 的核心是"eBL 凭证 + AI 折价发行 + RiskPricingOracle"，不是捐赠 / 众筹。
+But do not copy crowdfunding logic for the business side. AgentBL's core is "eBL title document + AI discounted issuance + RiskPricingOracle", not donations / crowdfunding.
 
-## 5. Harness 新规则
+## 5. New Harness Rules
 
-每个新增功能必须回答：
+Every new feature must answer:
 
-1. 它改变哪个 scenario？
-2. 它输出哪个 schema（RiskReport 过渡期 / PricingQuote 目标）？
-3. 它是否改变 `issue price` 或 `pricing_action`？
-4. 它是否需要写入 RiskPricingOracle？
-5. 它的失败兜底是什么（deterministic 引擎 / mock provider）？
+1. Which scenario does it change?
+2. Which schema does it output (RiskReport during the transition / PricingQuote as the target)?
+3. Does it change the `issue price` or `pricing_action`?
+4. Does it need to write to RiskPricingOracle?
+5. What is its failure fallback (deterministic engine / mock provider)?
 
-当前 Harness 命令：
+Current Harness commands:
 
 ```bash
 npm run check
@@ -175,7 +175,7 @@ npm run demo
 npm run agent:value
 ```
 
-推荐 PR 验证顺序：
+Recommended PR verification order:
 
 ```bash
 npm run check
@@ -184,23 +184,23 @@ npm run smoke
 npm run scenarios
 ```
 
-## 6. 最终演示结构
+## 6. Final Demo Structure
 
-3 分钟版本：
+3-minute version:
 
-1. 30 秒：出口商（新加坡铜贸易商）拿到 eBL，但要快钱，定价慢且不透明。
-2. 40 秒：AI 调用工具拉实时 LME 铜价 + 历史同类成交价，给出估值和 PricingQuote（发行价 0.85）。
-3. 40 秒：合约按折价开盘，RiskPricingOracle emit `PricingUpdated`，投资者认购。
-4. 40 秒：霍尔木兹战争升级 + 铜价剧烈波动 → AI 把 risk_discount 拉大，发行价压到 0.78，状态进入 Repriced / Paused。
-5. 30 秒：解释合规边界（目标兑付非保本）和未来可接真实行情 / AIS / 保险数据。
-6. 10 秒：收尾——AgentBL lets AI price trade risk into an RWA discount before investors buy it.
+1. 30 seconds: the exporter (a Singapore copper trader) holds an eBL but needs fast money, and pricing is slow and opaque.
+2. 40 seconds: the AI calls tools to pull the live LME copper price + historical comparable trade prices, and produces a valuation and PricingQuote (issue price 0.85).
+3. 40 seconds: the contract opens at the discount, RiskPricingOracle emits `PricingUpdated`, and investors subscribe.
+4. 40 seconds: war escalates in Hormuz + copper prices swing sharply → the AI widens risk_discount, pushes the issue price down to 0.78, and the state moves to Repriced / Paused.
+5. 30 seconds: explain the compliance boundary (target redemption, not a capital guarantee) and that real market data / AIS / insurance data can be plugged in later.
+6. 10 seconds: close with "AgentBL lets AI price trade risk into an RWA discount before investors buy it."
 
-## 7. 最后的取舍
+## 7. Final Trade-offs
 
-如果时间只够做三件事，优先顺序是：
+If there is only time for three things, the priority order is:
 
-1. PricingQuote schema + 定价引擎 + scenario harness 稳定（base / urgency / risk discount + coverage guardrail）。
-2. RiskPricingOracle + RWAOfferingPool 最小合约能测能部署，`PricingUpdated` 可演示。
-3. 前端展示 AI 折价如何触发链上改价（0.85 → 0.78）。
+1. PricingQuote schema + pricing engine + stable scenario harness (base / urgency / risk discount + coverage guardrail).
+2. Minimal RiskPricingOracle + RWAOfferingPool contracts that can be tested and deployed, with `PricingUpdated` demonstrable.
+3. Frontend showing how the AI discount triggers on-chain repricing (0.85 → 0.78).
 
-AI 估值 tool calling、MCP、Skill、RAG 是加分项，但必须服务这条主链路，不要变成新的不稳定入口。
+AI valuation tool calling, MCP, Skill and RAG are bonus items, but they must serve this main path and must not become new unstable entry points.
