@@ -10,6 +10,26 @@ AgentBL explores how the same intelligent-agent principles used in next-generati
 
 ---
 
+## ⚡ Quick Start
+
+Requires **Node.js 22.13+** (`node -v`). From the repository root:
+
+```bash
+npm install                    # install backend + frontend dependencies
+npm --prefix hardhat install   # install the smart-contract toolchain (Hardhat 3)
+npm run dev                    # start the server, then open http://localhost:3000
+```
+
+The site starts in Demo Mode, so no wallet or API keys are needed. To check that everything works:
+
+```bash
+npm test && npm --prefix hardhat test && npm run preflight
+```
+
+See [Build and Run](#-build-and-run) for Docker, live API keys, a full on-chain walkthrough on a local chain, and testnet deployment.
+
+---
+
 ## 🌐 Project Overview
 
 Modern e-commerce is moving beyond static keyword search.
