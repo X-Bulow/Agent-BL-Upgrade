@@ -1,68 +1,68 @@
-# 商业发票 (Commercial Invoice)
+# Commercial Invoice
 
-> 拟真样例数据（虚构） — 南方有色佛山 × 广东兴泰投资有限公司 铝锭现货采购。
+> Simulated sample data (fictional) — SouthMet Foshan × Guangdong Xingtai Investment Co., Ltd. aluminum ingot spot purchase.
 
-**广东兴泰投资有限公司**
-（虚构地址）
-统一社会信用代码: XXXXXXXXXXXXXX | Tel: XXXX-XXXXXXXX
+**Guangdong Xingtai Investment Co., Ltd.**
+(fictional address)
+Unified Social Credit Code: XXXXXXXXXXXXXX | Tel: XXXX-XXXXXXXX
 
 ---
 
 | | | | |
 |---|---|---|---|
-| **发票号码** | JY-AL0-INV-00011 | **发票日期** | 2025-01-14 |
-| **销售合同** | 2025-FS-AL0-CG-00011 | **Incoterms 2020** | **EXW 佛山仓库** |
-| **付款方式** | 先货后款（验收后7个工作日） | **付款期限** | 货到验收后7个工作日内 |
-| **仓单编号** | EWR-2025-FS-AL0-CG-00011 | **入库单号** | WH-FS-00011 |
-| **交货仓库** | 佛山南海有色金属指定交割库 | **增值税率** | 13% |
+| **Invoice No.** | JY-AL0-INV-00011 | **Invoice Date** | 2025-01-14 |
+| **Sales Contract** | 2025-FS-AL0-CG-00011 | **Incoterms 2020** | **EXW Foshan warehouse** |
+| **Payment Method** | Payment after delivery (7 business days after acceptance) | **Payment Due** | Within 7 business days after the goods arrive and pass acceptance |
+| **Warehouse Receipt No.** | EWR-2025-FS-AL0-CG-00011 | **Inbound Receipt No.** | WH-FS-00011 |
+| **Delivery Warehouse** | Nanhai, Foshan Designated Non-Ferrous Metals Delivery Warehouse | **VAT Rate** | 13% |
 
-**卖方:** 广东兴泰投资有限公司
-**买方:** 南方有色金属贸易有限公司，广东省佛山市南海区
+**Seller:** Guangdong Xingtai Investment Co., Ltd.
+**Buyer:** SouthMet International Trade Co., Ltd., Nanhai District, Foshan, Guangdong Province
 
 ---
 
-## 货物品名
+## Goods Description
 
-| # | 品名 | HS Code | 数量 | 单价（含税，EXW） | 金额（CNY，含税） |
+| # | Description | HS Code | Quantity | Unit Price (VAT incl., EXW) | Amount (CNY, VAT incl.) |
 |---|---|---|---:|---:|---:|
-| 1 | AL99.70 / P1020 级别，GB/T 1196-2017。品牌：西南铝业 / 锦源铝业。 | 7601.10 | 83.908 吨 | ¥20,150 / 吨 | ¥1,690,746.20 |
-| | | | **83.908 吨** | | **¥1,690,746.20** |
+| 1 | AL99.70 / P1020 grade, GB/T 1196-2017. Brand: Southwest Aluminum / Jinyuan Aluminum. | 7601.10 | 83.908 MT | ¥20,150 / MT | ¥1,690,746.20 |
+| | | | **83.908 MT** | | **¥1,690,746.20** |
 
-**发票总金额（含税）: CNY ¥1,690,746.20 — EXW。**
+**Invoice Total (VAT incl.): CNY ¥1,690,746.20 — EXW.**
 
-不含税金额: ¥1,496,235.575  |  增值税额（13%）: ¥194,510.625
-
----
-
-## 计价基础
-
-```
-单价 = SMM 佛山 A00 铝锭现货价 + 华南地区升贴水
-
-  • SMM A00 铝锭佛山现货参考价（2025-01-14）: ¥20,070.00 / 吨
-  • 华南地区品牌升贴水:                              ¥    80.00 / 吨
-  • 合同固定单价:                                   ¥20,150.00 / 吨
-```
-
-> **现货固定价合同。** 不设暂定价/QP调整机制。签约日锁定价格，以仓库入库验收重量为结算依据。
+Amount excl. VAT: ¥1,496,235.575  |  VAT (13%): ¥194,510.625
 
 ---
 
-## 结算信息
+## Pricing Basis
+
+```
+Unit price = SMM Foshan A00 aluminum ingot spot price + South China regional premium/discount
+
+  • SMM A00 aluminum ingot Foshan spot reference price (2025-01-14): ¥20,070.00 / MT
+  • South China regional brand premium/discount:                     ¥    80.00 / MT
+  • Contract fixed unit price:                                       ¥20,150.00 / MT
+```
+
+> **Spot fixed-price contract.** No provisional price / QP adjustment mechanism. The price is locked on the signing date, and settlement is based on the weight accepted at warehouse intake.
+
+---
+
+## Settlement Details
 
 | | |
 |---|---|
-| 收款方 | 广东兴泰投资有限公司 |
-| 开户行 | 中国工商银行（虚构分行） |
+| Payee | Guangdong Xingtai Investment Co., Ltd. |
+| Bank | Industrial and Commercial Bank of China (fictional branch) |
 | SWIFT | ICBKCNBJXXX |
-| 账号（人民币） | XXXX-XXXX-XXXX-XXXX |
+| Account No. (CNY) | XXXX-XXXX-XXXX-XXXX |
 
-兹证明本发票真实无误，所列货物产地、品质、数量均如上述。
+We hereby certify that this invoice is true and correct, and that the origin, quality and quantity of the goods listed are as stated above.
 
-代表 **广东兴泰投资有限公司**
-授权签字人：李某某（贸易部经理）
+For and on behalf of **Guangdong Xingtai Investment Co., Ltd.**
+Authorized Signatory: Mr. Li (Trading Department Manager)
 
 ---
 
-> 合同成交价 = **¥1,690,746.20**（83.908 吨 × ¥20,150/吨含税）。
-> 不含税单价约 ¥17832/吨，约合 USD $2460/吨。
+> Contract transaction price = **¥1,690,746.20** (83.908 MT × ¥20,150/MT, VAT incl.).
+> Unit price excl. VAT is about ¥17832/MT, roughly USD $2460/MT.

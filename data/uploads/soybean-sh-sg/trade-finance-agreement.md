@@ -1,6 +1,6 @@
-# 贸易融资协议 (Trade Finance Facility Agreement)
+# Trade Finance Facility Agreement
 
-> 拟真样例数据，用于 AgentBL demo。
+> Simulated sample data for the AgentBL demo.
 
 | | |
 |---|---|

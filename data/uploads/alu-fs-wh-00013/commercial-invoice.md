@@ -1,68 +1,68 @@
-# 商业发票 (Commercial Invoice)
+# Commercial Invoice
 
-> 拟真样例数据（虚构） — 南方有色佛山 × 上海锦源 铝锭现货采购。
+> Simulated sample data (fictional) — SouthMet Foshan × Shanghai Jinyuan aluminum ingot spot purchase.
 
-**上海锦源国际贸易有限公司**
-上海市浦东新区世纪大道100号
-统一社会信用代码: 91310000MA1K5XXXXX | Tel: 021-5888XXXX
+**Shanghai Jinyuan International Trade Co., Ltd.**
+100 Century Avenue, Pudong New Area, Shanghai
+Unified Social Credit Code: 91310000MA1K5XXXXX | Tel: 021-5888XXXX
 
 ---
 
 | | | | |
 |---|---|---|---|
-| **发票号码** | SH-AL0-INV-2026-00013 | **发票日期** | 2026-05-20 |
-| **销售合同** | 2026-FS-AL0-CG-00013 | **Incoterms 2020** | **EXW 佛山指定仓库** |
-| **付款方式** | 现汇（T/T 电汇结算） | **付款期限** | 货到验收后7个工作日内 |
-| **仓单编号** | EWR-2026-FS-AL0-00013 | **入库单号** | WH-FS-2026-05003 |
-| **交货仓库** | 佛山南海有色金属指定交割库 | **增值税率** | 13% |
+| **Invoice No.** | SH-AL0-INV-2026-00013 | **Invoice Date** | 2026-05-20 |
+| **Sales Contract** | 2026-FS-AL0-CG-00013 | **Incoterms 2020** | **EXW Foshan designated warehouse** |
+| **Payment Method** | Spot cash (T/T wire transfer settlement) | **Payment Due** | Within 7 business days after the goods arrive and pass acceptance |
+| **Warehouse Receipt No.** | EWR-2026-FS-AL0-00013 | **Inbound Receipt No.** | WH-FS-2026-05003 |
+| **Delivery Warehouse** | Nanhai, Foshan Designated Non-Ferrous Metals Delivery Warehouse | **VAT Rate** | 13% |
 
-**卖方:** 上海锦源国际贸易有限公司，上海市浦东新区
-**买方:** 南方有色金属贸易有限公司，广东省佛山市南海区
+**Seller:** Shanghai Jinyuan International Trade Co., Ltd., Pudong New Area, Shanghai
+**Buyer:** SouthMet International Trade Co., Ltd., Nanhai District, Foshan, Guangdong Province
 
 ---
 
-## 货物品名
+## Goods Description
 
-| # | 品名 | HS Code | 数量 | 单价（含税，EXW 佛山） | 金额（CNY，含税） |
+| # | Description | HS Code | Quantity | Unit Price (VAT incl., EXW Foshan) | Amount (CNY, VAT incl.) |
 |---|---|---|---:|---:|---:|
-| 1 | 铝锭 AL99.70（重熔用铝锭），P1020 级别，GB/T 1196-2017。品牌：云南铝业 / 锦源铝业。 | 7601.10 | 724.065 吨 | ¥24,460.00 / 吨 | ¥17,710,000.00 |
-| | | | **724.065 吨** | | **¥17,710,000.00** |
+| 1 | Aluminum ingot AL99.70 (for remelting), P1020 grade, GB/T 1196-2017. Brand: Yunnan Aluminum / Jinyuan Aluminum. | 7601.10 | 724.065 MT | ¥24,460.00 / MT | ¥17,710,000.00 |
+| | | | **724.065 MT** | | **¥17,710,000.00** |
 
-**发票总金额（含税）: CNY ¥17,710,000.00（人民币壹仟柒佰柒拾壹万元整）— EXW 佛山指定仓库。**
+**Invoice Total (VAT incl.): CNY ¥17,710,000.00 (RMB Seventeen Million Seven Hundred Ten Thousand Yuan Only) — EXW Foshan designated warehouse.**
 
-不含税金额: ¥15,672,600.00  |  增值税额（13%）: ¥2,037,400.00
-
----
-
-## 计价基础（大宗商品现货计价）
-
-```
-单价 = SMM 佛山 A00 铝锭现货价 + 华南地区升贴水
-
-  • SMM A00 铝锭佛山现货参考价（2026-05-20）: ¥24,390.00 / 吨
-  • 华南地区品牌升贴水:                              ¥    70.00 / 吨
-  • 合同暂定单价:                                   ¥24,460.00 / 吨
-```
-
-> **现货固定价合同。** 724吨中等规模现货合同。
-> 买卖双方签约日锁定价格，仓库交割。
+Amount excl. VAT: ¥15,672,600.00  |  VAT (13%): ¥2,037,400.00
 
 ---
 
-## 结算信息
+## Pricing Basis (Commodity Spot Pricing)
+
+```
+Unit price = SMM Foshan A00 aluminum ingot spot price + South China regional premium/discount
+
+  • SMM A00 aluminum ingot Foshan spot reference price (2026-05-20): ¥24,390.00 / MT
+  • South China regional brand premium/discount:                     ¥    70.00 / MT
+  • Contract provisional unit price:                                 ¥24,460.00 / MT
+```
+
+> **Spot fixed-price contract.** A mid-sized 724 MT spot contract.
+> Buyer and seller lock the price on the signing date; delivery takes place at the warehouse.
+
+---
+
+## Settlement Details
 
 | | |
 |---|---|
-| 收款方 | 上海锦源国际贸易有限公司 |
-| 开户行 | 中国工商银行上海浦东分行 |
+| Payee | Shanghai Jinyuan International Trade Co., Ltd. |
+| Bank | Industrial and Commercial Bank of China, Shanghai Pudong Branch |
 | SWIFT | ICBKCNBJSHI |
-| 账号（人民币） | 1001-XXXX-XXXX-XXXX-013 |
+| Account No. (CNY) | 1001-XXXX-XXXX-XXXX-013 |
 
-兹证明本发票真实无误，所列货物产地、品质、数量均如上述。
+We hereby certify that this invoice is true and correct, and that the origin, quality and quantity of the goods listed are as stated above.
 
-代表 **上海锦源国际贸易有限公司**
-授权签字人：李某某（贸易部经理）
+For and on behalf of **Shanghai Jinyuan International Trade Co., Ltd.**
+Authorized Signatory: Mr. Li (Trading Department Manager)
 
 ---
 
-> 合同成交价 = **¥17,710,000.00 EXW 佛山**（724.065 吨 × ¥24,460/吨含税）。
+> Contract transaction price = **¥17,710,000.00 EXW Foshan** (724.065 MT × ¥24,460/MT, VAT incl.).

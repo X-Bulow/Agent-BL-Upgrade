@@ -5,18 +5,18 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "transportType": "陆运",
+    "transportType": "Land transport",
     "shipper": {
-      "name": "华南国际贸易有限公司",
-      "businessPerson": "业务负责人",
+      "name": "South China International Trade Co., Ltd.",
+      "businessPerson": "Business lead",
       "employeeId": "EMP-2023001"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 1500,
-      "unit": "吨",
-      "origin": "西南示范仓库",
-      "destination": "华南主要目的地"
+      "unit": "MT",
+      "origin": "Southwest Demo Warehouse",
+      "destination": "Major destinations in South China"
     },
     "transportFee": {
       "unitPrice": 265.00,
@@ -28,11 +28,11 @@
       "start": "2024-01-01",
       "end": "2025-12-31"
     },
-    "remarks": "铁路或汽运陆运服务",
+    "remarks": "Rail or road land transport service",
     "metadata": {
-      "contractName": "西南分公司运输合同",
-      "supplierName": "示范物流西南分公司",
-      "supplierCode": "SUP-LOG-西南01"
+      "contractName": "Southwest branch transport contract",
+      "supplierName": "Demo Logistics Southwest Branch",
+      "supplierCode": "SUP-LOG-Southwest01"
     }
   },
   {
@@ -41,18 +41,18 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "transportType": "陆运",
+    "transportType": "Land transport",
     "shipper": {
-      "name": "华南国际贸易有限公司",
-      "businessPerson": "业务负责人",
+      "name": "South China International Trade Co., Ltd.",
+      "businessPerson": "Business lead",
       "employeeId": "EMP-2023001"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 2200,
-      "unit": "吨",
-      "origin": "西北国际陆港示范区",
-      "destination": "指定目的地"
+      "unit": "MT",
+      "origin": "Northwest International Inland Port Demo Zone",
+      "destination": "Designated destination"
     },
     "transportFee": {
       "unitPrice": 130.00,
@@ -64,11 +64,11 @@
       "start": "2024-01-01",
       "end": "2025-12-31"
     },
-    "remarks": "铁路或汽运",
+    "remarks": "Rail or road",
     "metadata": {
-      "contractName": "西北陆港运输合同",
-      "supplierName": "示范物流西北国际陆港有限公司",
-      "supplierCode": "SUP-LOG-西北02"
+      "contractName": "Northwest inland port transport contract",
+      "supplierName": "Demo Logistics Northwest International Inland Port Co., Ltd.",
+      "supplierCode": "SUP-LOG-Northwest02"
     }
   },
   {
@@ -77,13 +77,13 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "transportType": "陆运",
+    "transportType": "Land transport",
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 1800,
-      "unit": "吨",
-      "origin": "中州示范仓库",
-      "destination": "指定目的地"
+      "unit": "MT",
+      "origin": "Zhongzhou Demo Warehouse",
+      "destination": "Designated destination"
     },
     "transportFee": {
       "unitPrice": 190.00,
@@ -96,9 +96,9 @@
       "end": "2025-12-31"
     },
     "metadata": {
-      "contractName": "中州运输合同",
-      "supplierName": "示范物流中州有限公司",
-      "supplierCode": "SUP-LOG-中州03"
+      "contractName": "Zhongzhou transport contract",
+      "supplierName": "Demo Logistics Zhongzhou Co., Ltd.",
+      "supplierCode": "SUP-LOG-Zhongzhou03"
     }
   },
   {
@@ -107,13 +107,13 @@
     "issueDate": "2026-07-13",
     "validUntil": "2027-12-31",
     "status": "ISSUED",
-    "transportType": "陆运",
+    "transportType": "Land transport",
     "cargo": {
-      "description": "铝类货物",
+      "description": "Aluminum goods",
       "quantity": 5000,
-      "unit": "吨",
-      "origin": "中部陆港示范区",
-      "destination": "多地灵活配送"
+      "unit": "MT",
+      "origin": "Central Inland Port Demo Zone",
+      "destination": "Flexible multi-location delivery"
     },
     "transportFee": {
       "unitPrice": 200.00,
@@ -125,11 +125,11 @@
       "start": "2025-06-09",
       "end": "2027-12-31"
     },
-    "remarks": "大额长期运输协议",
+    "remarks": "Large long-term transport agreement",
     "metadata": {
-      "contractName": "中部陆港运输合同",
-      "supplierName": "示范物流中部国际陆港有限公司",
-      "supplierCode": "SUP-LOG-中部04",
+      "contractName": "Central inland port transport contract",
+      "supplierName": "Demo Logistics Central International Inland Port Co., Ltd.",
+      "supplierCode": "SUP-LOG-Central04",
       "contractAmount": 10000000
     }
   },
@@ -139,13 +139,13 @@
     "issueDate": "2026-07-13",
     "validUntil": "2026-12-31",
     "status": "ISSUED",
-    "transportType": "陆运",
+    "transportType": "Land transport",
     "cargo": {
-      "description": "铝类货物",
+      "description": "Aluminum goods",
       "quantity": 8000,
-      "unit": "吨",
-      "origin": "云南示范基地",
-      "destination": "指定目的地"
+      "unit": "MT",
+      "origin": "Yunnan Demo Base",
+      "destination": "Designated destination"
     },
     "transportFee": {
       "unitPrice": 250.00,
@@ -157,11 +157,11 @@
       "start": "2025-07-17",
       "end": "2026-12-31"
     },
-    "remarks": "区域铝材运输合同",
+    "remarks": "Regional aluminum product transport contract",
     "metadata": {
-      "contractName": "云南区域运输合同",
-      "supplierName": "示范物流云南建水分公司",
-      "supplierCode": "SUP-LOG-云南05",
+      "contractName": "Yunnan regional transport contract",
+      "supplierName": "Demo Logistics Yunnan Jianshui Branch",
+      "supplierCode": "SUP-LOG-Yunnan05",
       "contractAmount": 20000000
     }
   }

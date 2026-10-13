@@ -1,6 +1,6 @@
 {
   "name": "soy-fast-payout",
-  "description": "大豆 eBL 海运 - FAST 快速放款：5,000吨非转基因大豆，CIF Singapore，eBL 已质押 HSBC，走快速通道。",
+  "description": "Soybean eBL ocean shipment - FAST payout: 5,000 MT of non-GMO soybeans, CIF Singapore, eBL already pledged to HSBC, so it takes the fast track.",
   "base_case": "data/cases/soybean-sh-sg.case.json",
   "overrides": { "financing": { "payout_speed": "FAST" } },
   "pricing_expectations": {

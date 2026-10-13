@@ -5,32 +5,32 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货采购",
+    "contractType": "Spot purchase",
     "shipper": {
-      "name": "华南国际贸易有限公司",
-      "businessPerson": "业务负责人",
+      "name": "South China International Trade Co., Ltd.",
+      "businessPerson": "Business lead",
       "employeeId": "EMP-2023001"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 137.565,
-      "unit": "吨",
+      "unit": "MT",
       "unitPrice": 20260,
       "totalAmount": 2787090
     },
     "delivery": {
-      "method": "库内交易",
-      "location": "佛山地区指定仓库",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse transaction",
+      "location": "Designated warehouse in the Foshan area",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-22",
       "end": "2025-12-31"
     },
-    "remarks": "现货铝锭采购合同",
+    "remarks": "Spot aluminum ingot purchase contract",
     "metadata": {
-      "contractName": "铝锭现货采购-海亿-1.22",
-      "supplierName": "华南贸易示范公司",
+      "contractName": "Aluminum Ingot Spot Purchase-Haiyi-1.22",
+      "supplierName": "South China Trading Demo Company",
       "supplierCode": "SUP-PO-102031"
     }
   },
@@ -40,26 +40,26 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货采购",
+    "contractType": "Spot purchase",
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 279.281,
-      "unit": "吨",
+      "unit": "MT",
       "unitPrice": 20150,
       "totalAmount": 5627512
     },
     "delivery": {
-      "method": "库内交易",
-      "location": "佛山地区指定仓库",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse transaction",
+      "location": "Designated warehouse in the Foshan area",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-14",
       "end": "2025-12-31"
     },
     "metadata": {
-      "contractName": "铝锭现货采购-中冶-1.14",
-      "supplierName": "示范金属能源公司",
+      "contractName": "Aluminum Ingot Spot Purchase-Zhongye-1.14",
+      "supplierName": "Demo Metals & Energy Company",
       "supplierCode": "SUP-PO-100858"
     }
   },
@@ -69,26 +69,26 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货采购",
+    "contractType": "Spot purchase",
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 83.808,
-      "unit": "吨",
+      "unit": "MT",
       "unitPrice": 20150,
       "totalAmount": 1689748
     },
     "delivery": {
-      "method": "库内交易",
-      "location": "佛山地区指定仓库",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse transaction",
+      "location": "Designated warehouse in the Foshan area",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-14",
       "end": "2025-12-31"
     },
     "metadata": {
-      "contractName": "铝锭现货采购-兴夹-1.14",
-      "supplierName": "华南兴夹投资公司",
+      "contractName": "Aluminum Ingot Spot Purchase-Xingjia-1.14",
+      "supplierName": "South China Xingjia Investment Company",
       "supplierCode": "SUP-PO-100879"
     }
   },
@@ -98,26 +98,26 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货采购",
+    "contractType": "Spot purchase",
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 162.276,
-      "unit": "吨",
+      "unit": "MT",
       "unitPrice": 20285,
       "totalAmount": 3291787
     },
     "delivery": {
-      "method": "库内交易",
-      "location": "佛山地区指定仓库",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse transaction",
+      "location": "Designated warehouse in the Foshan area",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-20",
       "end": "2025-12-31"
     },
     "metadata": {
-      "contractName": "铝锭现货采购-海驰-1.20",
-      "supplierName": "示范供应链管理公司",
+      "contractName": "Aluminum Ingot Spot Purchase-Haichi-1.20",
+      "supplierName": "Demo Supply Chain Management Company",
       "supplierCode": "SUP-PO-102059"
     }
   },
@@ -127,26 +127,26 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货采购",
+    "contractType": "Spot purchase",
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 66.000,
-      "unit": "吨",
+      "unit": "MT",
       "unitPrice": 20350,
       "totalAmount": 1343100
     },
     "delivery": {
-      "method": "自提",
-      "location": "前工厂指定地点",
-      "paymentMethod": "现汇"
+      "method": "Self-pickup",
+      "location": "Designated ex-factory location",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-04-25",
       "end": "2025-12-31"
     },
     "metadata": {
-      "contractName": "铝合金锭现货采购-瑞熠-1.17",
-      "supplierName": "瑞熠通金属公司",
+      "contractName": "Aluminum Alloy Ingot Spot Purchase-Ruiyi-1.17",
+      "supplierName": "Ruiyitong Metals Company",
       "supplierCode": "SUP-PO-104586"
     }
   },
@@ -156,26 +156,26 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货采购",
+    "contractType": "Spot purchase",
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 112.054,
-      "unit": "吨",
+      "unit": "MT",
       "unitPrice": 20010,
       "totalAmount": 2242200
     },
     "delivery": {
-      "method": "库内交易",
-      "location": "佛山地区指定仓库",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse transaction",
+      "location": "Designated warehouse in the Foshan area",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-15",
       "end": "2025-12-31"
     },
     "metadata": {
-      "contractName": "铝锭现货采购-同欧-1.15",
-      "supplierName": "示范贸易实业公司",
+      "contractName": "Aluminum Ingot Spot Purchase-Tongou-1.15",
+      "supplierName": "Demo Trading Industrial Company",
       "supplierCode": "SUP-PO-102021"
     }
   }

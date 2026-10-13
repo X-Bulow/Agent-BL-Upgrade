@@ -1,50 +1,50 @@
-# 拟真上传单据（Simulated User Uploads）
+# Simulated User Uploads
 
-这里是**模拟用户上传**的贸易单据，给 AgentBL 的 AI 审单 / 估值 / 定价主链路当输入。两组货物都从**新加坡**起运。
+These are **simulated user-uploaded** trade documents that feed AgentBL's main AI document review / valuation / pricing pipeline. Both cargo sets ship from **Singapore**.
 
-> ⚠️ 全部为**虚构数据**：公司、人名、船名、单号、银行、地址均为 demo 编造，不指向任何真实实体或真实货运。价格基于 2026 年 6 月公开行情**校准**到真实量级（见下文），但具体成交价为模拟。
+> ⚠️ Everything here is **fictional data**: companies, people, vessels, document numbers, banks and addresses are all made up for the demo and do not refer to any real entity or real shipment. Prices are **calibrated** to real-world magnitudes using public market data from June 2026 (see below), but the specific deal prices are simulated.
 
-## 两组数据
+## The two sets
 
-| | 铜阴极板 | 原油 |
+| | Copper cathodes | Crude oil |
 |---|---|---|
-| 目录 | `copper-sg-shanghai/` | `crude-sg-ulsan/` |
-| 货物 | LME Grade A 铜阴极板 (HS 7403.11) | Murban 原油 (HS 2709.00) |
-| 路线 | Singapore → Shanghai (Yangshan) | Singapore (Jurong Island) → Ulsan, 韩国 |
-| 出口商 | Strait Resources Trading Pte. Ltd. (新加坡铜贸易商) | Equator Energy Trading Pte. Ltd. (新加坡油贸易商) |
-| 进口商 | Donghai Copper Materials Co., Ltd. (上海) | Hanbit Refining Co., Ltd. (蔚山) |
-| 数量 | 500 MT（20×20'GP，200 bundles） | 600,000 bbl（≈ 78,221 MT，Aframax） |
-| 计价基准 | LME 现金结算价(QP) + CIF 上海溢价 | Platts Dated Brent(QP) + 品质升贴水 |
-| 单位 | USD / MT | USD / bbl（按桶） |
-| **成交价（发票总额）** | **USD 6,875,000** (13,750 USD/MT, CIF) | **USD 57,900,000** (96.50 USD/bbl, CIF) |
-| 保险金额 (110% CIF) | USD 7,562,500 | USD 63,690,000 |
+| Directory | `copper-sg-shanghai/` | `crude-sg-ulsan/` |
+| Cargo | LME Grade A copper cathodes (HS 7403.11) | Murban crude oil (HS 2709.00) |
+| Route | Singapore → Shanghai (Yangshan) | Singapore (Jurong Island) → Ulsan, South Korea |
+| Exporter | Strait Resources Trading Pte. Ltd. (Singapore copper trader) | Equator Energy Trading Pte. Ltd. (Singapore oil trader) |
+| Importer | Donghai Copper Materials Co., Ltd. (Shanghai) | Hanbit Refining Co., Ltd. (Ulsan) |
+| Quantity | 500 MT (20×20'GP, 200 bundles) | 600,000 bbl (≈ 78,221 MT, Aframax) |
+| Pricing basis | LME cash settlement price (QP) + CIF Shanghai premium | Platts Dated Brent (QP) + quality differential |
+| Unit | USD / MT | USD / bbl (per barrel) |
+| **Deal price (invoice total)** | **USD 6,875,000** (13,750 USD/MT, CIF) | **USD 57,900,000** (96.50 USD/bbl, CIF) |
+| Insured amount (110% CIF) | USD 7,562,500 | USD 63,690,000 |
 | Incoterms | CIF Shanghai | CIF Ulsan |
-| 付款 | 不可撤销即期 L/C | 即期 L/C（90% 暂付 / 10% 结清） |
-| 到账速度档 | FAST | BALANCED |
-| 期望融资 (USDC) | 5,500,000 | 46,000,000 |
+| Payment | Irrevocable sight L/C | Sight L/C (90% provisional / 10% final settlement) |
+| Payout speed tier | FAST | BALANCED |
+| Requested financing (USDC) | 5,500,000 | 46,000,000 |
 
-每组包含：
-- `bill-of-lading.md` —— 拟真电子提单（eBL，To Order 可转让货权凭证）
-- `commercial-invoice.md` —— 拟真商业发票（含大宗商品计价条款，给出成交价）
-- 对应结构化案例：`../cases/copper-sg-shanghai.case.json`、`../cases/crude-sg-ulsan.case.json`
+Each set contains:
+- `bill-of-lading.md` — a simulated electronic bill of lading (eBL, a negotiable To Order document of title)
+- `commercial-invoice.md` — a simulated commercial invoice (with commodity pricing clauses that give the deal price)
+- The matching structured cases: `../cases/copper-sg-shanghai.case.json`, `../cases/crude-sg-ulsan.case.json`
 
-## 价格怎么来的（真实校准）
+## Where the prices come from (real-world calibration)
 
-模拟世界设为 **2026 年 6 月**，恰逢**中东 / 霍尔木兹海峡冲突**，铜和原油都被战争溢价推高且高波动（数据按当月公开行情校准）：
+The simulated world is set in **June 2026**, during a **Middle East / Strait of Hormuz conflict**, so both copper and crude oil are pushed up by a war premium and are highly volatile (figures calibrated to that month's public market data):
 
-- **LME 铜**：约 **13,700 USD/吨**（近历史高位）。驱动：霍尔木兹战争溢价、智利产量 23 年最低、美国铜进口加税预期。
-- **Brent 原油**：约 **95 USD/桶**（同比 +43%）。驱动：美伊冲突、霍尔木兹封锁威胁、美国库存连降。
+- **LME copper**: about **13,700 USD/MT** (near its all-time high). Drivers: the Hormuz war premium, Chilean output at a 23-year low, and expected US tariffs on copper imports.
+- **Brent crude**: about **95 USD/bbl** (+43% year on year). Drivers: the US–Iran conflict, the threat of a Hormuz blockade, and consecutive drawdowns in US inventories.
 
-这给 demo 一个绝佳叙事：**同一个地缘事件同时抬高了两种抵押物的"账面价值"，但也放大了波动和下行风险**——正是 AI 动态定价要解决的：把高位价格按波动/战争溢价做 haircut，再折算成 RWA 发行价。详见各 case 的 `macro_risk_events`。
+This gives the demo a great storyline: **the same geopolitical event raises the "book value" of both kinds of collateral at once, but also amplifies their volatility and downside risk** — exactly what AI dynamic pricing is meant to handle: apply a haircut to the elevated price for volatility / war premium, then convert it into an RWA issue price. See each case's `macro_risk_events` for details.
 
-## 两组的差异点（为什么各放一组）
+## How the two sets differ (why there is one of each)
 
-- **计价单位不同**：铜按吨、油按桶 → AI 估值工具要做单位换算（桶 ↔ 吨）。
-- **基准不同**：铜挂 LME + 区域溢价、油挂 Dated Brent + 升贴水 → 行情源要按品类切换。
-- **提单形态不同**：铜是集装箱提单（箱号/铅封/件数）、油是油轮提单（API 度/含硫量/桶数）。
-- **HS 编码不同**：740311 vs 270900 → 查历史同类成交价（UN Comtrade）时用不同编码。
+- **Different pricing units**: copper is priced per tonne, oil per barrel → the AI valuation tool has to convert units (barrels ↔ tonnes).
+- **Different benchmarks**: copper follows LME + a regional premium, oil follows Dated Brent + a differential → the market data source has to switch by commodity.
+- **Different bill of lading formats**: copper uses a container B/L (container numbers / seals / package counts), oil uses a tanker B/L (API gravity / sulphur content / barrel count).
+- **Different HS codes**: 740311 vs 270900 → different codes are used when looking up historical comparable trade prices (UN Comtrade).
 
-## 怎么用
+## How to use them
 
-- 任务三的 AI 估值 tool calling 默认对**铜**这组跑：`npm run agent:value`（见 `docs/ai-valuation-tooling.md`）。
-- 这些 case JSON 字段对齐 `docs/PRD.md` 的新模型（`requested_cash_usd` / `payout_speed` / `target_redemption_value_usd` / `macro_risk_events`），**不**走旧的 `assertTradeCase` 校验（旧 harness 数据在 `data/demo-case.json` 与 `data/scenarios/`）。
+- The Task 3 AI valuation tool calling runs against the **copper** set by default: `npm run agent:value` (see `docs/ai-valuation-tooling.md`).
+- The fields in these case JSONs follow the new model in `docs/PRD.md` (`requested_cash_usd` / `payout_speed` / `target_redemption_value_usd` / `macro_risk_events`) and do **not** go through the old `assertTradeCase` validation (the old harness data lives in `data/demo-case.json` and `data/scenarios/`).

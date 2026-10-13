@@ -1,13 +1,13 @@
-# 电子提单 (Electronic Bill of Lading — eBL)
+# Electronic Bill of Lading (eBL)
 
-> 拟真样例数据，用于 AgentBL demo。以下所有公司、人名、船名、单号均为**虚构**。
+> Simulated sample data for the AgentBL demo. All companies, people, vessels and document numbers below are **fictional**.
 > Issued as a sole electronic original on the TradeGo platform (MLETR-compliant).
 
 | | |
 |---|---|
 | **eBL Number** | TG-EBL-2026-0001 |
 | **Platform** | **TradeGo** (MLETR-compliant eBL platform) |
-| **B/L Type** | Negotiable — "To Order" (可转让货权凭证) |
+| **B/L Type** | Negotiable — "To Order" (negotiable document of title) |
 | **Booking No.** | BK-2026-001 |
 | **eBL Status** | **IN TRANSIT** |
 | **Current Controller** | HSBC Hong Kong (Pledgee) |
@@ -18,7 +18,7 @@
 
 **Shipper / Exporter**
 Beijing Agricultural Trading Co., Ltd.
-北京市朝阳区建国路88号，中国北京
+88 Jianguo Road, Chaoyang District, Beijing, China
 
 **Consignee**
 TO ORDER OF HSBC HONG KONG
@@ -85,6 +85,6 @@ Attn: Import Dept.
 
 ---
 
-> 说明（给团队）：本 eBL 对应结构化案例 `data/cases/soybean-sh-sg.case.json`。
-> 货权凭证 (To Order of HSBC Hong Kong) 可背书转让——这是它作为 RWA 抵押物的法律基础。
-> TradeGo 平台符合 MLETR 要求，支持 eBL 的签发、流转、质押和交单全流程。
+> Note (for the team): this eBL matches the structured case `data/cases/soybean-sh-sg.case.json`.
+> As a document of title (To Order of HSBC Hong Kong) it can be endorsed and transferred — this is the legal basis for using it as RWA collateral.
+> The TradeGo platform is MLETR-compliant and supports the full eBL lifecycle: issuance, transfer, pledge and document presentation.

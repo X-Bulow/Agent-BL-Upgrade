@@ -1,58 +1,58 @@
-# 国际货物买卖合同 (Sales Contract)
+# International Sales Contract
 
-> 拟真样例数据，用于 AgentBL demo。所有公司、人名均为**虚构**。
+> Simulated sample data for the AgentBL demo. All companies and people are **fictional**.
 
-**合同编号:** SC-2026-001  
-**签订日期:** 2026年4月10日  
-**适用法律:** English Law  
-**争议解决:** Singapore International Arbitration Centre (SIAC)
+**Contract No.:** SC-2026-001  
+**Date Signed:** 10 April 2026  
+**Governing Law:** English Law  
+**Dispute Resolution:** Singapore International Arbitration Centre (SIAC)
 
 ---
 
-## 买卖双方
+## Parties
 
 | | |
 |---|---|
-| **卖方 (Seller)** | Beijing Agricultural Trading Co., Ltd. |
-| **卖方地址** | 北京市朝阳区建国路88号 |
-| **买方 (Buyer)** | Singapore Food Processing Pte. Ltd. |
-| **买方地址** | 80 Robinson Road, Singapore 068898 |
+| **Seller** | Beijing Agricultural Trading Co., Ltd. |
+| **Seller Address** | 88 Jianguo Road, Chaoyang District, Beijing |
+| **Buyer** | Singapore Food Processing Pte. Ltd. |
+| **Buyer Address** | 80 Robinson Road, Singapore 068898 |
 
 ---
 
-## 商品 & 价格
+## Goods & Price
 
-| 商品名称 | 数量 | 单价 | 总金额 | 贸易术语 |
+| Commodity | Quantity | Unit Price | Total Amount | Trade Terms |
 |---|---|---|---|---|
-| Non-GMO Soybeans（非转基因大豆），Grade No.1, Protein ≥ 38% | 5,000 Metric Tons | USD 520 / MT | **USD 2,600,000** | CIF Singapore (Incoterms 2020) |
+| Non-GMO Soybeans, Grade No.1, Protein ≥ 38% | 5,000 Metric Tons | USD 520 / MT | **USD 2,600,000** | CIF Singapore (Incoterms 2020) |
 
 ---
 
-## 装运 & 交付
+## Shipment & Delivery
 
-| 字段 | 数值 |
+| Field | Value |
 |---|---|
-| 装运期 | 2026年5月1日 – 2026年5月15日 |
-| 装运港 | Shanghai Port, China |
-| 目的港 | Port of Singapore |
-| 包装 | Bulk Cargo（散货） |
+| Shipment Period | 1 May 2026 – 15 May 2026 |
+| Port of Shipment | Shanghai Port, China |
+| Port of Destination | Port of Singapore |
+| Packing | Bulk Cargo |
 
 ---
 
-## 付款条款
+## Payment Terms
 
-**Irrevocable Letter of Credit at Sight（不可撤销即期信用证）**
+**Irrevocable Letter of Credit at Sight**
 
 | | |
 |---|---|
-| 开证行 | HSBC Hong Kong |
-| L/C 号码 | HSBC-LC-2026-08921 |
-| 受益人 | Beijing Agricultural Trading Co., Ltd. |
-| 申请人 | Singapore Food Processing Pte. Ltd. |
+| Issuing Bank | HSBC Hong Kong |
+| L/C No. | HSBC-LC-2026-08921 |
+| Beneficiary | Beijing Agricultural Trading Co., Ltd. |
+| Applicant | Singapore Food Processing Pte. Ltd. |
 
 ---
 
-## 单据要求
+## Document Requirements
 
 1. Signed Commercial Invoice
 2. Full set of clean shipped on board Electronic Bill of Lading (TradeGo platform), made out **To Order of HSBC Hong Kong**
@@ -63,9 +63,9 @@
 
 ---
 
-## 签字
+## Signatures
 
-| **卖方签字** | **买方签字** |
+| **Seller Signature** | **Buyer Signature** |
 |---|---|
 | Beijing Agricultural Trading Co., Ltd. | Singapore Food Processing Pte. Ltd. |
-| 李某某 (Export Director) | T. Lim (Procurement Director) |
+| Mr. Li (Export Director) | T. Lim (Procurement Director) |

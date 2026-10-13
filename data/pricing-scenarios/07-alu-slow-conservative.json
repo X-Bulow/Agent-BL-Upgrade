@@ -1,6 +1,6 @@
 {
   "name": "alu-slow-conservative",
-  "description": "南方有色佛山铝锭仓单 - LOW_COST 保守放款：最大单笔合同（1,014吨/~2,484万元），大额保守审核，最低成本放款。",
+  "description": "SouthMet Foshan aluminum ingot warehouse receipt - LOW_COST payout: the largest single contract (1,014 MT / ~CNY 24.84 million), with a conservative review for the large amount and the lowest-cost payout.",
   "base_case": "data/cases/alu-fs-wh-00014.case.json",
   "overrides": { "financing": { "payout_speed": "LOW_COST" } },
   "pricing_expectations": {

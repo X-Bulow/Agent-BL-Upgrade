@@ -1,6 +1,6 @@
 # COMMERCIAL INVOICE
 
-> 拟真样例数据，用于 AgentBL demo。所有公司、人名、单号、银行信息均为**虚构**。
+> Simulated sample data for the AgentBL demo. All companies, people, document numbers and bank details are **fictional**.
 
 **STRAIT RESOURCES TRADING PTE. LTD.**
 8 Marina View, #34-01 Asia Square Tower 1, Singapore 018960
@@ -33,7 +33,7 @@ UEN: 201634789K | Tel: +65 6555 0148 | trade@straitresources.example
 
 ---
 
-## Pricing Basis (大宗商品计价条款)
+## Pricing Basis (Commodity Pricing Clauses)
 
 ```
 Unit Price = LME Copper Grade A Cash Settlement (QP average)  +  CIF Shanghai premium
@@ -71,5 +71,5 @@ Authorized Signatory: L. Tan (Director, Trade Finance)
 
 ---
 
-> 成交价 (transaction price) = **USD 6,875,000.00 CIF Shanghai**（500 吨 × 13,750 USD/吨）。
-> 这就是 AI 估值时要拿来和"数量 × 实时市场价"、"历史同类成交价"、"保险金额"做交叉校验的申报价。
+> Transaction price = **USD 6,875,000.00 CIF Shanghai** (500 MT × 13,750 USD/MT).
+> This is the declared price that the AI valuation cross-checks against "quantity × live market price", "historical comparable trade prices" and "insured amount".

@@ -1,71 +1,71 @@
-# 电子仓单 (Electronic Warehouse Receipt)
+# Electronic Warehouse Receipt
 
-> 拟真样例数据（虚构） — 南方有色佛山 × 厦门同鑫实业有限公司 铝锭现货采购。
-> 签发为 ENI 平台上的数字仓单，支持货权确权、流转和质押融资。
+> Simulated sample data (fictional) — SouthMet Foshan × Xiamen Tongxin Industrial Co., Ltd. aluminum ingot spot purchase.
+> Issued as a digital warehouse receipt on the ENI platform, supporting title confirmation, transfer and pledge financing.
 
 | | |
 |---|---|
-| **仓单类型** | 电子仓单 (Electronic Warehouse Receipt / EWR) |
-| **仓单编号** | EWR-2025-FS-AL0-CG-00013 |
-| **签发平台** | AgentBL ENI（数字仓单） |
+| **Receipt Type** | Electronic Warehouse Receipt (EWR) |
+| **Receipt No.** | EWR-2025-FS-AL0-CG-00013 |
+| **Issuing Platform** | AgentBL ENI (digital warehouse receipt) |
 | **Token / Title Ref** | ENI-EWR-AL0-00013-XXXX |
-| **入库单号** | WH-FS-00013 |
-| **签发日期** | 2025-01-15 |
+| **Inbound Receipt No.** | WH-FS-00013 |
+| **Issue Date** | 2025-01-15 |
 
 ---
 
-## 货权方
+## Title Holders
 
-**出让人（Shipper / 仓单签发时货主）**
-厦门同鑫实业有限公司
-（虚构地址）
+**Transferor (Shipper / owner of the goods when the receipt was issued)**
+Xiamen Tongxin Industrial Co., Ltd.
+(fictional address)
 
-**受让人（Consignee / 仓单受让方）**
-南方有色金属贸易有限公司
-广东省佛山市南海区（虚构地址）
+**Transferee (Consignee / receipt transferee)**
+SouthMet International Trade Co., Ltd.
+Nanhai District, Foshan, Guangdong Province (fictional address)
 
 ---
 
-## 仓储信息
+## Storage Details
 
-| 字段 | 数值 |
+| Field | Value |
 |---|---|
-| 交割仓库 | 佛山南海有色金属指定交割仓库 |
-| 仓库地址 | 广东省佛山市南海区（虚构地址） |
-| 入库日期 | 2025-01-15 |
-| 交货方式 | 库内交接 |
-| 提货有效期 | 2025-02-14 |
+| Delivery Warehouse | Nanhai, Foshan Designated Non-Ferrous Metals Delivery Warehouse |
+| Warehouse Address | Nanhai District, Foshan, Guangdong Province (fictional address) |
+| Inbound Date | 2025-01-15 |
+| Delivery Method | In-warehouse handover |
+| Pickup Valid Until | 2025-02-14 |
 
 ---
 
-## 货物品名
+## Goods Description
 
-**唛头:** JINYUAN / AL99.70 / P1020 / 佛山库交 / 合同号 2025-FS-AL0-CG-00013
+**Marks:** JINYUAN / AL99.70 / P1020 / Foshan warehouse delivery / Contract No. 2025-FS-AL0-CG-00013
 
-| 品名 | HS Code | 数量 | 净重 | 品牌 |
+| Description | HS Code | Quantity | Net Weight | Brand |
 |---|---|---|---|---|
-| AL99.70 / P1020 级别，GB/T 1196-2017 | 7601.10 | 112.054 吨 | 112054 kg | 西南铝业 / 锦源铝业（国产主流品牌） |
+| AL99.70 / P1020 grade, GB/T 1196-2017 | 7601.10 | 112.054 MT | 112054 kg | Southwest Aluminum / Jinyuan Aluminum (mainstream domestic brands) |
 
-**存放形式:** 散货仓库堆存，按批次码放
+**Storage Form:** bulk warehouse storage, stacked by batch
 
-**申报货值（仓单价值):** CNY ¥2,242,200.54
+**Declared Value (receipt value):** CNY ¥2,242,200.54
 
 ---
 
-## 声明
+## Statements
 
-- 上述货物已入库完毕，数量/外观经仓库与货主共同核验确认。
-- 本仓单为 **ENI 平台电子仓单**，仓单所有权记录在链上，支持转让、质押。
-- 谁合法持有本电子仓单，即对仓内对应货物享有提货权/处置权。
-- 重量、标牌、含量等由货主申报，仓库仅对数量/外观负责。
+- The goods above have been fully received into storage; their quantity/appearance was jointly inspected and confirmed by the warehouse and the cargo owner.
+- This receipt is an **ENI platform electronic warehouse receipt**; its ownership is recorded on-chain and it supports transfer and pledge.
+- Whoever lawfully holds this electronic warehouse receipt has the right to take delivery of / dispose of the corresponding goods in the warehouse.
+- Weight, brand marks, content, etc. are declared by the cargo owner; the warehouse is responsible only for quantity/appearance.
 
 | | |
 |---|---|
-| **签发地点 & 日期** | 广东省佛山市，2025-01-15 |
-| **签发人** | 佛山南海正源仓储物流有限公司（仓库方签章） |
+| **Place & Date of Issue** | Foshan, Guangdong Province, 2025-01-15 |
+| **Issued By** | Foshan Nanhai Zhengyuan Warehousing & Logistics Co., Ltd. (warehouse seal) |
 | **Document Hash (SHA-256)** | 0xd3770ea3f33181b486ff9a6d977e76a9629f6313298a41e0019f64f05a3fa338 |
 
 ---
 
-> 说明（给团队）：本仓单对应商业发票与结构化案例 `data/cases/alu-fs-wh-00013b.case.json`。
-> 仓单所有权的链上流转是实现 RWA 货押融资的核心。
+> Note (for the team): this receipt matches the invoice and the structured case `data/cases/alu-fs-wh-00013b.case.json`.
+> On-chain transfer of receipt ownership is the core of RWA inventory-backed financing.

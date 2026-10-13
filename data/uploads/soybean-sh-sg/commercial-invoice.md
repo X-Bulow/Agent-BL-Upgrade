@@ -1,9 +1,9 @@
-# 商业发票 (Commercial Invoice)
+# Commercial Invoice
 
-> 拟真样例数据，用于 AgentBL demo。
+> Simulated sample data for the AgentBL demo.
 
 **Beijing Agricultural Trading Co., Ltd.**
-北京市朝阳区建国路88号，中国北京
+88 Jianguo Road, Chaoyang District, Beijing, China
 Tel: +86 10 8888-XXXX | export@batc-agri.example
 
 ---

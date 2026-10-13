@@ -5,34 +5,34 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "shipper": {
-      "name": "华南国际贸易有限公司",
-      "businessPerson": "业务负责人",
+      "name": "South China International Trade Co., Ltd.",
+      "businessPerson": "Business lead",
       "employeeId": "EMP-2023001"
     },
     "customer": {
-      "name": "示范金属材料有限公司",
+      "name": "Demo Metal Materials Co., Ltd.",
       "customerCode": "CUST-101706"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 310.000,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 6221700
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2024-12-30",
       "end": "2025-12-31"
     },
-    "remarks": "现货铝锭销售合同",
+    "remarks": "Spot aluminum ingot sales contract",
     "metadata": {
-      "contractName": "铝锭现货销售-融和天创",
-      "businessUnit": "市场开发部"
+      "contractName": "Aluminum Ingot Spot Sale-Ronghe Tianchuang",
+      "businessUnit": "Market Development Department"
     }
   },
   {
@@ -41,20 +41,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范合金有限公司",
+      "name": "Demo Alloys Co., Ltd.",
       "customerCode": "CUST-101124"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 275.000,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 5511000
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2024-12-26",
@@ -67,20 +67,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范联合物资有限公司",
+      "name": "Demo United Materials Co., Ltd.",
       "customerCode": "CUST-101829"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 320.000,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 6422400
     },
     "delivery": {
-      "method": "包到",
-      "paymentMethod": "现汇"
+      "method": "Delivered to destination (freight included)",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2024-12-31",
@@ -93,20 +93,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "嘉能可示范有限公司",
+      "name": "Glencore Demo Co., Ltd.",
       "customerCode": "CUST-100780"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 1000.000,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 21000000
     },
     "delivery": {
-      "method": "包到",
-      "paymentMethod": "现汇"
+      "method": "Delivered to destination (freight included)",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-06",
@@ -119,20 +119,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范金属有限公司",
+      "name": "Demo Metals Co., Ltd.",
       "customerCode": "CUST-100197"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 320.000,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 6720000
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     }
   },
   {
@@ -141,20 +141,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范喜盈金属材料有限公司",
+      "name": "Demo Xiying Metal Materials Co., Ltd.",
       "customerCode": "CUST-104359"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 27.399,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 551268
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-02",
@@ -167,20 +167,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范广展冶金集团有限公司",
+      "name": "Demo Guangzhan Metallurgy Group Co., Ltd.",
       "customerCode": "CUST-101157"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 69.478,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 1397203
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-02",
@@ -193,20 +193,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范华之鹏供应链有限公司",
+      "name": "Demo Huazhipeng Supply Chain Co., Ltd.",
       "customerCode": "CUST-100267"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 36.910,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 742260
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-02",
@@ -219,20 +219,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范远大物产集团有限公司",
+      "name": "Demo Yuanda Materials Group Co., Ltd.",
       "customerCode": "CUST-103531"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 110.408,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 2218097
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-02",
@@ -245,20 +245,20 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "status": "ISSUED",
-    "contractType": "现货销售",
+    "contractType": "Spot sale",
     "customer": {
-      "name": "示范江铜供应链管理有限公司",
+      "name": "Demo Jiangtong Supply Chain Management Co., Ltd.",
       "customerCode": "CUST-104738"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 71.617,
-      "unit": "吨",
+      "unit": "MT",
       "totalAmount": 1438786
     },
     "delivery": {
-      "method": "库内交接",
-      "paymentMethod": "现汇"
+      "method": "In-warehouse handover",
+      "paymentMethod": "Spot cash"
     },
     "contractPeriod": {
       "start": "2025-01-03",
