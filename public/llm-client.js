@@ -1,31 +1,31 @@
-// DeepSeek 流式聊天客户端 —— 浏览器端 OpenAI-compatible API
+// DeepSeek streaming chat client: browser-side OpenAI-compatible API
 //
-// 直连 api.deepseek.com，支持：
-// - 流式 SSE 响应
-// - Function Calling（工具调用）
-// - 超时与错误处理
+// Talks directly to api.deepseek.com. Supports:
+// - Streaming SSE responses
+// - Function calling (tool calls)
+// - Timeouts and error handling
 //
-// 依赖：fetch（浏览器原生）、TextDecoder
+// Dependencies: fetch (native in the browser), TextDecoder
 
 const DEEPSEEK_CONFIG = {
   API_KEY: window.ENV?.DEEPSEEK_API_KEY || '',
   BASE_URL: window.ENV?.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
   MODEL: 'deepseek-chat',
   TIMEOUT_MS: 60000,
-  MAX_TOOL_ROUNDS: 5  // Function calling 最大轮数
+  MAX_TOOL_ROUNDS: 5  // Max function-calling rounds
 };
 
 /**
- * 生成唯一 ID
+ * Generate a unique ID
  */
 function uid() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 /**
- * 将 tool 定义转换为 OpenAI function calling 格式
+ * Convert tool definitions to the OpenAI function-calling format
  * @param {Array<{name:string, description:string, parameters?:object}>} tools
- * @returns {Array} OpenAI tools 格式
+ * @returns {Array} Tools in OpenAI format
  */
 function toOpenAITools(tools) {
   return tools.map((t) => ({
@@ -39,7 +39,7 @@ function toOpenAITools(tools) {
 }
 
 /**
- * DeepSeek 流式聊天客户端
+ * DeepSeek streaming chat client
  */
 export class DeepSeekClient {
   constructor(config = {}) {
@@ -50,15 +50,15 @@ export class DeepSeekClient {
   }
 
   /**
-   * 流式聊天（支持 Function Calling）
+   * Streaming chat (with function calling)
    *
-   * @param {Array<{role:string, content:string|object, tool_calls?:Array}>} messages - 对话历史
-   * @param {Array<{name:string, description:string, parameters?:object}>} tools - 可用工具列表
+   * @param {Array<{role:string, content:string|object, tool_calls?:Array}>} messages - Conversation history
+   * @param {Array<{name:string, description:string, parameters?:object}>} tools - Available tools
    * @param {object} callbacks
-   * @param {function(string):void} callbacks.onChunk - 收到文本增量
-   * @param {function({name:string, args:object}):void} callbacks.onToolCall - 收到工具调用
-   * @param {function(string):void} callbacks.onThinking - 收到思考内容（deepseek-reasoner）
-   * @returns {Promise<{content:string|null, tool_calls:Array|null}>} 完整响应
+   * @param {function(string):void} callbacks.onChunk - Called with each text delta
+   * @param {function({name:string, args:object}):void} callbacks.onToolCall - Called when a tool call arrives
+   * @param {function(string):void} callbacks.onThinking - Called with reasoning content (deepseek-reasoner)
+   * @returns {Promise<{content:string|null, tool_calls:Array|null}>} Full response
    */
   async streamChat(messages, tools, { onChunk, onToolCall, onThinking } = {}) {
     const body = {
@@ -122,18 +122,18 @@ export class DeepSeekClient {
             const delta = parsed.choices?.[0]?.delta;
             if (!delta) continue;
 
-            // 文本内容
+            // Text content
             if (delta.content) {
               content += delta.content;
               onChunk?.(delta.content);
             }
 
-            // 思考内容（deepseek-reasoner）
+            // Reasoning content (deepseek-reasoner)
             if (delta.reasoning_content) {
               onThinking?.(delta.reasoning_content);
             }
 
-            // 工具调用
+            // Tool calls
             if (delta.tool_calls) {
               for (const tc of delta.tool_calls) {
                 const idx = tc.index ?? 0;
@@ -159,12 +159,12 @@ export class DeepSeekClient {
               }
             }
           } catch (_) {
-            // 无法解析的行，跳过
+            // Skip lines that cannot be parsed
           }
         }
       }
 
-      // 组装完整 tool_calls
+      // Assemble the complete tool_calls
       const indexes = Object.keys(toolCallMap).sort((a, b) => Number(a) - Number(b));
       toolCalls = indexes.map((i) => {
         const tc = toolCallMap[i];
@@ -187,7 +187,7 @@ export class DeepSeekClient {
   }
 
   /**
-   * 非流式聊天（用于简单的单轮 tool 调用）
+   * Non-streaming chat (for simple single-round tool calls)
    */
   async chat(messages, tools) {
     const body = {
@@ -241,7 +241,7 @@ export class DeepSeekClient {
   }
 }
 
-/** 默认单例 */
+/** Default singleton */
 let _instance = null;
 export function getDeepSeekClient() {
   if (!_instance) _instance = new DeepSeekClient();

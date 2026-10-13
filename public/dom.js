@@ -17,7 +17,7 @@ export function el(tag, attrs = {}, ...kids) {
     else if (k === 'html') node.innerHTML = v;
     else if (k === 'text') node.textContent = v;
     else if (k === 'style') {
-      // 直接设置 style.cssText 而不是用 setAttribute，更可靠
+      // Set style.cssText directly instead of using setAttribute; it is more reliable
       node.style.cssText = v;
     }
     else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);

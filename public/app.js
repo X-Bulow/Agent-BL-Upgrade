@@ -85,11 +85,13 @@ function visibleCases() {
     const q = state.searchQuery.trim().toLowerCase();
     cases = cases.filter(c => {
       const bl = c.case?.bill_of_lading ?? {};
-      const searchable = [
+      const fields = [
         c.label, c.cargo, c.route, c.risk_hint, c.case_id,
         bl.cargo, bl.port_of_loading, bl.port_of_discharge,
         bl.bl_id, bl.vessel_name
-      ].filter(Boolean).join(' ').toLowerCase();
+      ].filter(Boolean);
+      // Match the source data and its displayed translation, so Chinese queries work in the Chinese UI.
+      const searchable = [...fields, ...fields.map((value) => tData(value))].join(' ').toLowerCase();
       return searchable.includes(q);
     });
   }
@@ -531,6 +533,7 @@ function renderMarketCard(entry, comparison) {
   const cName = (bl.cargo || entry.cargo || '').toLowerCase();
   const match = (kw) => cId.includes(kw) || cName.includes(kw);
 
+  // The Chinese keywords below are intentional: they also match Chinese cargo names / input.
   if (match('copper') || match('cuconc') || match('-cu-') || match('铜')) cargoType = 'copper';
   else if (match('crude') || match('refined') || match('-oil-') || match('oil') || match('petroleum') || match('油')) cargoType = 'oil';
   else if (match('ironore') || match('iron ore') || match('铁')) cargoType = 'ore';

@@ -66,6 +66,7 @@ function randomHex32() {
 
 function cargoImage(category) {
   const cargo = String(category ?? '').toLowerCase();
+  // The Chinese alternatives below are intentional: they also match Chinese cargo names / input.
   if (/copper|铜/u.test(cargo)) return '/img/cargo/copper.jpg';
   if (/oil|petroleum|原油|成品油/u.test(cargo)) return '/img/cargo/oil.jpg';
   if (/iron|ore|矿/u.test(cargo)) return '/img/cargo/ore.jpg';

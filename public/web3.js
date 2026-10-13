@@ -403,8 +403,8 @@ async function getContract(write = false) {
   const address = cfg?.contracts?.AgentBLRWA;
   const hasAbi = Array.isArray(cfg?.abi) && cfg.abi.length > 0;
   console.log('[mint] chain-config:', { network: cfg?.network, address: address?.slice(0,10)+'…', abiLen: cfg?.abi?.length, hasAbi, session: !!_session });
-  if (!isAddress(address)) throw err('NO_CONTRACT', 'AgentBLRWA 尚未部署（chain-config 无地址）');
-  if (!_session) throw err('NO_SESSION', '钱包未连接');
+  if (!isAddress(address)) throw err('NO_CONTRACT', 'AgentBLRWA is not deployed (no address in chain-config)');
+  if (!_session) throw err('NO_SESSION', 'Wallet not connected');
   if (_session.kind !== 'evm') {
     throw err('EVM_WALLET_REQUIRED', 'This EVM contract action requires MetaMask; Keplr/Leap remain available for native Injective transactions');
   }
@@ -425,18 +425,18 @@ function explorerTx(cfg, hash) {
  * Build the on-chain tokenize() arguments from a PricingQuote + financing.
  */
 export function mintArgsFromQuote(quote, financingUsd) {
-  // 确保哈希是有效的 bytes32 格式（0x + 64 个十六进制字符）
+  // Ensure the hash is a valid bytes32 (0x + 64 hex characters)
   const fixHash = (hash) => {
     if (!hash) return '0x' + '0'.repeat(64);
-    // 移除 0x 前缀
+    // Strip the 0x prefix
     let cleanHash = hash.replace(/^0x/i, '');
-    // 严格截取到 64 个字符（如果超长）或补齐到 64 个字符（如果太短）
+    // Truncate to exactly 64 characters if too long, or pad to 64 if too short
     if (cleanHash.length > 64) {
       cleanHash = cleanHash.substring(0, 64);
     } else if (cleanHash.length < 64) {
       cleanHash = cleanHash.padEnd(64, '0');
     }
-    // 确保只包含有效的十六进制字符
+    // Ensure only valid hex characters remain
     cleanHash = cleanHash.replace(/[^0-9a-fA-F]/g, '0');
     return '0x' + cleanHash;
   };
@@ -475,11 +475,11 @@ export async function mintOnChain(quote, financingUsd, onConfirmed) {
   const contract = await getContract(true);
   const a = mintArgsFromQuote(quote, financingUsd);
 
-  // 🔍 添加详细的参数日志
+  // 🔍 Detailed parameter logging
   console.log('═'.repeat(60));
-  console.log('🔍 [MINT DEBUG] 铸造参数详情:');
+  console.log('🔍 [MINT DEBUG] Mint parameters:');
   console.log('═'.repeat(60));
-  console.log('📊 Quote 原始数据:');
+  console.log('📊 Raw quote data:');
   console.log('  - final_issue_price_usd:', quote.final_issue_price_usd);
   console.log('  - recommended_token_supply:', quote.recommended_token_supply);
   console.log('  - bl_id:', quote.bl_id);
@@ -487,10 +487,10 @@ export async function mintOnChain(quote, financingUsd, onConfirmed) {
   console.log('  - ai_verified_collateral_value_usd:', quote.ai_verified_collateral_value_usd);
   console.log('  - risk_score_bps:', quote.risk_score_bps);
   console.log('  - risk_level:', quote.risk_level);
-  console.log('\n🔧 转换后的链上参数:');
+  console.log('\n🔧 Converted on-chain parameters:');
   console.log('  - blId:', a.blId);
-  console.log('  - issuePriceE6:', a.issuePriceE6.toString(), a.issuePriceE6 === 0n ? '❌ 错误!' : '✅');
-  console.log('  - tokenSupply:', a.tokenSupply.toString(), a.tokenSupply === 0n ? '❌ 错误!' : '✅');
+  console.log('  - issuePriceE6:', a.issuePriceE6.toString(), a.issuePriceE6 === 0n ? '❌ Error!' : '✅');
+  console.log('  - tokenSupply:', a.tokenSupply.toString(), a.tokenSupply === 0n ? '❌ Error!' : '✅');
   console.log('  - financingUsd:', a.financingUsd.toString());
   console.log('  - collateralValueUsd:', a.collateralValueUsd.toString());
   console.log('  - riskScoreBps:', a.riskScoreBps);
@@ -499,52 +499,52 @@ export async function mintOnChain(quote, financingUsd, onConfirmed) {
   console.log('  - evidenceHash:', a.evidenceHash);
   console.log('═'.repeat(60));
 
-  // 参数验证
+  // Parameter validation
   if (a.issuePriceE6 === 0n) {
-    console.error('❌ 致命错误: issuePriceE6 = 0, 合约会拒绝交易!');
-    console.error('   原因: quote.final_issue_price_usd =', quote.final_issue_price_usd);
-    throw err('INVALID_PARAMS', '发行价格为 0，无法铸造。请检查定价数据是否正常。');
+    console.error('❌ Fatal: issuePriceE6 = 0, the contract will reject the transaction!');
+    console.error('   Cause: quote.final_issue_price_usd =', quote.final_issue_price_usd);
+    throw err('INVALID_PARAMS', 'Issue price is 0, cannot mint. Please check the pricing data.');
   }
 
   if (a.tokenSupply === 0n) {
-    console.error('❌ 致命错误: tokenSupply = 0, 合约会拒绝交易!');
-    console.error('   原因: quote.recommended_token_supply =', quote.recommended_token_supply);
-    throw err('INVALID_PARAMS', '代币供应量为 0，无法铸造。请检查定价数据是否正常。');
+    console.error('❌ Fatal: tokenSupply = 0, the contract will reject the transaction!');
+    console.error('   Cause: quote.recommended_token_supply =', quote.recommended_token_supply);
+    throw err('INVALID_PARAMS', 'Token supply is 0, cannot mint. Please check the pricing data.');
   }
 
   let tx;
   try {
-    // 手动设置更高的 gas limit 和其他交易参数
+    // Manually set a higher gas limit and other transaction parameters
     const gasLimit = 500000n;
 
-    // 获取当前 gas price
+    // Fetch the current gas price
     const feeData = await _session.browserProvider.getFeeData();
     const gasPrice = feeData.gasPrice || feeData.maxFeePerGas;
 
-    console.log('⛽ 交易参数:');
+    console.log('⛽ Transaction parameters:');
     console.log('  Gas Limit:', gasLimit.toString());
     console.log('  Gas Price:', gasPrice ? gasPrice.toString() : 'auto');
 
     const txOptions = { gasLimit };
 
-    // 如果 gas price 可用，添加到选项中（某些网络需要明确指定）
+    // Add the gas price to the options when available (some networks require it explicitly)
     if (gasPrice) {
       txOptions.gasPrice = gasPrice;
     }
 
-    console.log('📤 发送交易到合约...');
+    console.log('📤 Sending transaction to the contract...');
     tx = await contract.tokenize(
       a.blId, a.issuePriceE6, a.tokenSupply, a.financingUsd,
       a.collateralValueUsd, a.riskScoreBps, a.riskLevel, a.quoteHash, a.evidenceHash,
       txOptions
     );
 
-    console.log('✅ 交易已发送到网络，等待打包...');
-    console.log('📝 交易哈希:', tx.hash);
-    console.log('🔗 查看交易:', explorerTx(cfg, tx.hash));
+    console.log('✅ Transaction sent to the network, waiting to be mined...');
+    console.log('📝 Transaction hash:', tx.hash);
+    console.log('🔗 View transaction:', explorerTx(cfg, tx.hash));
   } catch (e) {
     console.error('═'.repeat(60));
-    console.error('❌ [MINT ERROR] 交易失败详情:');
+    console.error('❌ [MINT ERROR] Transaction failure details:');
     console.error('═'.repeat(60));
     console.error('[mint] Error code:', e.code);
     console.error('[mint] Error message:', e.message);
@@ -560,12 +560,12 @@ export async function mintOnChain(quote, financingUsd, onConfirmed) {
     console.error('═'.repeat(60));
 
     if (e?.code === 'ACTION_REJECTED' || e?.code === 4001) {
-      throw err('REJECTED', '用户在钱包中拒绝了交易');
+      throw err('REJECTED', 'User rejected the transaction in the wallet');
     }
 
-    // 给出更友好的错误提示
+    // Give a friendlier error message
     if (e.message?.includes('network') || e.message?.includes('timeout')) {
-      throw err('NETWORK_ERROR', 'RPC 网络连接不稳定，请稍后重试或更换 RPC 节点');
+      throw err('NETWORK_ERROR', 'RPC network connection is unstable; please retry later or switch RPC node');
     }
 
     throw e;
@@ -592,37 +592,37 @@ export async function mintOnChain(quote, financingUsd, onConfirmed) {
 async function pollForReceipt(txHash, contract, quote, financingUsd, a, cfg, onConfirmed) {
   const ethers = await loadEthers();
 
-  // 使用多个 RPC 节点作为备份，优先使用最稳定的 sentry 节点
+  // Use several RPC nodes as fallbacks, preferring the most stable sentry node
   const rpcUrls = [
     'https://testnet.sentry.chain.json-rpc.injective.network',
     'https://k8s.testnet.json-rpc.injective.network',
     ...(cfg.rpcUrls || [])
   ];
-  const uniqueRpcUrls = [...new Set(rpcUrls)]; // 去重
-  console.log('[mint] 可用的 RPC 节点:', uniqueRpcUrls);
+  const uniqueRpcUrls = [...new Set(rpcUrls)]; // Deduplicate
+  console.log('[mint] Available RPC nodes:', uniqueRpcUrls);
 
   let pubProvider = new ethers.JsonRpcProvider(uniqueRpcUrls[0]);
   let currentRpcIndex = 0;
 
-  const deadline = Date.now() + 180000; // 增加到 3 分钟
+  const deadline = Date.now() + 180000; // Raised to 3 minutes
   let pollCount = 0;
   let lastPoolCounter = null;
   let consecutiveFailures = 0;
 
-  // 预先获取当前的 poolCounter
+  // Read the current poolCounter up front
   try {
     lastPoolCounter = await contract.poolCounter();
-    console.log('[mint] 当前 poolCounter:', lastPoolCounter?.toString());
+    console.log('[mint] Current poolCounter:', lastPoolCounter?.toString());
   } catch (e) {
-    console.warn('[mint] 无法读取初始 poolCounter:', e.message);
+    console.warn('[mint] Could not read initial poolCounter:', e.message);
   }
 
-  // RPC 切换函数
+  // Switch to the next RPC
   const switchToNextRpc = () => {
     if (currentRpcIndex < uniqueRpcUrls.length - 1) {
       currentRpcIndex++;
       pubProvider = new ethers.JsonRpcProvider(uniqueRpcUrls[currentRpcIndex]);
-      console.log(`[mint] 🔄 切换到备用 RPC [${currentRpcIndex}]:`, uniqueRpcUrls[currentRpcIndex]);
+      console.log(`[mint] 🔄 Switching to backup RPC [${currentRpcIndex}]:`, uniqueRpcUrls[currentRpcIndex]);
       consecutiveFailures = 0;
       return true;
     }
@@ -631,17 +631,17 @@ async function pollForReceipt(txHash, contract, quote, financingUsd, a, cfg, onC
 
   const poll = async () => {
     pollCount++;
-    console.log(`[mint] 轮询第 ${pollCount} 次，检查交易状态: ${txHash.slice(0, 10)}... (RPC: ${uniqueRpcUrls[currentRpcIndex]})`);
+    console.log(`[mint] Poll #${pollCount}, checking transaction status: ${txHash.slice(0, 10)}... (RPC: ${uniqueRpcUrls[currentRpcIndex]})`);
 
     try {
       const receipt = await pubProvider.getTransactionReceipt(txHash);
 
       if (receipt) {
-        console.log('[mint] 收到 receipt:', receipt);
-        consecutiveFailures = 0; // 重置失败计数
+        console.log('[mint] Received receipt:', receipt);
+        consecutiveFailures = 0; // Reset the failure count
 
         if (receipt.status === 0) {
-          console.error('[mint] ❌ 交易失败 (status=0)');
+          console.error('[mint] ❌ Transaction failed (status=0)');
           if (onConfirmed) {
             onConfirmed({
               mode: 'chain_failed',
@@ -655,17 +655,17 @@ async function pollForReceipt(txHash, contract, quote, financingUsd, a, cfg, onC
         }
 
         if (receipt.blockNumber) {
-          console.log('[mint] ✅ 交易已确认 — block:', receipt.blockNumber);
+          console.log('[mint] ✅ Transaction confirmed — block:', receipt.blockNumber);
           let poolId = null, mintedAmount = null;
 
           for (const log of receipt.logs ?? []) {
             try {
               const parsed = contract.interface.parseLog(log);
-              console.log('[mint] 解析事件:', parsed?.name, parsed?.args);
+              console.log('[mint] Parsed event:', parsed?.name, parsed?.args);
               if (parsed?.name === 'Tokenized') {
                 poolId = parsed.args.poolId;
                 mintedAmount = parsed.args.mintedAmount;
-                console.log('[mint] 🎉 找到 Tokenized 事件! poolId:', poolId?.toString(), 'mintedAmount:', mintedAmount?.toString());
+                console.log('[mint] 🎉 Found Tokenized event! poolId:', poolId?.toString(), 'mintedAmount:', mintedAmount?.toString());
               }
             } catch (parseErr) {
               // not our event
@@ -683,35 +683,35 @@ async function pollForReceipt(txHash, contract, quote, financingUsd, a, cfg, onC
             blockNumber: receipt.blockNumber
           };
 
-          console.log('[mint] 📤 调用 onConfirmed 回调，更新 UI...', confirmed);
+          console.log('[mint] 📤 Calling onConfirmed callback to update the UI...', confirmed);
           if (onConfirmed) {
             onConfirmed(confirmed);
           }
           return;
         }
       } else {
-        // 备用方案：如果 receipt 为 null，尝试用 getTransaction 检查
-        console.log('[mint] receipt 为 null，尝试备用方案 getTransaction...');
+        // Fallback: if the receipt is null, check with getTransaction
+        console.log('[mint] Receipt is null, falling back to getTransaction...');
         try {
           const tx = await pubProvider.getTransaction(txHash);
           if (tx && tx.blockNumber) {
-            console.log('[mint] ✅ getTransaction 返回了 blockNumber:', tx.blockNumber);
-            consecutiveFailures = 0; // 重置失败计数
+            console.log('[mint] ✅ getTransaction returned blockNumber:', tx.blockNumber);
+            consecutiveFailures = 0; // Reset the failure count
 
-            // 尝试读取新的 poolCounter 来推断 poolId
+            // Try reading the new poolCounter to infer the poolId
             let poolId = null;
             try {
               const currentPoolCounter = await contract.poolCounter();
-              console.log('[mint] 当前 poolCounter:', currentPoolCounter?.toString());
+              console.log('[mint] Current poolCounter:', currentPoolCounter?.toString());
               if (lastPoolCounter != null && currentPoolCounter > lastPoolCounter) {
                 poolId = currentPoolCounter.toString();
-                console.log('[mint] 🎯 推断 poolId:', poolId);
+                console.log('[mint] 🎯 Inferred poolId:', poolId);
               }
             } catch (e) {
-              console.warn('[mint] 无法读取 poolCounter:', e.message);
+              console.warn('[mint] Could not read poolCounter:', e.message);
             }
 
-            console.log('[mint] 🔄 使用备用方案确认交易');
+            console.log('[mint] 🔄 Confirming transaction via fallback');
 
             const confirmed = {
               mode: 'chain',
@@ -724,41 +724,41 @@ async function pollForReceipt(txHash, contract, quote, financingUsd, a, cfg, onC
               blockNumber: tx.blockNumber
             };
 
-            console.log('[mint] 📤 调用 onConfirmed 回调（备用方案），更新 UI...', confirmed);
+            console.log('[mint] 📤 Calling onConfirmed callback (fallback) to update the UI...', confirmed);
             if (onConfirmed) {
               onConfirmed(confirmed);
             }
             return;
           } else {
-            console.log('[mint] getTransaction 也未返回 blockNumber');
+            console.log('[mint] getTransaction returned no blockNumber either');
             consecutiveFailures++;
           }
         } catch (txErr) {
-          console.error('[mint] getTransaction 也失败:', txErr.message);
+          console.error('[mint] getTransaction failed as well:', txErr.message);
           consecutiveFailures++;
         }
       }
     } catch (e) {
-      console.error('[mint] ⚠️ 轮询遇到错误:', e.message);
+      console.error('[mint] ⚠️ Polling error:', e.message);
       consecutiveFailures++;
     }
 
-    // 如果连续失败 3 次，尝试切换到备用 RPC
+    // After 3 consecutive failures, try switching to a backup RPC
     if (consecutiveFailures >= 3) {
-      console.warn(`[mint] ⚠️ 当前 RPC 连续失败 ${consecutiveFailures} 次`);
+      console.warn(`[mint] ⚠️ Current RPC failed ${consecutiveFailures} times in a row`);
       if (switchToNextRpc()) {
-        console.log('[mint] 🔄 已切换到备用 RPC，继续轮询...');
+        console.log('[mint] 🔄 Switched to backup RPC, continuing to poll...');
       } else {
-        console.error('[mint] ❌ 所有 RPC 节点都已尝试');
+        console.error('[mint] ❌ All RPC nodes have been tried');
       }
     }
 
     if (Date.now() < deadline) {
       setTimeout(poll, 3000);
     } else {
-      console.error('[mint] ❌ 轮询超时 (3分钟) — tx:', txHash);
-      console.error('[mint] 请手动在区块链浏览器中检查交易状态');
-      // 超时也通知前端
+      console.error('[mint] ❌ Polling timed out (3 minutes) — tx:', txHash);
+      console.error('[mint] Please check the transaction status manually in a block explorer');
+      // Notify the frontend on timeout as well
       if (onConfirmed) {
         onConfirmed({
           mode: 'chain_timeout',
@@ -942,9 +942,9 @@ export async function logX402PaymentOnChain({ payer, serviceId, amountMicrousd, 
   const cfg = await loadChainConfig();
   const address = cfg?.contracts?.PaymentOracle;
   const abi = cfg?.paymentOracle?.abi;
-  if (!isAddress(address) || !abi) throw err('NO_CONTRACT', 'PaymentOracle 未部署');
+  if (!isAddress(address) || !abi) throw err('NO_CONTRACT', 'PaymentOracle is not deployed');
 
-  if (!_session) throw err('NO_SESSION', '钱包未连接');
+  if (!_session) throw err('NO_SESSION', 'Wallet not connected');
   if (_session.kind !== 'evm') throw err('EVM_WALLET_REQUIRED', 'PaymentOracle requires the MetaMask EVM path');
 
   const ethers = await loadEthers();
@@ -957,7 +957,7 @@ export async function logX402PaymentOnChain({ payer, serviceId, amountMicrousd, 
       responseHash, quoteHash, evidenceHash, pricingAction
     );
   } catch (e) {
-    if (e?.code === 'ACTION_REJECTED' || e?.code === 4001) throw err('REJECTED', '用户在钱包中拒绝了交易');
+    if (e?.code === 'ACTION_REJECTED' || e?.code === 4001) throw err('REJECTED', 'User rejected the transaction in the wallet');
     throw e;
   }
   console.log('[x402] tx sent:', tx.hash);
@@ -977,14 +977,14 @@ export async function logX402PaymentOnChain({ payer, serviceId, amountMicrousd, 
     if (currentRpcIndex < uniqueRpcUrls.length - 1) {
       currentRpcIndex++;
       pubProvider = new ethers.JsonRpcProvider(uniqueRpcUrls[currentRpcIndex]);
-      console.log(`[x402] 🔄 切换到备用 RPC [${currentRpcIndex}]:`, uniqueRpcUrls[currentRpcIndex]);
+      console.log(`[x402] 🔄 Switching to backup RPC [${currentRpcIndex}]:`, uniqueRpcUrls[currentRpcIndex]);
       consecutiveFailures = 0;
       return true;
     }
     return false;
   };
 
-  const deadline = Date.now() + 180000; // 3 分钟
+  const deadline = Date.now() + 180000; // 3 minutes
   const poll = async () => {
     try {
       const receipt = await pubProvider.getTransactionReceipt(tx.hash);
@@ -994,7 +994,7 @@ export async function logX402PaymentOnChain({ payer, serviceId, amountMicrousd, 
         if (onConfirmed) onConfirmed({ txHash: tx.hash, explorerUrl: explorerTx(cfg, tx.hash), blockNumber: receipt.blockNumber });
         return;
       } else {
-        // 尝试 getTransaction 作为备用
+        // Try getTransaction as a fallback
         const txData = await pubProvider.getTransaction(tx.hash);
         if (txData && txData.blockNumber) {
           console.log('[x402] confirmed via getTransaction — block:', txData.blockNumber);
@@ -1009,10 +1009,10 @@ export async function logX402PaymentOnChain({ payer, serviceId, amountMicrousd, 
       consecutiveFailures++;
     }
 
-    // 连续失败 3 次则切换 RPC
+    // Switch RPC after 3 consecutive failures
     if (consecutiveFailures >= 3) {
       if (!switchToNextRpc()) {
-        console.error('[x402] 所有 RPC 节点都已尝试');
+        console.error('[x402] All RPC nodes have been tried');
       }
     }
 

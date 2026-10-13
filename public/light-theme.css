@@ -515,9 +515,9 @@ body {
 .agent-activity-console {
   position: fixed;
   bottom: 24px; left: 24px;
-  /* 响应式宽度：原始的 3/4 */
+  /* Responsive width: 3/4 of the original */
   width: clamp(300px, 26vw, 675px);
-  /* 响应式高度：原始的 3/4 */
+  /* Responsive height: 3/4 of the original */
   height: clamp(120px, 19vh, 338px);
   background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(24px) saturate(180%);
@@ -533,7 +533,7 @@ body {
   overflow: hidden;
 }
 
-/* 超大屏幕优化（4K显示器等，2560px+） */
+/* Extra-large screen tuning (4K displays etc., 2560px+) */
 @media (min-width: 2560px) {
   .agent-activity-console {
     width: clamp(450px, 22vw, 900px);
@@ -542,7 +542,7 @@ body {
   }
 }
 
-/* 大屏幕优化（1920px-2559px） */
+/* Large screen tuning (1920px-2559px) */
 @media (min-width: 1920px) and (max-width: 2559px) {
   .agent-activity-console {
     width: clamp(375px, 24vw, 750px);
@@ -550,7 +550,7 @@ body {
   }
 }
 
-/* 中等屏幕（1280px-1919px） */
+/* Medium screens (1280px-1919px) */
 @media (min-width: 1280px) and (max-width: 1919px) {
   .agent-activity-console {
     width: clamp(300px, 26vw, 600px);
@@ -558,7 +558,7 @@ body {
   }
 }
 
-/* 小屏幕适配（1279px以下） */
+/* Small screens (1279px and below) */
 @media (max-width: 1279px) {
   .agent-activity-console {
     width: clamp(280px, 30vw, 450px);
@@ -585,14 +585,14 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* 超大屏幕标题字体 */
+/* Title font size on extra-large screens */
 @media (min-width: 2560px) {
   .aac-title {
     font-size: 13px;
   }
 }
 
-/* 大屏幕标题字体 */
+/* Title font size on large screens */
 @media (min-width: 1920px) and (max-width: 2559px) {
   .aac-title {
     font-size: 12px;
@@ -628,21 +628,21 @@ body {
   padding-right: 6px;
 }
 
-/* 超大屏幕日志字体 */
+/* Log font size on extra-large screens */
 @media (min-width: 2560px) {
   .aac-col {
     font-size: 12px;
   }
 }
 
-/* 大屏幕日志字体 */
+/* Log font size on large screens */
 @media (min-width: 1920px) and (max-width: 2559px) {
   .aac-col {
     font-size: 11px;
   }
 }
 
-/* 小屏幕日志字体 */
+/* Log font size on small screens */
 @media (max-width: 1279px) {
   .aac-col {
     font-size: 9px;

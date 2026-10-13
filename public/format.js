@@ -242,13 +242,13 @@ export function dateAtProgress(dep, eta, p) {
 }
 
 /** Human waypoint text for the ship's current progress along the route. */
-export function waypointFor(p, loadPort = '起运港', dischPort = '目的港') {
-  if (p <= 0.02) return `在 ${loadPort} 装船待发`;
-  if (p < 0.15) return `驶离 ${loadPort}`;
-  if (p < 0.45) return '航行于南海 (South China Sea)';
-  if (p < 0.72) return '航行于东海 / 公海 (open water)';
-  if (p < 0.97) return `接近 ${dischPort}`;
-  return `抵达 ${dischPort}`;
+export function waypointFor(p, loadPort = t('waypoint_default_load_port'), dischPort = t('waypoint_default_disch_port')) {
+  if (p <= 0.02) return t('waypoint_loading', { port: loadPort });
+  if (p < 0.15) return t('waypoint_departing', { port: loadPort });
+  if (p < 0.45) return t('waypoint_south_china_sea');
+  if (p < 0.72) return t('waypoint_open_water');
+  if (p < 0.97) return t('waypoint_approaching', { port: dischPort });
+  return t('waypoint_arrived', { port: dischPort });
 }
 
 const RISK_LEVEL_UINT8 = { LOW: 0, MEDIUM: 1, WARNING: 2, CRITICAL: 3 };
@@ -273,7 +273,7 @@ export function priceToE6(usd) {
 }
 
 /**
- * The data sources behind the AI's risk/valuation, for View ①'s "数据来源".
+ * The data sources behind the AI's risk/valuation, for View ①'s "Data sources" panel.
  * Combines RAG intel citations, the market benchmark source, the valuation
  * method, and any document-consistency findings.
  * @returns {Array<{tag:string, detail:string}>}

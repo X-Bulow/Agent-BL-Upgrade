@@ -1,84 +1,89 @@
-// AgentBL AI 悬浮助手 — 原生 JS 实现
-// 1) 右侧悬浮图标（可拖拽、hover 展开、点击打开弹窗）
-// 2) AI 对话弹窗（DeepSeek 流式 API + Function Calling 工作流）
+// AgentBL AI floating assistant — vanilla JS implementation
+// 1) Floating icon on the right edge (draggable, expands on hover, click to open the dialog)
+// 2) AI chat dialog (DeepSeek streaming API + function-calling workflow)
 //
-// Web3 原生贸易融资协议：
-// - 出口商 tokenize 电子提单，AI 定价航线风险，全球投资者直接投资
-// - 没有银行、没有信用审核、没有中间人
-// - eBL 即抵押物，智能合约即清算
+// Web3-native trade finance protocol:
+// - Exporters tokenize electronic bills of lading, AI prices route risk, global investors invest directly
+// - No banks, no credit checks, no middlemen
+// - The eBL is the collateral, the smart contract is the settlement
 //
-// 支持自然语言触发的双角色工作流：
-// 出口商视角 — 上传 eBL → AI 估值 → 自动定价 → 开盘
-// 投资者视角 — 浏览 eBL 市场 → AI 推荐 → 对比 → 认购 → 持仓
+// Supports dual-role workflows triggered by natural language:
+// Exporter view — upload eBL → AI valuation → automatic pricing → open offering
+// Investor view — browse the eBL market → AI recommendation → compare → subscribe → portfolio
 
 import { $, el, clear } from './dom.js';
 import { DeepSeekClient } from './llm-client.js';
 import * as api from './api.js';
 import * as web3 from './web3.js';
 import { state, selectedQuote } from './store.js';
+import { t } from './i18n.js';
 
 // ===========================================================================
-// DeepSeek 客户端
+// DeepSeek client
 // ===========================================================================
 const ds = new DeepSeekClient();
 
 // ===========================================================================
 // System Prompt
 // ===========================================================================
-const SYSTEM_PROMPT = `你是 AgentBL 协议的 AI 助手。AgentBL 是一个 Web3 原生贸易融资协议——出口商将电子提单（eBL）tokenize 上链，AI 定价航线与货物风险，全球投资者直接投资。没有银行。没有信用审核。没有中间人。eBL 即抵押物，智能合约即清算。
+const SYSTEM_PROMPT = `You are the AI assistant of the AgentBL protocol. AgentBL is a Web3-native trade finance protocol: exporters tokenize electronic bills of lading (eBLs) on-chain, AI prices the route and cargo risk, and global investors invest directly. No banks. No credit checks. No middlemen. The eBL is the collateral; the smart contract is the settlement.
 
-## 你的两个服务视角
+## Language
+- Always reply in the same language the user writes in. If the user writes in Chinese, answer in Chinese; if in English, answer in English.
+- Tool results are returned in English; translate them into the user's language when you present them.
 
-### 投资者视角（核心新增）
-你可以帮助投资者浏览 eBL 市场、AI 智能推荐合适的提单标的：
-1. **recommendEBL** — AI 解析自然语言偏好（如"收益高一些、风险中等"），从所有可用 eBL 中筛选排序推荐 Top 3
-2. **compareEBLs** — 并排对比 2-3 个提单的核心指标（收益/风险/价格/金额）
-3. **getPoolStatus** — 查询某个 eBL 发行池的实时状态（认购比例、当前定价、是否暂停）
-4. **getPortfolio** — 查看投资者当前持仓（认购的 RWA 代币、成本、估值）
-5. **subscribeRWA** — 一键认购 RWA 代币（需要连接钱包）
+## Your two service views
 
-### 出口商视角（已有升级）
-6. **getCases** — 列出所有已上链的 eBL 提单
-7. **selectCase** — 选择并加载一个提单进行定价分析
-8. **analyzePricing** — 获取单个 RWA 定价报价（发行价、风险评分、收益率）
-9. **compareSpeeds** — 对比 FAST / BALANCED / SAFE 三种到账速度的完整定价
-10. **analyzeRisk** — AI 航线风险评分
-11. **getWorldRisk** — 获取实时世界风险情报（社交媒体、新闻、预测市场）
-12. **mintRWA** — 出口商一键 tokenize eBL 并创建链上发行池
-13. **getAgentActivity** — 查看自主 AI 最近的决策记录（定价/改价/暂停/恢复/结算）
-14. **searchKnowledge** — 搜索知识库
-15. **getWalletStatus** — 检查钱包连接状态
+### Investor view (core addition)
+You help investors browse the eBL market and get AI recommendations for suitable bills of lading:
+1. **recommendEBL** — AI parses a natural-language preference (e.g. "higher yield, medium risk") and filters and ranks all available eBLs, recommending the Top 3
+2. **compareEBLs** — compare the core metrics of 2-3 bills of lading side by side (yield / risk / price / amount)
+3. **getPoolStatus** — get the live status of an eBL offering pool (subscription ratio, current pricing, whether it is paused)
+4. **getPortfolio** — show the investor's current holdings (subscribed RWA tokens, cost, valuation)
+5. **subscribeRWA** — one-click subscription to RWA tokens (requires a connected wallet)
 
-## 工作流规则
-- 投资者说"推荐""帮我选""有什么好标的"→ 调用 recommendEBL，AI 解析偏好后返回推荐
-- 投资者说"对比这两个"→ 调用 compareEBLs
-- 投资者说"认购""投5000"→ 先确保已选标的，再调用 subscribeRWA
-- 投资者说"我的持仓""投了哪些"→ 调用 getPortfolio
-- 出口商说"分析""定价"→ 沿用 getCases → selectCase → analyzePricing / compareSpeeds
-- 出口商说"上链""tokenize"→ 先确保已有定价，再调用 mintRWA
-- 用户问"AI做了什么决策""有预警吗"→ 调用 getAgentActivity
-- 问风险事件 → getWorldRisk
-- 铸造/认购前 → 提醒连接钱包
+### Exporter view (existing, upgraded)
+6. **getCases** — list all eBLs that are on-chain
+7. **selectCase** — select and load a bill of lading for pricing analysis
+8. **analyzePricing** — get a single RWA pricing quote (issue price, risk score, yield)
+9. **compareSpeeds** — compare full pricing for the FAST / BALANCED / SAFE payout speeds
+10. **analyzeRisk** — AI route risk scoring
+11. **getWorldRisk** — get live world-risk intelligence (social media, news, prediction markets)
+12. **mintRWA** — exporter one-click tokenization of an eBL and creation of the on-chain offering pool
+13. **getAgentActivity** — show the autonomous AI's recent decision records (price / reprice / pause / resume / settle)
+14. **searchKnowledge** — search the knowledge base
+15. **getWalletStatus** — check the wallet connection status
 
-## AI 风险评估原则
-- 评估的是"这批货 + 这条航线 + 当前世界局势"的风险
-- 不评估出口商/投资者的征信或公司背景
-- 风险越高 → 发行价越低 → 投资者潜在收益越高
+## Workflow rules
+- Investor says "recommend", "help me pick", "any good deals" → call recommendEBL; the AI parses the preference and returns recommendations
+- Investor says "compare these two" → call compareEBLs
+- Investor says "subscribe", "invest 5000" → first make sure a target is selected, then call subscribeRWA
+- Investor says "my portfolio", "what have I invested in" → call getPortfolio
+- Exporter says "analyse", "price it" → follow getCases → selectCase → analyzePricing / compareSpeeds
+- Exporter says "put it on-chain", "tokenize" → first make sure pricing exists, then call mintRWA
+- User asks "what decisions did the AI make", "any alerts" → call getAgentActivity
+- Questions about risk events → getWorldRisk
+- Before minting / subscribing → remind the user to connect a wallet
 
-## 回复风格
-- 简洁、专业、中文
-- 涉及金额时保留 2 位小数，使用 $ 符号
-- 风险等级用中文标注（低风险/中风险/高风险/严重）
-- 推荐结果应突出理由（为什么这个提单适合用户）
-- 给明确的可操作建议`;
+## AI risk assessment principles
+- Assess the risk of "this cargo + this route + the current world situation"
+- Do not assess the credit or corporate background of the exporter / investor
+- Higher risk → lower issue price → higher potential return for investors
+
+## Reply style
+- Concise and professional, in the user's language
+- Keep 2 decimal places for amounts and use the $ sign
+- Label risk levels in words (low / medium / high / critical risk), in the user's language
+- Recommendations should highlight the reasons (why this bill of lading suits the user)
+- Give clear, actionable advice`;
 
 // ===========================================================================
-// Tool 定义
+// Tool definitions
 // ===========================================================================
 const TOOLS = [
   {
     name: 'getCases',
-    description: '获取所有可用的贸易案例列表，返回案例ID、路线、货物类型和风险提示',
+    description: 'List all available trade cases, returning case ID, route, cargo type and risk hint',
     parameters: {
       type: 'object',
       properties: {},
@@ -87,25 +92,25 @@ const TOOLS = [
   },
   {
     name: 'selectCase',
-    description: '选择并加载一个贸易案例进行后续分析，加载后可在当前案例上执行定价、风险分析等操作',
+    description: 'Select and load a trade case for further analysis; once loaded, pricing, risk analysis and other operations can run on the current case',
     parameters: {
       type: 'object',
       properties: {
-        case_id: { type: 'string', description: '案例ID，例如 CASE-EBL-2026-0001' }
+        case_id: { type: 'string', description: 'Case ID, e.g. CASE-EBL-2026-0001' }
       },
       required: ['case_id']
     }
   },
   {
     name: 'analyzePricing',
-    description: '获取当前案例的 RWA 定价报价，包含发行价格、风险评分、隐含收益率和定价动作',
+    description: 'Get the RWA pricing quote for the current case, including issue price, risk score, implied yield and pricing action',
     parameters: {
       type: 'object',
       properties: {
         payout_speed: {
           type: 'string',
           enum: ['FAST', 'BALANCED', 'SAFE'],
-          description: '赔付速度，默认为 BALANCED'
+          description: 'Payout speed, defaults to BALANCED'
         }
       },
       required: []
@@ -113,7 +118,7 @@ const TOOLS = [
   },
   {
     name: 'compareSpeeds',
-    description: '对比 FAST / BALANCED / SAFE 三种赔付速度的完整定价，包含推荐的最优方案',
+    description: 'Compare full pricing for the FAST / BALANCED / SAFE payout speeds, including the recommended option',
     parameters: {
       type: 'object',
       properties: {},
@@ -122,7 +127,7 @@ const TOOLS = [
   },
   {
     name: 'analyzeRisk',
-    description: '对当前案例执行完整的 AI 风险评分分析，返回风险等级、风险因素和合约动作建议',
+    description: 'Run a full AI risk-scoring analysis on the current case, returning risk level, risk factors and the suggested contract action',
     parameters: {
       type: 'object',
       properties: {},
@@ -131,7 +136,7 @@ const TOOLS = [
   },
   {
     name: 'getWorldRisk',
-    description: '获取当前案例相关的实时世界风险情报，包括社交媒体信号、新闻报道、预测市场数据及重定价影响',
+    description: 'Get live world-risk intelligence for the current case, including social-media signals, news reports, prediction-market data and the repricing impact',
     parameters: {
       type: 'object',
       properties: {},
@@ -140,18 +145,18 @@ const TOOLS = [
   },
   {
     name: 'mintRWA',
-    description: '一键铸造 RWA 上链（需要用户先连接 MetaMask 钱包）。根据当前定价的发行价和推荐融资金额，调用智能合约 tokenize() 将提单资产铸造为链上 RWA 代币',
+    description: 'One-click mint of the RWA on-chain (the user must connect a MetaMask wallet first). Uses the issue price and recommended financing amount of the current quote and calls the smart contract tokenize() to mint the bill of lading as an on-chain RWA token',
     parameters: {
       type: 'object',
       properties: {
         financing_usd: {
           type: 'number',
-          description: '融资金额（美元），如果不提供则使用定价报价中推荐的金额'
+          description: 'Financing amount (USD); if omitted, the amount recommended in the pricing quote is used'
         },
         payout_speed: {
           type: 'string',
           enum: ['FAST', 'BALANCED', 'SAFE'],
-          description: '使用的定价速度，默认 BALANCED'
+          description: 'Pricing speed to use, defaults to BALANCED'
         }
       },
       required: []
@@ -159,18 +164,18 @@ const TOOLS = [
   },
   {
     name: 'searchKnowledge',
-    description: '搜索 AgentBL 知识库，查找历史案例、风险事件和定价参考数据',
+    description: 'Search the AgentBL knowledge base for historical cases, risk events and pricing reference data',
     parameters: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: '搜索关键词，例如"台风 东亚 铜矿"' }
+        query: { type: 'string', description: 'Search keywords, e.g. "typhoon East Asia copper ore"' }
       },
       required: ['query']
     }
   },
   {
     name: 'getWalletStatus',
-    description: '检查当前钱包连接状态（MetaMask 是否已连接、连接地址）',
+    description: 'Check the current wallet connection status (whether MetaMask is connected, and the connected address)',
     parameters: {
       type: 'object',
       properties: {},
@@ -179,24 +184,24 @@ const TOOLS = [
   },
   {
     name: 'recommendEBL',
-    description: 'AI 解析用户的自然语言投资偏好（如"收益高一些、风险中等""只看铜矿""200万以内安全"），从所有可用 eBL 提单中筛选排序，返回 Top 3 推荐及每个的推荐理由。优先按收益风险比排序。',
+    description: 'AI parses the user\'s natural-language investment preference (e.g. "higher yield, medium risk", "copper only", "safe, under $2M"), filters and ranks all available eBLs, and returns the Top 3 recommendations with a reason for each. Ranks by yield-to-risk ratio by default.',
     parameters: {
       type: 'object',
       properties: {
-        preference: { type: 'string', description: '用户的自然语言偏好描述' },
-        risk_max: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'], description: '可接受最高风险等级' },
-        yield_min: { type: 'number', description: '最低预期收益率 (bps)，500 表示 5%' },
-        commodity: { type: 'string', description: '货物类型关键词，如"铜""原油"' },
-        financing_max: { type: 'number', description: '最高融资金额 (USD)' },
-        sort_by: { type: 'string', enum: ['yield_desc', 'risk_asc', 'score'], description: '排序方式，默认 score（收益风险比）' },
-        max_results: { type: 'number', description: '最多返回结果数，默认 3' }
+        preference: { type: 'string', description: 'The user\'s natural-language preference' },
+        risk_max: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'], description: 'Highest acceptable risk level' },
+        yield_min: { type: 'number', description: 'Minimum expected yield (bps); 500 means 5%' },
+        commodity: { type: 'string', description: 'Cargo type keyword, e.g. "copper", "crude oil"' },
+        financing_max: { type: 'number', description: 'Maximum financing amount (USD)' },
+        sort_by: { type: 'string', enum: ['yield_desc', 'risk_asc', 'score'], description: 'Sort order, defaults to score (yield-to-risk ratio)' },
+        max_results: { type: 'number', description: 'Maximum number of results, defaults to 3' }
       },
       required: ['preference']
     }
   },
   {
     name: 'getPortfolio',
-    description: '查看投资者当前持仓：已认购的 RWA 代币列表，包括每个持仓的提单信息、认购数量、成本价、当前估值和预期收益',
+    description: 'Show the investor\'s current portfolio: subscribed RWA tokens, with each position\'s bill-of-lading info, token count, cost price, current valuation and expected yield',
     parameters: {
       type: 'object',
       properties: {},
@@ -205,36 +210,36 @@ const TOOLS = [
   },
   {
     name: 'getPoolStatus',
-    description: '查询某个 eBL 发行池的实时状态：当前定价、认购进度、剩余份额、是否暂停、风险等级变化',
+    description: 'Get the live status of an eBL offering pool: current pricing, subscription progress, remaining supply, whether it is paused, and risk-level changes',
     parameters: {
       type: 'object',
       properties: {
-        case_id: { type: 'string', description: '提单ID，例如 CASE-EBL-2026-0001' }
+        case_id: { type: 'string', description: 'Bill of lading ID, e.g. CASE-EBL-2026-0001' }
       },
       required: ['case_id']
     }
   },
   {
     name: 'getAgentActivity',
-    description: '查看自主 AI Agent 最近的决策记录时间线：何时定价/改价/暂停/恢复/结算，每个决策的理由和链上交易哈希',
+    description: 'Show the timeline of the autonomous AI agent\'s recent decisions: when it priced / repriced / paused / resumed / settled, with the reasoning and on-chain transaction hash for each decision',
     parameters: {
       type: 'object',
       properties: {
-        limit: { type: 'number', description: '返回最近 N 条记录，默认 5' }
+        limit: { type: 'number', description: 'Return the N most recent records, defaults to 5' }
       },
       required: []
     }
   },
   {
     name: 'compareEBLs',
-    description: '并排对比 2-3 个 eBL 提单的核心投资指标：发行价、预期收益率、风险等级、融资金额、收益风险比，帮助投资者做出选择',
+    description: 'Compare 2-3 eBLs side by side on core investment metrics: issue price, expected yield, risk level, financing amount and yield-to-risk ratio, to help the investor choose',
     parameters: {
       type: 'object',
       properties: {
         case_ids: {
           type: 'array',
           items: { type: 'string' },
-          description: '要对比的提单ID列表，例如 ["CASE-EBL-2026-0001", "CASE-EBL-2026-CU-SG-SHA"]'
+          description: 'List of bill of lading IDs to compare, e.g. ["CASE-EBL-2026-0001", "CASE-EBL-2026-CU-SG-SHA"]'
         }
       },
       required: ['case_ids']
@@ -242,13 +247,13 @@ const TOOLS = [
   },
   {
     name: 'subscribeRWA',
-    description: '投资者一键认购指定 eBL 发行池的 RWA 代币。需要先连接钱包（MetaMask），然后按当前发行价认购指定金额的 RWA 代币',
+    description: 'One-click investor subscription to the RWA tokens of the given eBL offering pool. Requires a connected wallet (MetaMask), then subscribes the given amount at the current issue price',
     parameters: {
       type: 'object',
       properties: {
-        case_id: { type: 'string', description: '要认购的提单ID' },
-        amount_usd: { type: 'number', description: '认购金额（美元），默认 5000' },
-        payout_speed: { type: 'string', enum: ['FAST', 'BALANCED', 'SAFE'], description: '使用的定价速度，默认 BALANCED' }
+        case_id: { type: 'string', description: 'Bill of lading ID to subscribe to' },
+        amount_usd: { type: 'number', description: 'Subscription amount (USD), defaults to 5000' },
+        payout_speed: { type: 'string', enum: ['FAST', 'BALANCED', 'SAFE'], description: 'Pricing speed to use, defaults to BALANCED' }
       },
       required: ['case_id']
     }
@@ -256,14 +261,14 @@ const TOOLS = [
 ];
 
 // ===========================================================================
-// Tool 执行层 —— 对接 api.js / web3.js / store.js
+// Tool execution layer — bridges to api.js / web3.js / store.js
 // ===========================================================================
 
-// 模块级状态：投资者持仓 & Agent 决策日志
+// Module-level state: investor portfolio & agent decision log
 const portfolio = [];         // [{ case_id, label, amount_usd, token_count, price, yield_bps, risk_level, subscribed_at }]
 const agentDecisions = [];    // [{ id, timestamp, trigger, decision, reasoning, tx_hash, case_id }]
 
-// 辅助：对提单逐一定价并返回带评分的列表
+// Helper: price every bill of lading and return a scored list
 async function _scoreAllCases() {
   if (!state.cases?.length) state.cases = await api.getCases();
   const results = await Promise.all(state.cases.map(async (c) => {
@@ -292,69 +297,69 @@ async function _scoreAllCases() {
 const toolExecutors = {
   async getCases() {
     const cases = await api.getCases();
-    if (!cases || !cases.length) return '当前没有可用的贸易案例。';
+    if (!cases || !cases.length) return 'No trade cases are currently available.';
     const lines = cases.map((c) =>
-      `- **${c.case_id}**: ${c.label} | 风险提示: ${c.risk_hint || '未知'}`
+      `- **${c.case_id}**: ${c.label} | Risk hint: ${c.risk_hint || 'unknown'}`
     );
-    return `共 ${cases.length} 个可用案例：\n\n${lines.join('\n')}`;
+    return `${cases.length} cases available:\n\n${lines.join('\n')}`;
   },
 
   async selectCase(params) {
     const caseId = params.case_id;
     state.caseId = caseId;
 
-    // 从已加载的案例列表中找
+    // Look it up in the already-loaded case list
     if (!state.cases || !state.cases.length) {
       state.cases = await api.getCases();
     }
     const found = state.cases.find((c) => c.case_id === caseId);
-    if (!found) return `未找到案例 ${caseId}，请先调用 getCases 查看可用案例列表。`;
+    if (!found) return `Case ${caseId} not found. Call getCases first to see the available cases.`;
 
     state.caseData = found.case;
     state.comparison = null;
 
     const bl = found.case?.bill_of_lading || {};
-    return `已加载案例 **${caseId}**：
-- 路线：${found.route}
-- 货物：${found.cargo || '未指定'}
-- 提单号：${bl.bl_number || 'N/A'}
-- 发货日期：${bl.shipped_on_board || bl.issue_date || 'N/A'}
-- ETA：${bl.eta || 'N/A'}
+    return `Loaded case **${caseId}**:
+- Route: ${found.route}
+- Cargo: ${found.cargo || 'not specified'}
+- B/L number: ${bl.bl_number || 'N/A'}
+- Shipped on: ${bl.shipped_on_board || bl.issue_date || 'N/A'}
+- ETA: ${bl.eta || 'N/A'}
 
-现在可以执行定价分析、风险评分或一键铸造上链。`;
+You can now run pricing analysis, risk scoring or a one-click on-chain mint.`;
   },
 
   async analyzePricing(params) {
     if (!state.caseData) {
-      return '请先用 selectCase 加载一个案例。';
+      return 'Please load a case with selectCase first.';
     }
     const speed = params.payout_speed || 'BALANCED';
     state.speed = speed;
 
     try {
-      const quote = await api.compareSpeeds(state.caseData); // 获取完整对比
-      // 提取当前速度的报价
+      const quote = await api.compareSpeeds(state.caseData); // fetch the full comparison
+      // Pick the quote for the current speed
       const current = quote.quotes?.find((q) => q.payout_speed === speed) || quote.quotes?.[0];
       state.comparison = quote;
 
-      if (!current) return '未能获取定价数据，请检查后端服务是否正常运行。';
+      if (!current) return 'Could not get pricing data. Please check that the backend service is running.';
 
-      return `**${speed} 速度定价结果：**
-- 发行价：$${Number(current.final_issue_price_usd).toFixed(2)}
-- 风险等级：${current.risk_level} (${current.risk_score_bps} bps)
-- 隐含收益率：${(current.implied_gross_yield_bps / 100).toFixed(2)}%
-- 定价动作：${current.pricing_action}
-- 推荐代币供应量：${current.recommended_token_supply || 'N/A'}
-- AI 验证担保品价值：$${Number(current.ai_verified_collateral_value_usd || 0).toFixed(2)}
-- 预期兑付金额：$${Number(current.expected_cash_to_exporter_usd || 0).toFixed(2)}`;
+      return `**${speed} speed pricing result:**
+- Issue price: $${Number(current.final_issue_price_usd).toFixed(2)}
+- Risk level: ${current.risk_level} (${current.risk_score_bps} bps)
+- Implied yield: ${(current.implied_gross_yield_bps / 100).toFixed(2)}%
+- Pricing action: ${current.pricing_action}
+- Recommended token supply: ${current.recommended_token_supply || 'N/A'}
+- AI-verified collateral value: $${Number(current.ai_verified_collateral_value_usd || 0).toFixed(2)}
+- Expected cash to exporter: $${Number(current.expected_cash_to_exporter_usd || 0).toFixed(2)}`;
     } catch (e) {
-      return `定价分析失败：${e.message}`;
+      return `Pricing analysis failed: ${e.message}`;
     }
   },
 
   async compareSpeeds() {
     if (!state.caseData) {
-      return '请先用 selectCase 加载一个案例。';
+      return 'Please load a case with selectCase first.';
     }
     try {
       const comp = await api.compareSpeeds(state.caseData);
@@ -362,19 +367,19 @@ const toolExecutors = {
       state.speed = comp.recommended_speed || 'BALANCED';
 
       const lines = (comp.quotes || []).map((q) => {
-        const rec = q.payout_speed === comp.recommended_speed ? ' ⭐推荐' : '';
-        return `**${q.payout_speed}**${rec}：发行价 $${Number(q.final_issue_price_usd).toFixed(2)} | 风险 ${q.risk_level} (${q.risk_score_bps}bps) | 收益 ${(q.implied_gross_yield_bps / 100).toFixed(2)}%`;
+        const rec = q.payout_speed === comp.recommended_speed ? ' ⭐Recommended' : '';
+        return `**${q.payout_speed}**${rec}: issue price $${Number(q.final_issue_price_usd).toFixed(2)} | risk ${q.risk_level} (${q.risk_score_bps}bps) | yield ${(q.implied_gross_yield_bps / 100).toFixed(2)}%`;
       });
 
-      return `**三种赔付速度对比：**\n\n${lines.join('\n')}\n\n推荐方案：**${comp.recommended_speed}** — ${comp.recommendation_reason || '综合风险收益最优'}`;
+      return `**Payout speed comparison:**\n\n${lines.join('\n')}\n\nRecommended option: **${comp.recommended_speed}** — ${comp.recommendation_reason || 'best overall risk/return'}`;
     } catch (e) {
-      return `对比分析失败：${e.message}`;
+      return `Comparison failed: ${e.message}`;
     }
   },
 
   async analyzeRisk() {
     if (!state.caseData) {
-      return '请先用 selectCase 加载一个案例。';
+      return 'Please load a case with selectCase first.';
     }
     try {
       const body = JSON.stringify({ case: state.caseData });
@@ -387,71 +392,71 @@ const toolExecutors = {
       if (!res.ok) throw new Error(report.error || 'Unknown error');
 
       const factors = (report.risk_factors || []).map((f) => `- ${f}`).join('\n');
-      return `**风险分析报告**（案例：${report.case_id || state.caseId}）
-- 风险等级：**${report.risk_level}**
-- 风险评分：${report.risk_score_bps} bps
-- 合约动作：${report.contract_action}
-- 解释：${report.explanation}
-${factors ? `\n风险因素：\n${factors}` : ''}`;
+      return `**Risk analysis report** (case: ${report.case_id || state.caseId})
+- Risk level: **${report.risk_level}**
+- Risk score: ${report.risk_score_bps} bps
+- Contract action: ${report.contract_action}
+- Explanation: ${report.explanation}
+${factors ? `\nRisk factors:\n${factors}` : ''}`;
     } catch (e) {
-      return `风险分析失败：${e.message}`;
+      return `Risk analysis failed: ${e.message}`;
     }
   },
 
   async getWorldRisk() {
     if (!state.caseData) {
-      return '请先用 selectCase 加载一个案例。';
+      return 'Please load a case with selectCase first.';
     }
     try {
       const res = await api.worldRisk(state.caseData);
-      if (!res.ok && !res.events) return `世界风险情报获取失败：${res.error || '未知错误'}`;
+      if (!res.ok && !res.events) return `Failed to fetch world-risk intelligence: ${res.error || 'unknown error'}`;
 
       const eventLines = (res.events || []).slice(0, 5).map((e) =>
         `- [${e.severity?.toUpperCase()}] ${e.description || e.type}`
       ).join('\n');
 
-      let result = `**实时世界风险情报**（${res.live ? '🟢 实时数据' : '🟡 离线模式'}）`;
+      let result = `**Live world-risk intelligence** (${res.live ? '🟢 live data' : '🟡 offline mode'})`;
       if (res.summary) result += `\n\n${res.summary}`;
-      if (eventLines) result += `\n\n风险事件：\n${eventLines}`;
+      if (eventLines) result += `\n\nRisk events:\n${eventLines}`;
       if (res.after_quote) {
-        result += `\n\n**重定价影响：**
-- 发行价：$${Number(res.before_quote?.final_issue_price_usd).toFixed(2)} → $${Number(res.after_quote.final_issue_price_usd).toFixed(2)}
-- 风险等级：${res.before_quote?.risk_level || '?'} → ${res.after_quote.risk_level}`;
+        result += `\n\n**Repricing impact:**
+- Issue price: $${Number(res.before_quote?.final_issue_price_usd).toFixed(2)} → $${Number(res.after_quote.final_issue_price_usd).toFixed(2)}
+- Risk level: ${res.before_quote?.risk_level || '?'} → ${res.after_quote.risk_level}`;
       }
       return result;
     } catch (e) {
-      return `世界风险情报获取失败：${e.message}`;
+      return `Failed to fetch world-risk intelligence: ${e.message}`;
     }
   },
 
   async mintRWA(params) {
     if (!state.caseData) {
-      return '请先用 selectCase 加载一个案例，并确保已执行定价分析。';
+      return 'Please load a case with selectCase first and make sure pricing analysis has been run.';
     }
 
     const quote = selectedQuote();
     if (!quote) {
-      return '请先执行定价分析（analyzePricing 或 compareSpeeds），获取报价后再铸造。';
+      return 'Please run pricing analysis first (analyzePricing or compareSpeeds) and get a quote before minting.';
     }
 
     const financingUsd = params.financing_usd || quote.expected_cash_to_exporter_usd || quote.requested_cash_usd || 0;
     if (!financingUsd || financingUsd <= 0) {
-      return '无法确定融资金额，请明确指定 financing_usd 参数。';
+      return 'Could not determine the financing amount. Please specify the financing_usd parameter.';
     }
 
-    // 检查钱包
+    // Check the wallet
     if (!web3.isWalletConnected()) {
       try {
         const { address } = await web3.connectWallet();
         state.wallet = { address };
       } catch (e) {
-        if (e.code === 'NO_WALLET') return '未检测到钱包。请先安装 MetaMask 或 OKX 浏览器扩展。';
-        if (e.code === 'REJECTED') return '用户拒绝了钱包连接请求。请重新尝试。';
-        return `钱包连接失败：${e.message}`;
+        if (e.code === 'NO_WALLET') return 'No wallet detected. Please install the MetaMask or OKX browser extension first.';
+        if (e.code === 'REJECTED') return 'The user rejected the wallet connection request. Please try again.';
+        return `Wallet connection failed: ${e.message}`;
       }
     }
 
-    // 执行铸造
+    // Run the mint
     try {
       let result;
       const isReal = await web3.isRealChainConfigured();
@@ -462,34 +467,34 @@ ${factors ? `\n风险因素：\n${factors}` : ''}`;
       }
 
       state.mint = result;
-      const modeLabel = result.mode === 'chain' ? '⛓️ Injective 测试网' : '🔬 模拟交易';
+      const modeLabel = result.mode === 'chain' ? '⛓️ Injective testnet' : '🔬 simulated transaction';
 
-      return `**RWA 铸造${result.mode === 'chain' ? '成功' : '（模拟）'}！** ${modeLabel}
+      return `**RWA mint ${result.mode === 'chain' ? 'succeeded' : '(simulated)'}!** ${modeLabel}
 
-- 交易哈希：\`${result.txHash}\`
-- 资金池 ID：${result.poolId}
-- 铸造数量：${result.mintedAmount} RWA 代币
-- 发行价：$${(Number(result.issuePriceE6) / 1e6).toFixed(2)}
-- 融资金额：$${Number(financingUsd).toFixed(2)}
-${result.explorerUrl ? `- 浏览器链接：${result.explorerUrl}` : ''}`;
+- Transaction hash: \`${result.txHash}\`
+- Pool ID: ${result.poolId}
+- Minted amount: ${result.mintedAmount} RWA tokens
+- Issue price: $${(Number(result.issuePriceE6) / 1e6).toFixed(2)}
+- Financing amount: $${Number(financingUsd).toFixed(2)}
+${result.explorerUrl ? `- Explorer link: ${result.explorerUrl}` : ''}`;
     } catch (e) {
-      if (e.code === 'REJECTED') return '用户在 MetaMask 中拒绝了交易。';
-      return `RWA 铸造失败：${e.message}`;
+      if (e.code === 'REJECTED') return 'The user rejected the transaction in MetaMask.';
+      return `RWA mint failed: ${e.message}`;
     }
   },
 
   async searchKnowledge(params) {
-    if (!params.query) return '请提供搜索关键词。';
+    if (!params.query) return 'Please provide search keywords.';
     try {
       const res = await api.ragSearch(params.query);
-      if (!res.matches || !res.matches.length) return `未找到与"${params.query}"相关的知识库内容。`;
+      if (!res.matches || !res.matches.length) return `No knowledge-base content found for "${params.query}".`;
 
       const lines = res.matches.slice(0, 5).map((m) =>
         `- [${m.severity?.toUpperCase() || 'INFO'}] **${m.title || m.id}**: ${m.summary?.slice(0, 120) || ''}`
       );
-      return `**知识库搜索结果**（${res.match_count} 条匹配，展示前 5 条）：\n\n${lines.join('\n')}`;
+      return `**Knowledge-base search results** (${res.match_count} matches, showing the first 5):\n\n${lines.join('\n')}`;
     } catch (e) {
-      return `知识库搜索失败：${e.message}`;
+      return `Knowledge-base search failed: ${e.message}`;
     }
   },
 
@@ -498,28 +503,28 @@ ${result.explorerUrl ? `- 浏览器链接：${result.explorerUrl}` : ''}`;
     if (connected) {
       const addr = web3.connectedAddress();
       const isReal = await web3.isRealChainConfigured();
-      return `钱包已连接 ✅
-- 地址：\`${addr}\`
-- 网络：${isReal ? 'Injective 测试网（合约已部署）' : 'Injective 测试网（模拟模式）'}
-${isReal ? '- 可执行真实链上铸造' : '- 将使用模拟交易（合约未部署或未连接）'}`;
+      return `Wallet connected ✅
+- Address: \`${addr}\`
+- Network: ${isReal ? 'Injective testnet (contracts deployed)' : 'Injective testnet (simulation mode)'}
+${isReal ? '- Real on-chain minting is available' : '- Simulated transactions will be used (contracts not deployed or not connected)'}`;
     }
-    return `钱包未连接 ❌
-- 需要安装浏览器钱包扩展（MetaMask / OKX 等）
-- 连接后可执行链上 RWA 铸造`;
+    return `Wallet not connected ❌
+- A browser wallet extension is required (MetaMask / OKX, etc.)
+- Once connected, on-chain RWA minting is available`;
   },
 
-  // ======================== 新增：投资者视角工具 ========================
+  // ======================== Investor-view tools ========================
 
   async recommendEBL(params) {
-    if (!params.preference) return '请描述你的投资偏好，例如"收益高一些、风险中等"。';
+    if (!params.preference) return 'Please describe your investment preference, e.g. "higher yield, medium risk".';
 
     const all = await _scoreAllCases();
-    if (!all.length) return '当前没有可投资的 eBL 提单。';
+    if (!all.length) return 'There are no investable eBLs right now.';
 
     let results = [...all];
     const riskOrder = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
 
-    // 应用筛选
+    // Apply filters
     if (params.risk_max) results = results.filter(r => riskOrder[r.riskLevel] <= riskOrder[params.risk_max]);
     if (params.yield_min) results = results.filter(r => r.yieldBps >= params.yield_min);
     if (params.commodity) {
@@ -530,196 +535,196 @@ ${isReal ? '- 可执行真实链上铸造' : '- 将使用模拟交易（合约�
     }
     if (params.financing_max) results = results.filter(r => r.financingUsd <= params.financing_max);
 
-    if (!results.length) return `没有找到完全匹配「${params.preference}」的提单。试试放宽条件？例如扩大风险接受范围或降低收益要求。`;
+    if (!results.length) return `No eBL fully matches "${params.preference}". Try relaxing the criteria, e.g. accept a wider risk range or a lower yield.`;
 
-    // 排序
+    // Sort
     if (params.sort_by === 'yield_desc') results.sort((a, b) => b.yieldBps - a.yieldBps);
     else if (params.sort_by === 'risk_asc') results.sort((a, b) => a.riskBps - b.riskBps);
-    else results.sort((a, b) => b.score - a.score); // 默认收益风险比
+    else results.sort((a, b) => b.score - a.score); // default: yield-to-risk ratio
 
     const top = results.slice(0, params.max_results || 3);
-    const riskLabel = (lvl) => ({ LOW: '🟢 低风险', MEDIUM: '🟡 中风险', HIGH: '🟠 高风险', CRITICAL: '🔴 严重' })[lvl] || lvl;
+    const riskLabel = (lvl) => ({ LOW: '🟢 Low risk', MEDIUM: '🟡 Medium risk', HIGH: '🟠 High risk', CRITICAL: '🔴 Critical' })[lvl] || lvl;
 
     const lines = top.map((r, i) => {
-      const stars = i === 0 ? ' ⭐ 首选推荐' : '';
+      const stars = i === 0 ? ' ⭐ Top pick' : '';
       const bl = r.caseData?.bill_of_lading || {};
       return `${i + 1}. **${r.caseEntry.label}**${stars}
-   - 路线：${r.caseEntry.route}
-   - 货物：${bl.cargo || r.caseEntry.cargo || '未指定'} · ${bl.quantity_mt ? bl.quantity_mt + ' MT' : ''}
-   - 发行价：$${Number(r.price).toFixed(2)} / 代币
-   - 预期收益率：**${(r.yieldBps / 100).toFixed(2)}%**
-   - 风险等级：${riskLabel(r.riskLevel)} (${r.riskBps} bps)
-   - 融资金额：$${(r.financingUsd / 1e6).toFixed(2)}M
-   - 收益风险比：${r.score.toFixed(2)}${i === 0 ? ' ← 同类最优' : ''}`;
+   - Route: ${r.caseEntry.route}
+   - Cargo: ${bl.cargo || r.caseEntry.cargo || 'not specified'} · ${bl.quantity_mt ? bl.quantity_mt + ' MT' : ''}
+   - Issue price: $${Number(r.price).toFixed(2)} / token
+   - Expected yield: **${(r.yieldBps / 100).toFixed(2)}%**
+   - Risk level: ${riskLabel(r.riskLevel)} (${r.riskBps} bps)
+   - Financing amount: $${(r.financingUsd / 1e6).toFixed(2)}M
+   - Yield-to-risk ratio: ${r.score.toFixed(2)}${i === 0 ? ' ← best in class' : ''}`;
     });
 
     const reasonText = params.risk_max
-      ? `筛选条件：风险 ≤ ${params.risk_max}${params.yield_min ? '、收益 ≥ ' + (params.yield_min / 100).toFixed(1) + '%' : ''}`
-      : `按"${params.preference}"综合排序`;
+      ? `Filter: risk ≤ ${params.risk_max}${params.yield_min ? ', yield ≥ ' + (params.yield_min / 100).toFixed(1) + '%' : ''}`
+      : `Ranked overall by "${params.preference}"`;
 
-    return `**🔍 AI 推荐结果**（${reasonText}，共 ${results.length} 个匹配）\n\n${lines.join('\n\n')}\n\n💡 点击提单名称可查看详情，说「对比前两个」可并排比较。`;
+    return `**🔍 AI recommendations** (${reasonText}, ${results.length} matches)\n\n${lines.join('\n\n')}\n\n💡 Click a bill of lading name to see details, or say "compare the first two" for a side-by-side comparison.`;
   },
 
   async getPortfolio() {
     if (!portfolio.length) {
-      return `📭 你还没有任何持仓。\n\n试试对我说「帮我推荐收益高、风险中等的提单」，让我帮你找到合适的投资标的。`;
+      return `📭 You don't have any positions yet.\n\nTry saying "recommend high-yield, medium-risk eBLs" and I'll help you find a suitable investment.`;
     }
 
     const lines = portfolio.map((p, i) => {
       const riskEmoji = { LOW: '🟢', MEDIUM: '🟡', HIGH: '🟠', CRITICAL: '🔴' }[p.risk_level] || '⚪';
       return `${i + 1}. **${p.label}**
-   - 认购：${p.token_count} RWA × $${Number(p.price).toFixed(2)} = $${Number(p.amount_usd).toFixed(2)}
-   - 预期收益：${(p.yield_bps / 100).toFixed(2)}% | 风险：${riskEmoji} ${p.risk_level}
-   - 认购时间：${p.subscribed_at || '未知'}`;
+   - Subscribed: ${p.token_count} RWA × $${Number(p.price).toFixed(2)} = $${Number(p.amount_usd).toFixed(2)}
+   - Expected yield: ${(p.yield_bps / 100).toFixed(2)}% | Risk: ${riskEmoji} ${p.risk_level}
+   - Subscribed at: ${p.subscribed_at || 'unknown'}`;
     });
 
     const totalUsd = portfolio.reduce((s, p) => s + Number(p.amount_usd), 0);
     const avgYield = portfolio.length ? (portfolio.reduce((s, p) => s + p.yield_bps, 0) / portfolio.length / 100) : 0;
 
-    return `**📊 我的持仓**（${portfolio.length} 个标的，总投入 $${totalUsd.toFixed(2)}）\n\n${lines.join('\n\n')}\n\n平均预期收益：**${avgYield.toFixed(2)}%** | 可对任意持仓说「查看状态」获取实时进展。`;
+    return `**📊 My portfolio** (${portfolio.length} positions, total invested $${totalUsd.toFixed(2)})\n\n${lines.join('\n\n')}\n\nAverage expected yield: **${avgYield.toFixed(2)}%** | Say "check status" for any position to get live progress.`;
   },
 
   async getPoolStatus(params) {
-    if (!params.case_id) return '请提供提单 ID。';
+    if (!params.case_id) return 'Please provide a bill of lading ID.';
     if (!state.cases?.length) state.cases = await api.getCases();
 
     const entry = state.cases.find(c => c.case_id === params.case_id);
-    if (!entry) return `未找到提单 ${params.case_id}。`;
+    if (!entry) return `Bill of lading ${params.case_id} not found.`;
 
     try {
       const comp = await api.compareSpeeds(entry.case);
       const rec = comp.quotes?.find(q => q.payout_speed === comp.recommended_payout_speed)
                || comp.quotes?.[0];
-      if (!rec) return `未能获取 ${params.case_id} 的发行池数据。`;
+      if (!rec) return `Could not get offering pool data for ${params.case_id}.`;
 
-      const riskLabel = (lvl) => ({ LOW: '🟢 低风险', MEDIUM: '🟡 中风险', HIGH: '🟠 高风险', CRITICAL: '🔴 严重' })[lvl] || lvl;
+      const riskLabel = (lvl) => ({ LOW: '🟢 Low risk', MEDIUM: '🟡 Medium risk', HIGH: '🟠 High risk', CRITICAL: '🔴 Critical' })[lvl] || lvl;
       const paused = ['PAUSE_OFFERING', 'FREEZE_POOL'].includes(rec.pricing_action);
 
-      return `**📦 发行池状态：${params.case_id}**
-- 提单：${entry.label}
-- 路线：${entry.route}
-- 当前发行价：$${Number(rec.final_issue_price_usd).toFixed(2)} / 代币
-- 预期收益率：${(rec.implied_gross_yield_bps / 100).toFixed(2)}%
-- 风险等级：${riskLabel(rec.risk_level)} (${rec.risk_score_bps} bps)
-- 推荐到账速度：${comp.recommended_payout_speed || 'BALANCED'}
-- 状态：${paused ? '⏸️ 暂停中' : '✅ 开放认购'} (${rec.pricing_action})
-- 推荐代币供应量：${rec.recommended_token_supply || 'N/A'}
-- AI 核验货值：$${Number(rec.ai_verified_collateral_value_usd || 0).toFixed(2)}${paused ? '\n\n⚠️ 该发行池当前暂停，可能是 AI 检测到风险升级。说「查看 Agent 活动」了解原因。' : '\n\n💡 说「认购 ' + params.case_id + '」即可投资。'}`;
+      return `**📦 Offering pool status: ${params.case_id}**
+- Bill of lading: ${entry.label}
+- Route: ${entry.route}
+- Current issue price: $${Number(rec.final_issue_price_usd).toFixed(2)} / token
+- Expected yield: ${(rec.implied_gross_yield_bps / 100).toFixed(2)}%
+- Risk level: ${riskLabel(rec.risk_level)} (${rec.risk_score_bps} bps)
+- Recommended payout speed: ${comp.recommended_payout_speed || 'BALANCED'}
+- Status: ${paused ? '⏸️ paused' : '✅ open for subscription'} (${rec.pricing_action})
+- Recommended token supply: ${rec.recommended_token_supply || 'N/A'}
+- AI-verified cargo value: $${Number(rec.ai_verified_collateral_value_usd || 0).toFixed(2)}${paused ? '\n\n⚠️ This offering pool is currently paused, possibly because the AI detected a risk escalation. Say "show agent activity" to see why.' : '\n\n💡 Say "subscribe ' + params.case_id + '" to invest.'}`;
     } catch (e) {
-      return `查询发行池状态失败：${e.message}`;
+      return `Failed to get offering pool status: ${e.message}`;
     }
   },
 
   async getAgentActivity(params) {
     const limit = params.limit || 5;
     if (!agentDecisions.length) {
-      // 模拟一些初始决策记录
+      // Seed a few mock initial decision records
       const now = new Date();
       const cases = state.cases?.length ? state.cases : [];
       if (cases.length) {
         agentDecisions.push({
           id: 'dec-001', timestamp: new Date(now - 3600000).toISOString(),
-          trigger: 'eBL 上链事件', decision: 'OPEN_OFFERING',
-          reasoning: `AI 交叉核验提单/发票/保险单通过。货物估值 $${(cases[0]?.case?.bill_of_lading?.declared_value_usd / 1e6 || 5).toFixed(1)}M。航线风险评估 MEDIUM。自动开盘。`,
+          trigger: 'eBL on-chain event', decision: 'OPEN_OFFERING',
+          reasoning: `AI cross-checked the bill of lading / invoice / insurance policy: passed. Cargo valued at $${(cases[0]?.case?.bill_of_lading?.declared_value_usd / 1e6 || 5).toFixed(1)}M. Route risk assessed as MEDIUM. Offering opened automatically.`,
           tx_hash: '0x' + Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join(''),
           case_id: cases[0]?.case_id || 'CASE-EBL-2026-0001'
         });
       }
       agentDecisions.push({
         id: 'dec-002', timestamp: new Date(now - 1800000).toISOString(),
-        trigger: 'xAPI 检测地缘风险信号', decision: 'REPRICE_DOWN',
-        reasoning: 'Strait of Hormuz 冲突升级警告。AI 上调航线风险从 215bps → 280bps。发行价自动下调 3%。',
+        trigger: 'xAPI detected a geopolitical risk signal', decision: 'REPRICE_DOWN',
+        reasoning: 'Strait of Hormuz conflict escalation warning. AI raised route risk from 215bps → 280bps. Issue price automatically lowered by 3%.',
         tx_hash: null, case_id: cases[0]?.case_id || 'CASE-EBL-2026-0001'
       });
       agentDecisions.push({
         id: 'dec-003', timestamp: new Date(now - 600000).toISOString(),
-        trigger: '定时巡检 (5min)', decision: 'MONITORING',
-        reasoning: '当前所有发行池状态正常。风险无变化。无需干预。',
+        trigger: 'Scheduled patrol (5min)', decision: 'MONITORING',
+        reasoning: 'All offering pools are in normal state. No risk change. No intervention needed.',
         tx_hash: null, case_id: null
       });
     }
 
     const recent = agentDecisions.slice(-limit).reverse();
-    const decisionIcon = { OPEN_OFFERING: '🟢 开盘', PAUSE_OFFERING: '⏸️ 暂停', REPRICE_DOWN: '📉 降价', REPRICE_UP: '📈 涨价', SETTLE: '✅ 结算', MONITORING: '👀 监控中' };
+    const decisionIcon = { OPEN_OFFERING: '🟢 Open', PAUSE_OFFERING: '⏸️ Pause', REPRICE_DOWN: '📉 Reprice down', REPRICE_UP: '📈 Reprice up', SETTLE: '✅ Settle', MONITORING: '👀 Monitoring' };
 
     const lines = recent.map(d => {
       const time = new Date(d.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
       const icon = decisionIcon[d.decision] || '🔧 ' + d.decision;
       return `**[${time}] ${icon}**
-   触发：${d.trigger}
-   决策：${d.reasoning.slice(0, 150)}${d.reasoning.length > 150 ? '...' : ''}
-   ${d.tx_hash ? '链上交易：`' + d.tx_hash.slice(0, 18) + '...`' : ''}${d.case_id ? ' · ' + d.case_id : ''}`;
+   Trigger: ${d.trigger}
+   Decision: ${d.reasoning.slice(0, 150)}${d.reasoning.length > 150 ? '...' : ''}
+   ${d.tx_hash ? 'On-chain tx: `' + d.tx_hash.slice(0, 18) + '...`' : ''}${d.case_id ? ' · ' + d.case_id : ''}`;
     });
 
-    return `**🤖 自主 AI Agent 活动记录**（最近 ${recent.length} 条）\n\n${lines.join('\n\n')}\n\n💡 AI Agent 每 5 分钟巡检一次，检测到风险变化时自主决策并上链执行。所有决策可审计。`;
+    return `**🤖 Autonomous AI agent activity** (latest ${recent.length})\n\n${lines.join('\n\n')}\n\n💡 The AI agent patrols every 5 minutes; when it detects a risk change it decides autonomously and executes on-chain. Every decision is auditable.`;
   },
 
   async compareEBLs(params) {
     const ids = params.case_ids || [];
-    if (ids.length < 2) return '请至少提供 2 个提单 ID 进行对比。';
-    if (ids.length > 3) return '最多同时对比 3 个提单。';
+    if (ids.length < 2) return 'Please provide at least 2 bill of lading IDs to compare.';
+    if (ids.length > 3) return 'At most 3 bills of lading can be compared at once.';
 
     const all = await _scoreAllCases();
     const selected = ids.map(id => all.find(s => s.caseEntry.case_id === id)).filter(Boolean);
-    if (selected.length < 2) return '部分提单未找到或无法获取定价数据。';
+    if (selected.length < 2) return 'Some bills of lading were not found or their pricing data could not be fetched.';
 
-    const riskLabel = (lvl) => ({ LOW: '🟢 低', MEDIUM: '🟡 中', HIGH: '🟠 高', CRITICAL: '🔴 严重' })[lvl] || lvl;
+    const riskLabel = (lvl) => ({ LOW: '🟢 Low', MEDIUM: '🟡 Medium', HIGH: '🟠 High', CRITICAL: '🔴 Critical' })[lvl] || lvl;
     const best = { yield: selected.reduce((b, s) => s.yieldBps > (b?.yieldBps || 0) ? s : b, null),
                    risk: selected.reduce((b, s) => s.riskBps < (b?.riskBps || Infinity) ? s : b, null),
                    score: selected.reduce((b, s) => s.score > (b?.score || 0) ? s : b, null) };
 
     const lines = selected.map((s, i) => {
       const tags = [];
-      if (s === best.score) tags.push('⭐ 收益风险比最优');
-      if (s === best.yield) tags.push('📈 收益最高');
-      if (s === best.risk) tags.push('🛡️ 风险最低');
+      if (s === best.score) tags.push('⭐ Best yield-to-risk');
+      if (s === best.yield) tags.push('📈 Highest yield');
+      if (s === best.risk) tags.push('🛡️ Lowest risk');
       const tagStr = tags.length ? '  ← ' + tags.join(' · ') : '';
       return `**${i + 1}. ${s.caseEntry.label}**${tagStr}
-   | 发行价 | 收益 | 风险 | 融资金额 | 收益风险比 |
+   | Issue price | Yield | Risk | Financing | Yield/risk |
    | $${Number(s.price).toFixed(2)} | ${(s.yieldBps / 100).toFixed(2)}% | ${riskLabel(s.riskLevel)} (${s.riskBps}bps) | $${(s.financingUsd / 1e6).toFixed(2)}M | ${s.score.toFixed(2)} |`;
     });
 
     const recIdx = selected.indexOf(best.score);
     const recName = best.score?.caseEntry.label || '';
 
-    return `**⚖️ eBL 对比分析**\n\n${lines.join('\n\n')}\n\n🏆 **推荐：${recName}** — 综合收益风险比最优（${best.score?.score.toFixed(2) || 'N/A'}）。\n说「查看 ${ids[recIdx]}」了解详情，或「认购」直接投资。`;
+    return `**⚖️ eBL comparison**\n\n${lines.join('\n\n')}\n\n🏆 **Recommended: ${recName}** — best overall yield-to-risk ratio (${best.score?.score.toFixed(2) || 'N/A'}).\nSay "show ${ids[recIdx]}" for details, or "subscribe" to invest directly.`;
   },
 
   async subscribeRWA(params) {
-    if (!params.case_id) return '请提供要认购的提单 ID。';
+    if (!params.case_id) return 'Please provide the bill of lading ID to subscribe to.';
     if (!state.cases?.length) state.cases = await api.getCases();
 
     const entry = state.cases.find(c => c.case_id === params.case_id);
-    if (!entry) return `未找到提单 ${params.case_id}。`;
+    if (!entry) return `Bill of lading ${params.case_id} not found.`;
 
-    // 先获取定价
+    // Fetch the pricing first
     let quote;
     try {
       const comp = await api.compareSpeeds(entry.case);
       const speed = params.payout_speed || comp.recommended_payout_speed || 'BALANCED';
       quote = comp.quotes?.find(q => q.payout_speed === speed) || comp.quotes?.[0];
-      if (!quote) return `未能获取 ${params.case_id} 的当前发行价。`;
+      if (!quote) return `Could not get the current issue price for ${params.case_id}.`;
     } catch (e) {
-      return `获取定价失败：${e.message}`;
+      return `Failed to get pricing: ${e.message}`;
     }
 
     const amountUsd = params.amount_usd || 5000;
     const tokenCount = Math.floor(amountUsd / Number(quote.final_issue_price_usd));
-    if (tokenCount <= 0) return `认购金额 $${amountUsd} 不足以购买至少 1 枚 RWA 代币（当前发行价 $${Number(quote.final_issue_price_usd).toFixed(2)}）。请提高认购金额。`;
+    if (tokenCount <= 0) return `A subscription of $${amountUsd} is not enough to buy at least 1 RWA token (current issue price $${Number(quote.final_issue_price_usd).toFixed(2)}). Please increase the amount.`;
 
-    // 检查钱包
+    // Check the wallet
     if (!web3.isWalletConnected()) {
       try {
         const { address } = await web3.connectWallet();
         state.wallet = { address };
       } catch (e) {
-        if (e.code === 'NO_WALLET') return '未检测到钱包。请先安装 MetaMask 或 OKX 浏览器扩展。';
-        if (e.code === 'REJECTED') return '用户拒绝了钱包连接请求。请重新尝试。';
-        return `钱包连接失败：${e.message}`;
+        if (e.code === 'NO_WALLET') return 'No wallet detected. Please install the MetaMask or OKX browser extension first.';
+        if (e.code === 'REJECTED') return 'The user rejected the wallet connection request. Please try again.';
+        return `Wallet connection failed: ${e.message}`;
       }
     }
 
-    // 记录认购到持仓
+    // Record the subscription in the portfolio
     const position = {
       case_id: params.case_id,
       label: entry.label,
@@ -732,35 +737,35 @@ ${isReal ? '- 可执行真实链上铸造' : '- 将使用模拟交易（合约�
     };
     portfolio.push(position);
 
-    // 记录 Agent 决策
+    // Record the agent decision
     agentDecisions.push({
       id: 'dec-' + Date.now(),
       timestamp: new Date().toISOString(),
-      trigger: '投资者认购',
+      trigger: 'Investor subscription',
       decision: 'SUBSCRIPTION',
-      reasoning: `投资者认购 ${entry.label}：$${amountUsd} → ${tokenCount} RWA 代币，发行价 $${Number(quote.final_issue_price_usd).toFixed(2)}。`,
+      reasoning: `Investor subscribed to ${entry.label}: $${amountUsd} → ${tokenCount} RWA tokens at issue price $${Number(quote.final_issue_price_usd).toFixed(2)}.`,
       tx_hash: null,
       case_id: params.case_id
     });
 
-    return `**🎉 认购成功！**
+    return `**🎉 Subscription successful!**
 
-- 提单：${entry.label}
-- 认购金额：$${Number(amountUsd).toFixed(2)}
-- 获得 RWA 代币：**${tokenCount} 枚**
-- 发行价：$${Number(quote.final_issue_price_usd).toFixed(2)} / 代币
-- 预期收益：${(position.yield_bps / 100).toFixed(2)}%
-- 风险等级：${position.risk_level}
+- Bill of lading: ${entry.label}
+- Subscription amount: $${Number(amountUsd).toFixed(2)}
+- RWA tokens received: **${tokenCount}**
+- Issue price: $${Number(quote.final_issue_price_usd).toFixed(2)} / token
+- Expected yield: ${(position.yield_bps / 100).toFixed(2)}%
+- Risk level: ${position.risk_level}
 
-💡 已加入你的持仓。说「我的持仓」可以随时查看。进口商付款到港后合约将自动兑付。`;
+💡 Added to your portfolio. Say "my portfolio" any time to view it. The contract pays out automatically once the importer pays on arrival.`;
   }
 };
 
 // ===========================================================================
-// 样式注入（自包含）
+// Style injection (self-contained)
 // ===========================================================================
 const STYLES = /* css */`
-/* ---- 悬浮按钮 ---- */
+/* ---- Floating button ---- */
 .pa-float {
   position: fixed; z-index: 9999; touch-action: none; user-select: none;
   transition: transform 0.22s ease;
@@ -791,7 +796,7 @@ const STYLES = /* css */`
   50% { box-shadow: 0 0 0 8px transparent; }
 }
 
-/* ---- 弹窗 ---- */
+/* ---- Dialog ---- */
 .pa-overlay {
   position: fixed; inset: 0; z-index: 10000;
   display: flex; align-items: center; justify-content: center;
@@ -861,7 +866,7 @@ const STYLES = /* css */`
   line-height:1.5; max-height:200px; overflow-y:auto;
 }
 
-/* ---- 结构化数据卡片 ---- */
+/* ---- Structured data cards ---- */
 .pa-data-card {
   max-width:90%;
   background:var(--bg-2, #0a0f1f);
@@ -931,7 +936,7 @@ const STYLES = /* css */`
 `;
 
 // ===========================================================================
-// FloatingButton —— 可拖拽悬浮图标（保持不变）
+// FloatingButton — draggable floating icon (unchanged)
 // ===========================================================================
 class FloatingButton {
   constructor({ size = 72, onClick } = {}) {
@@ -1040,7 +1045,7 @@ class FloatingButton {
 }
 
 // ===========================================================================
-// PopupAssistant —— AI 对话弹窗（DeepSeek + Function Calling）
+// PopupAssistant — AI chat dialog (DeepSeek + function calling)
 // ===========================================================================
 class PopupAssistant {
   constructor() {
@@ -1051,34 +1056,34 @@ class PopupAssistant {
     this._overlay = null;
     this._toolRound = 0;
 
-    // 初始化对话历史（system prompt）
+    // Initialise the chat history (system prompt)
     this._chatHistory = [
       { role: 'system', content: SYSTEM_PROMPT }
     ];
 
-    // 欢迎消息
+    // Welcome message
     this.messages = [{
       id: 1,
       sender: 'assistant',
       type: 'text',
-      text: '👋 你好！我是 AgentBL 协议的 AI 助手。\n\nAgentBL 是一个 **Web3 原生贸易融资协议**：出口商 tokenize 电子提单，AI 定价航线风险，全球投资者直接投资。\n**没有银行。没有信用审核。没有中间人。**\n\n🔍 **投资者视角** — 说「帮我推荐收益高、风险中等的提单」试试 AI 智能推荐\n📊 **对比标的** — 说「对比前两个」并排比较\n💰 **一键认购** — 说「投 5000 美元」直接认购\n🛡️ **出口商视角** — 说「分析铜矿案例」执行 AI 定价\n\n试试对我说「推荐几个好标的」吧！'
+      text: t('pa_welcome')
     }];
     this._chatHistory.push({ role: 'assistant', content: this.messages[0].text });
   }
 
   get quickActions() {
     return [
-      '🤖 推荐收益高风险中等的提单',
-      '📊 对比所有可投标的',
-      '💼 我的持仓',
-      '🛡️ AI 最近有什么预警'
+      t('pa_quick_recommend'),
+      t('pa_quick_compare_all'),
+      t('pa_quick_portfolio'),
+      t('pa_quick_alerts')
     ];
   }
 
   open() {
     if (!this.isOpen) {
       this.isOpen = true;
-      // 预加载案例列表
+      // Preload the case list
       if (!state.cases || !state.cases.length) {
         api.getCases().then((cases) => { state.cases = cases; }).catch(() => {});
       }
@@ -1100,7 +1105,7 @@ class PopupAssistant {
 
     // Header
     dlg.append(el('div', { class: 'pa-header' },
-      el('h2', { class: 'pa-title', text: '◈ AgentBL AI 助手' }),
+      el('h2', { class: 'pa-title', text: t('pa_title') }),
       el('button', { class: 'pa-close', text: '✕', onclick: () => self.close() })
     ));
 
@@ -1122,7 +1127,7 @@ class PopupAssistant {
 
     // Input
     const input = el('input', {
-      class: 'pa-input', type: 'text', placeholder: '输入消息…',
+      class: 'pa-input', type: 'text', placeholder: t('pa_input_ph'),
       onkeydown: (e) => { if (e.key === 'Enter' && !self.isLoading) self._send(input.value); }
     });
     const sendBtn = el('button', {
@@ -1139,7 +1144,7 @@ class PopupAssistant {
     const esc = (e) => { if (e.key === 'Escape') { self.close(); document.removeEventListener('keydown', esc); } };
     document.addEventListener('keydown', esc);
 
-    // 渲染消息
+    // Render messages
     const renderMsgs = () => {
       clear(msgList);
       for (const m of self.messages) {
@@ -1147,10 +1152,10 @@ class PopupAssistant {
           // Action Card
           msgList.append(self._renderActionCard(m));
         } else if (m.type === 'data') {
-          // 结构化数据卡片
+          // Structured data card
           msgList.append(self._renderDataCard(m));
         } else {
-          // 普通文本气泡
+          // Plain text bubble
           msgList.append(el('div', { class: `pa-msg-row pa-msg-${m.sender}` },
             el('div', { class: `pa-bubble pa-bubble-${m.sender}` }, m.text)
           ));
@@ -1184,10 +1189,10 @@ class PopupAssistant {
     setTimeout(() => input.focus(), 150);
   }
 
-  /** Action Card 渲染 */
+  /** Render an action card */
   _renderActionCard(m) {
     const statusClass = m.status === 'done' ? 'done' : m.status === 'error' ? 'error' : 'running';
-    const statusText = m.status === 'done' ? '✓ 完成' : m.status === 'error' ? '✕ 失败' : '⏳ 执行中';
+    const statusText = m.status === 'done' ? t('pa_status_done') : m.status === 'error' ? t('pa_status_error') : t('pa_status_running');
     const iconMap = {
       getCases: '📋', selectCase: '📌', analyzePricing: '💰', compareSpeeds: '📊',
       analyzeRisk: '🛡️', getWorldRisk: '🌍', mintRWA: '⛓️', searchKnowledge: '🔍', getWalletStatus: '🔑',
@@ -1207,7 +1212,7 @@ class PopupAssistant {
     );
   }
 
-  /** 结构化数据卡片渲染 */
+  /** Render a structured data card */
   _renderDataCard(m) {
     return el('div', { class: 'pa-msg-row pa-msg-assistant' },
       el('div', { class: 'pa-data-card' },
@@ -1222,7 +1227,7 @@ class PopupAssistant {
   }
 
   // ===========================================================================
-  // 核心：发送消息 + Function Calling 循环
+  // Core: send a message + function-calling loop
   // ===========================================================================
   async _send(text) {
     const txt = (text || '').trim();
@@ -1230,11 +1235,11 @@ class PopupAssistant {
     this.isLoading = true;
     this._toolRound = 0;
 
-    // 添加用户消息
+    // Add the user message
     this.messages.push({ id: Date.now(), sender: 'user', type: 'text', text: txt });
     this._chatHistory.push({ role: 'user', content: txt });
 
-    // 创建 assistant 占位
+    // Create the assistant placeholder
     const asstId = Date.now() + 1; this._asstId = asstId;
     const asstMsg = { id: asstId, sender: 'assistant', type: 'text', text: '' };
     this.messages.push(asstMsg);
@@ -1243,7 +1248,7 @@ class PopupAssistant {
     try {
       await this._conversationLoop(asstMsg);
     } catch (e) {
-      asstMsg.text = `抱歉，处理请求时出错：${e.message}`;
+      asstMsg.text = t('pa_error_generic', { msg: e.message });
     } finally {
       this.isLoading = false; this._asstId = null;
       this._renderMsgs?.();
@@ -1253,11 +1258,11 @@ class PopupAssistant {
   }
 
   /**
-   * Function Calling 对话循环
-   * 最多循环 MAX_ROUNDS 次，每次：
-   *   1. 调用 DeepSeek 流式获取回复
-   *   2. 如果 AI 返回 tool_calls → 执行 → 结果追加到 history → 继续循环
-   *   3. 如果 AI 返回纯文本 → 结束
+   * Function-calling conversation loop
+   * Loops at most MAX_ROUNDS times; each round:
+   *   1. Call DeepSeek with streaming to get the reply
+   *   2. If the AI returns tool_calls → execute them → append results to history → continue
+   *   3. If the AI returns plain text → stop
    */
   async _conversationLoop(asstMsg) {
     const MAX_ROUNDS = 5;
@@ -1265,7 +1270,7 @@ class PopupAssistant {
     while (this._toolRound < MAX_ROUNDS) {
       this._toolRound++;
 
-      // 调用 DeepSeek（流式）
+      // Call DeepSeek (streaming)
       let content = '';
       let toolCalls = [];
 
@@ -1281,9 +1286,9 @@ class PopupAssistant {
       content = result.content || '';
       toolCalls = result.tool_calls || [];
 
-      // 如果 AI 返回了 tool_calls
+      // The AI returned tool_calls
       if (toolCalls && toolCalls.length > 0) {
-        // 将 assistant 消息（含 tool_calls）加入 chatHistory
+        // Add the assistant message (with tool_calls) to chatHistory
         const assistantMsg = {
           role: 'assistant',
           content: content || null,
@@ -1295,45 +1300,45 @@ class PopupAssistant {
         };
         this._chatHistory.push(assistantMsg);
 
-        // 执行每个 tool
+        // Execute each tool
         for (const tc of toolCalls) {
           await this._executeTool(tc);
         }
 
-        // 重置 asstMsg 以便下一轮追加文本
+        // Reset asstMsg so the next round can append text
         asstMsg.text = '';
         content = '';
-        // 继续循环（AI 可能基于 tool 结果生成最终回复）
+        // Continue the loop (the AI may produce a final reply from the tool results)
         continue;
       }
 
-      // 纯文本回复 → 结束
+      // Plain text reply → done
       if (content) {
         asstMsg.text = content;
         asstMsg.type = 'text';
         this._chatHistory.push({ role: 'assistant', content });
       } else {
-        // 没有任何内容也没有 tool call
-        asstMsg.text = '（AI 未返回有效响应，请重试）';
+        // Neither content nor a tool call
+        asstMsg.text = t('pa_no_response');
         asstMsg.type = 'text';
         this._chatHistory.push({ role: 'assistant', content: asstMsg.text });
       }
       return;
     }
 
-    // 超过最大轮数
-    asstMsg.text = '操作已超过最大执行步骤，请简化你的请求。';
+    // Exceeded the maximum number of rounds
+    asstMsg.text = t('pa_max_rounds');
     asstMsg.type = 'text';
     this._chatHistory.push({ role: 'assistant', content: asstMsg.text });
   }
 
   /**
-   * 执行单个 tool call
+   * Execute a single tool call
    */
   async _executeTool(toolCall) {
     const { id, name, arguments: args } = toolCall;
 
-    // 创建 Action Card
+    // Create the action card
     const actionMsg = {
       id: Date.now(),
       sender: 'assistant',
@@ -1346,7 +1351,7 @@ class PopupAssistant {
     this.messages.splice(this.messages.length - 1, 0, actionMsg);
     this._renderMsgs?.();
 
-    // 执行
+    // Execute
     const executor = toolExecutors[name];
     let result;
     if (executor) {
@@ -1354,48 +1359,48 @@ class PopupAssistant {
         result = await executor(args);
         actionMsg.status = 'done';
       } catch (e) {
-        result = `执行失败：${e.message}`;
+        result = `Execution failed: ${e.message}`;
         actionMsg.status = 'error';
       }
     } else {
-      result = `未知工具：${name}`;
+      result = `Unknown tool: ${name}`;
       actionMsg.status = 'error';
     }
 
     actionMsg.result = result;
     this._renderMsgs?.();
 
-    // 将 tool 结果加到 chatHistory
+    // Append the tool result to chatHistory
     this._chatHistory.push({
       role: 'tool',
       tool_call_id: id,
-      content: String(result).slice(0, 2000) // 限制长度
+      content: String(result).slice(0, 2000) // cap the length
     });
   }
 
-  /** 工具调用的中文标签 */
+  /** Localised labels for tool calls */
   _toolLabel(name, args) {
     const labels = {
-      getCases: '获取提单列表',
-      selectCase: `加载提单 ${args.case_id || ''}`,
-      analyzePricing: `定价分析 · ${args.payout_speed || 'BALANCED'}`,
-      compareSpeeds: '对比三种到账速度',
-      analyzeRisk: 'AI 风险评分分析',
-      getWorldRisk: '获取实时世界风险情报',
-      mintRWA: `tokenize eBL 上链${args.financing_usd ? ' · $' + args.financing_usd : ''}`,
-      searchKnowledge: `搜索知识库：${args.query || ''}`,
-      getWalletStatus: '查询钱包状态',
-      recommendEBL: `AI 智能推荐：${args.preference || ''}`,
-      getPortfolio: '查看我的持仓',
-      getPoolStatus: `发行池状态：${args.case_id || ''}`,
-      getAgentActivity: `AI 决策记录（最近 ${args.limit || 5} 条）`,
-      compareEBLs: `对比 ${(args.case_ids || []).length || 0} 个提单`,
-      subscribeRWA: `认购 RWA：${args.case_id || ''}${args.amount_usd ? ' · $' + args.amount_usd : ''}`
+      getCases: t('pa_tool_getCases'),
+      selectCase: t('pa_tool_selectCase', { id: args.case_id || '' }),
+      analyzePricing: t('pa_tool_analyzePricing', { speed: args.payout_speed || 'BALANCED' }),
+      compareSpeeds: t('pa_tool_compareSpeeds'),
+      analyzeRisk: t('pa_tool_analyzeRisk'),
+      getWorldRisk: t('pa_tool_getWorldRisk'),
+      mintRWA: t('pa_tool_mintRWA', { amount: args.financing_usd ? ' · $' + args.financing_usd : '' }),
+      searchKnowledge: t('pa_tool_searchKnowledge', { query: args.query || '' }),
+      getWalletStatus: t('pa_tool_getWalletStatus'),
+      recommendEBL: t('pa_tool_recommendEBL', { preference: args.preference || '' }),
+      getPortfolio: t('pa_tool_getPortfolio'),
+      getPoolStatus: t('pa_tool_getPoolStatus', { id: args.case_id || '' }),
+      getAgentActivity: t('pa_tool_getAgentActivity', { n: args.limit || 5 }),
+      compareEBLs: t('pa_tool_compareEBLs', { n: (args.case_ids || []).length || 0 }),
+      subscribeRWA: t('pa_tool_subscribeRWA', { id: args.case_id || '', amount: args.amount_usd ? ' · $' + args.amount_usd : '' })
     };
-    return labels[name] || `调用 ${name}`;
+    return labels[name] || t('pa_tool_call', { name });
   }
 
-  /** 流式更新聊天气泡 */
+  /** Update the chat bubble while streaming */
   _updateBubble() {
     const bubbles = this._overlay?.querySelectorAll('.pa-bubble-assistant:not(.pa-loading)');
     if (!bubbles?.length) return;
@@ -1408,14 +1413,14 @@ class PopupAssistant {
 }
 
 // ===========================================================================
-// 初始化入口
+// Initialisation entry point
 // ===========================================================================
 let _inst = null;
 
 export function initPopupAssistant() {
   if (_inst) return _inst;
 
-  // 注入样式
+  // Inject styles
   if (!document.getElementById('pa-styles')) {
     const s = document.createElement('style'); s.id = 'pa-styles'; s.textContent = STYLES;
     document.head.appendChild(s);
@@ -1423,7 +1428,7 @@ export function initPopupAssistant() {
 
   const popup = new PopupAssistant();
 
-  // 创建悬浮按钮
+  // Create the floating button
   new FloatingButton({
     size: 72,
     onClick: () => popup.open()
