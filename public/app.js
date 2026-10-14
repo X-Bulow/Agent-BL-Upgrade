@@ -2881,7 +2881,28 @@ function renderAgentTimeline() {
 // ===========================================================================
 // Wiring
 // ===========================================================================
+/**
+ * Publish the real topbar and sub-bar heights as CSS variables so sticky
+ * elements sit right below them; both bars change height when they wrap.
+ */
+function trackStickyBarHeights() {
+  const bars = { '--topbar-h': document.querySelector('.topbar'), '--subbar-h': document.querySelector('.subbar') };
+  const apply = () => {
+    for (const [name, node] of Object.entries(bars)) {
+      if (node) document.documentElement.style.setProperty(name, `${node.offsetHeight}px`);
+    }
+  };
+  apply();
+  if (typeof ResizeObserver === 'function') {
+    const observer = new ResizeObserver(apply);
+    Object.values(bars).forEach((node) => node && observer.observe(node));
+  } else {
+    window.addEventListener('resize', apply);
+  }
+}
+
 function wireStaticHandlers() {
+  trackStickyBarHeights();
   document.querySelectorAll('#nav .nav-tab').forEach((b) =>
     b.addEventListener('click', () => {
       setView(b.dataset.view);

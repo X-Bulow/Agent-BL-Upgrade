@@ -302,7 +302,10 @@ strong { color: var(--text); }
   background: linear-gradient(180deg, var(--panel) 0%, var(--bg-deep) 120%);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
 }
-.market-rail, .market-detail { position: sticky; top: 136px; }
+.market-rail, .market-detail {
+  position: sticky;
+  top: calc(var(--topbar-h, 62px) + var(--subbar-h, 46px) + 12px);
+}
 .market-rail { padding: 16px; }
 .market-rail-head { display: flex; flex-direction: column; gap: 7px; }
 .market-sort {
@@ -916,7 +919,8 @@ strong { color: var(--text); }
 .pricing-event-head { display: flex; justify-content: space-between; gap: 8px; }
 
 .subbar {
-  position: sticky; top: 62px; z-index: 40;
+  /* --topbar-h is the measured topbar height (set in app.js), so nothing is hidden under it. */
+  position: sticky; top: var(--topbar-h, 62px); z-index: 40;
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
 }
@@ -1247,7 +1251,6 @@ strong { color: var(--text); }
   .readout-grid { grid-template-columns: repeat(2, 1fr); }
   .readout-grid.market-readout-grid { grid-template-columns: 1fr; }
   .live-price { font-size: 42px; }
-  .subbar { top: 56px; }
   .subbar-inner { gap: 8px; }
   .case-picker { flex-basis: 100%; min-width: 0; }
   .category-filter { flex-basis: 100%; }
