@@ -1,62 +1,59 @@
-# 🎬 AgentBL · Injective 新星计划视频脚本
+# 🎬 AgentBL · Injective Rising Star Program Video Script
 
-> **目标赛事**：Injective × Microsoft × Web3Labs 联合发起的 Injective 新星计划
+> **Target competition**: the Injective Rising Star Program, jointly launched by Injective × Microsoft × Web3Labs
 >
-> **视频时长**：3 分钟（180 秒）
+> **Video length**: 3 minutes (180 seconds)
 >
-> **核心定位**：Web3-Native Trade Finance Protocol — 取代银行的贸易融资协议
+> **Core positioning**: Web3-Native Trade Finance Protocol - a trade finance protocol that replaces the bank
 >
-> **必须强调**：Injective inEVM 部署、ENI 可信文件层、丽讯科技物流场景、AI 自主决策
+> **Must emphasise**: Injective inEVM deployment, the ENI trusted document layer, the Lixun Technology logistics scenario, autonomous AI decision-making
 >
-> **录制语言**：中文口播 + 英文字幕（关键句提供双语）
+> **Recording language**: English voiceover + English subtitles (key lines highlighted)
 
 ---
 
-## 🎯 一句话核心（片头/片尾字幕）
-
-**中文**：
-> **AgentBL：出口商上链提单，AI 定价货物风险，全球投资者直接融资。无需银行。**
+## 🎯 Core One-Liner (opening/closing caption)
 
 **English**:
 > **AgentBL: Exporters tokenize eBLs. AI prices cargo risk. Global investors fund directly. No bank required.**
 
-**Powered by**: Injective × ENI × 丽讯科技
+**Powered by**: Injective × ENI × Lixun Technology
 
 ---
 
-## 📋 视频脚本 — 完整版（3 分钟）
+## 📋 Video Script - Full Version (3 minutes)
 
-### 片头字幕（5 秒）
+### Opening Caption (5 seconds)
 ```
 AgentBL
 Web3-Native Trade Finance Protocol
 
-出口商上链提单 · AI 定价风险 · 投资者直接融资
-Powered by Injective × ENI × 丽讯科技
+Exporters tokenize eBLs · AI prices risk · Investors fund directly
+Powered by Injective × ENI × Lixun Technology
 
-Injective × Microsoft × Web3Labs 新星计划
+Injective × Microsoft × Web3Labs Rising Star Program
 ```
 
 ---
 
-### [0:00–0:35] 开场：痛点 + 传统模式 vs Web3 原生模式
+### [0:00–0:35] Opening: The Pain Point + Traditional Model vs Web3-Native Model
 
-**【画面】** 
-- 世界地图 + 集装箱船动画
-- 简单对比图：传统模式（银行中介）vs AgentBL（Web3 原生）
+**[Visuals]** 
+- World map + container ship animation
+- Simple comparison graphic: traditional model (bank intermediary) vs AgentBL (Web3-native)
 
-**【口播 - 中文】**
-> 各位评委好，这是 AgentBL。
+**[Voiceover]**
+> Hello judges, this is AgentBL.
 >
-> 先看一个真实痛点：国际贸易中，货物一装船，出口商的钱要 **30 到 45 天**才能回来。全球贸易融资缺口高达 **2.5 万亿美元**。
+> Let's start with a real pain point: in international trade, once the goods are loaded onto the ship, it takes **30 to 45 days** for the exporter to get paid. The global trade finance gap is as large as **US$2.5 trillion**.
 >
-> 传统模式下，出口商向银行申请融资——银行审核资质、评估风险、层层审批，几周时间，然后赚取利差。
+> In the traditional model, the exporter applies to a bank for financing - the bank reviews their credentials, assesses the risk, and goes through layer after layer of approvals. That takes weeks, and then the bank earns the spread.
 >
-> **AgentBL 要做的是：取代银行。**
+> **What AgentBL sets out to do is replace the bank.**
 >
-> 出口商把电子提单上链、AI 秒级定价、智能合约自动开盘、全球投资者直接认购。资金从投资者直达出口商，中间没有银行，没有审批，代码决定一切。
+> The exporter puts the electronic bill of lading on-chain, AI prices it in seconds, a smart contract opens the offering automatically, and global investors subscribe directly. Funds flow straight from investors to the exporter - no bank in between, no approvals, code decides everything.
 
-**【英文字幕】**
+**[English Subtitles]**
 > Traditional: Exporters → Banks → Weeks of approval → High spreads
 >
 > AgentBL: Exporters → AI pricing → Smart contracts → Global investors
@@ -65,127 +62,127 @@ Injective × Microsoft × Web3Labs 新星计划
 
 ---
 
-### [0:35–1:15] 核心创新①：ENI 可信文件层 + eBL 唯一性
+### [0:35–1:15] Core Innovation 1: ENI Trusted Document Layer + eBL Uniqueness
 
-**【画面】**
-- ENI logo + 文件上链动画
-- 显示 cargoHash 防双花机制
-- EBLRegistry 合约界面
+**[Visuals]**
+- ENI logo + document-on-chain animation
+- Show the cargoHash anti-double-spend mechanism
+- EBLRegistry contract interface
 
-**【口播 - 中文】**
-> 但这里有个核心问题：**链下的世界全是欺诈和风险**。单据可能造假，同一批货可能开多张提单骗贷——传统上是银行的贸易融资部门在把关。
+**[Voiceover]**
+> But there's a core problem here: **the off-chain world is full of fraud and risk**. Documents can be forged, and the same shipment can be used to issue multiple bills of lading to obtain multiple loans - traditionally, the bank's trade finance department is the gatekeeper.
 >
-> AgentBL 的第一层创新：**ENI 可信文件层**。
+> AgentBL's first layer of innovation: the **ENI trusted document layer**.
 >
-> ENI 是 Injective 生态的官方可信文件基础设施。每一张电子提单上链时，我们生成一个 **cargoHash**——船名、航次、货物、数量、装货港的 SHA-256 哈希。
+> ENI is the official trusted document infrastructure of the Injective ecosystem. When each electronic bill of lading goes on-chain, we generate a **cargoHash** - a SHA-256 hash of the vessel name, voyage, cargo, quantity and port of loading.
 >
-> 这个 cargoHash 在链上注册，**同一批货只能注册一次**。试图用同一批货开第二张提单？合约直接拒绝。
+> This cargoHash is registered on-chain, and **each shipment can only be registered once**. Try to issue a second bill of lading for the same shipment? The contract rejects it outright.
 >
-> **这就是 ENI 的价值：不可篡改 + 唯一性控制 = 取代了银行对贸易真实性的审核。**
+> **This is the value of ENI: immutability + uniqueness control = replacing the bank's review of trade authenticity.**
 
-**【画面叠加文字】**
+**[On-screen Text Overlay]**
 ```
-✅ ENI 可信文件层
-✅ cargoHash 防一货多单
-✅ 链上唯一性注册
+✅ ENI trusted document layer
+✅ cargoHash prevents multiple eBLs per shipment
+✅ On-chain uniqueness registration
 
-传统：银行贸易融资部审核（几天）
-AgentBL：ENI + 智能合约验证（秒级）
+Traditional: bank trade finance department review (days)
+AgentBL: ENI + smart contract verification (seconds)
 ```
 
-**【英文字幕】**
+**[English Subtitles]**
 > **ENI Trusted Document Layer**: One cargo = One eBL. On-chain uniqueness prevents double-financing fraud.
 
 ---
 
-### [1:15–2:00] 核心创新②：AI 自主定价引擎 + 丽讯科技物流场景
+### [1:15–2:00] Core Innovation 2: Autonomous AI Pricing Engine + Lixun Technology Logistics Scenario
 
-**【画面】**
-- 切换到 Dashboard，选择案例（新加坡 → 上海 铜货）
-- AI Pricing Console 瀑布图展开
-- 显示数据来源：LME 铜价、xAPI 风险情报、丽讯物流数据
+**[Visuals]**
+- Switch to the Dashboard and select a case (Singapore → Shanghai copper cargo)
+- The AI Pricing Console waterfall chart expands
+- Show the data sources: LME copper price, xAPI risk intelligence, Lixun logistics data
 
-**【口播 - 中文】**
-> 第二层创新：**AI 自主定价引擎**。
+**[Voiceover]**
+> The second layer of innovation: the **autonomous AI pricing engine**.
 >
-> 传统银行模式下，风控部门评估的是"这家出口商的信用等级"。AgentBL 完全不同——**AI 只评估货物本身和航线风险，不管出口商是谁。**
+> In the traditional bank model, the risk department assesses "this exporter's credit rating". AgentBL is completely different - **the AI only assesses the cargo itself and the route risk, regardless of who the exporter is.**
 >
-> 看这个案例：新加坡出口商，500 吨铜阴极板，发往上海港。
+> Look at this case: a Singapore exporter, 500 tonnes of copper cathode, bound for the port of Shanghai.
 >
-> AI 自动启动工作：
-> - 调用实时 **LME 铜价** API 估值货物 → 450 万美元
-> - 交叉核验电子提单、商业发票、保险单三份文件 → 检测数量是否一致、保险是否足额
-> - 通过 **xAPI 协议**实时抓取地缘风险、天气、航线风险
-> - 接入**丽讯科技物流系统**，获取这条航线的历史准时率、港口拥堵情况
+> The AI starts working automatically:
+> - It calls the real-time **LME copper price** API to value the cargo → US$4.5 million
+> - It cross-checks three documents - the electronic bill of lading, the commercial invoice and the insurance policy → verifying that the quantities match and that the insurance cover is sufficient
+> - It pulls geopolitical, weather and route risk in real time via the **xAPI protocol**
+> - It connects to the **Lixun Technology logistics system** to get this route's historical on-time rate and port congestion
 >
-> 然后 AI 给出三档融资方案：FAST 到账（折价 20%）、BALANCED（折价 15%）、SAFE（折价 10%）。
+> The AI then offers three financing options: FAST payout (20% discount), BALANCED (15% discount), and SAFE (10% discount).
 >
-> **出口商选择方案后，AI 自动在 Injective 链上创建发行池、自动开盘——无需任何人审批。**
+> **Once the exporter picks an option, the AI automatically creates the offering pool on the Injective chain and opens it automatically - no human approval needed.**
 
-**【画面叠加文字】**
+**[On-screen Text Overlay]**
 ```
-AI 定价输入：
-✅ 实时 LME 铜价 API
-✅ xAPI 地缘风险情报
-✅ 丽讯科技物流数据
-✅ 三份单据交叉核验
+AI pricing inputs:
+✅ Real-time LME copper price API
+✅ xAPI geopolitical risk intelligence
+✅ Lixun Technology logistics data
+✅ Cross-verification of three documents
 
-输出：
-→ 货物估值：$4,500,000
-→ 风险评分：MEDIUM
-→ 发行价：$0.80（FAST）/ $0.85（BALANCED）/ $0.90（SAFE）
+Output:
+→ Cargo valuation: $4,500,000
+→ Risk score: MEDIUM
+→ Issue price: $0.80 (FAST) / $0.85 (BALANCED) / $0.90 (SAFE)
 ```
 
-**【英文字幕】**
+**[English Subtitles]**
 > **AI prices the cargo, not the credit score.**
 >
-> Data sources: LME prices + xAPI risk intel + 丽讯 logistics + document cross-verification
+> Data sources: LME prices + xAPI risk intel + Lixun logistics + document cross-verification
 >
 > Output: Risk-adjusted issuance price. Auto-opens on Injective. No human approval.
 
 ---
 
-### [2:00–2:35] 核心创新③：在途自主决策 + Injective 链上执行
+### [2:00–2:35] Core Innovation 3: Autonomous In-Transit Decisions + On-Chain Execution on Injective
 
-**【画面】**
-- 切换到航运追踪界面（Voyage Tracking）
-- 点击"模拟霍尔木兹冲突升级"按钮
-- 显示风险维度飙红、AI 自主决策改价、状态变为 PAUSE
-- 显示链上交易记录
+**[Visuals]**
+- Switch to the Voyage Tracking screen
+- Click the "Simulate Strait of Hormuz conflict escalation" button
+- Show the risk dimensions turning red, the AI autonomously repricing, and the status changing to PAUSE
+- Show the on-chain transaction record
 
-**【口播 - 中文】**
-> 第三层创新：**AI 在途自主决策**。
+**[Voiceover]**
+> The third layer of innovation: **autonomous AI decisions while the cargo is in transit**.
 >
-> 货物在海上航行时，风险是实时变化的。传统银行模式下，贷款已经放出去了，风险变化银行也只能事后处理。
+> While the cargo is at sea, the risk changes in real time. In the traditional bank model, the loan has already been disbursed, and the bank can only deal with changes in risk after the fact.
 >
-> AgentBL 不同。我们模拟一个极端场景：这批铜正在海上，突然**霍尔木兹海峡冲突升级**。
+> AgentBL is different. Let's simulate an extreme scenario: this copper is out at sea when the **Strait of Hormuz conflict suddenly escalates**.
 >
-> 此时铜价其实在涨——普通的价格预言机会认为"抵押物更值钱、更安全"。**完全看反。**
+> At that moment the copper price is actually rising - an ordinary price oracle would conclude that "the collateral is worth more, so it's safer". **That's exactly backwards.**
 >
-> AgentBL 的 AI 知道：这是**脆弱的战争溢价**。它同时意味着：
-> - 进口商违约概率上升
-> - 保险因"战争除外"条款失效  
-> - 货物清算回收率下降
+> AgentBL's AI knows this is a **fragile war premium**. At the same time it means:
+> - The importer's probability of default goes up
+> - The insurance becomes void because of the "war exclusion" clause  
+> - The cargo's liquidation recovery rate goes down
 >
-> 所以 AI **自主决策**：把货值 haircut 21%、风险分打到 1410 个基点、直接在 **Injective 链上执行 PAUSE**——暂停新的投资者进场，把他们拦在爆雷之外。
+> So the AI **decides autonomously**: it applies a 21% haircut to the cargo value, pushes the risk score to 1410 basis points, and directly **executes PAUSE on the Injective chain** - stopping new investors from entering and keeping them clear of the blow-up.
 >
-> **这个决策从检测风险到链上执行，全程自动，无需人工干预。**
+> **From detecting the risk to executing on-chain, this decision is fully automatic, with no human intervention.**
 
-**【画面叠加文字】**
+**[On-screen Text Overlay]**
 ```
-事件：霍尔木兹冲突升级
+Event: Strait of Hormuz conflict escalates
 
-AI 自主决策链路：
-1. xAPI 检测地缘风险升级
-2. AI 重新评估：违约↑ 保险↓ 回收↓
-3. 自动生成新报价：货值 -21%、风险 1410bps
-4. Injective 链上执行：PAUSE_OFFERING
-5. 决策证据哈希上链：可审计
+AI autonomous decision path:
+1. xAPI detects the geopolitical risk escalation
+2. AI reassesses: default ↑ insurance ↓ recovery ↓
+3. Automatically generates a new quote: cargo value -21%, risk 1410bps
+4. Executed on the Injective chain: PAUSE_OFFERING
+5. Decision evidence hash recorded on-chain: auditable
 
-耗时：< 3 秒
+Time taken: < 3 seconds
 ```
 
-**【英文字幕】**
+**[English Subtitles]**
 > **Autonomous AI decision on-chain.**
 >
 > War breaks out → AI detects via xAPI → Reprices risk → Auto-pauses on Injective
@@ -196,37 +193,37 @@ AI 自主决策链路：
 
 ---
 
-### [2:35–3:00] 收束：三位一体 + 核心价值
+### [2:35–3:00] Wrap-up: Three Pillars + Core Value
 
-**【画面】**
-- 架构图展示：Injective + ENI + 丽讯科技 + AgentBL
-- 回到首页，显示"Powered by"标识
-- 最后定格在 tagline 全屏
+**[Visuals]**
+- Architecture diagram: Injective + ENI + Lixun Technology + AgentBL
+- Return to the home page and show the "Powered by" badge
+- End on a full-screen tagline
 
-**【口播 - 中文】**
-> 总结一下，AgentBL 是一个 **Web3 原生的贸易融资协议**，建立在三个官方工具之上：
+**[Voiceover]**
+> To sum up, AgentBL is a **Web3-native trade finance protocol** built on three official tools:
 >
-> **Injective**——所有智能合约部署在 Injective inEVM 测试网，每一个 AI 决策、每一次状态转移，都在链上强制执行。
+> **Injective** - all smart contracts are deployed on the Injective inEVM testnet, and every AI decision and every state transition is enforced on-chain.
 >
-> **ENI 可信文件层**——电子提单的唯一性控制和不可篡改性，这是整个协议的信任根基。
+> **The ENI trusted document layer** - uniqueness control and immutability for electronic bills of lading, which is the foundation of trust for the whole protocol.
 >
-> **丽讯科技物流场景**——真实的物流数据和行业客户，让 AI 的风险评估建立在真实业务之上。
+> **The Lixun Technology logistics scenario** - real logistics data and industry customers, so the AI's risk assessment is grounded in real business.
 >
-> **核心价值：取代银行**。出口商不需要银行授信、投资者不需要银行账户、AI 和智能合约取代了银行的风控部、放款部、清算部。
+> **The core value: replacing the bank.** Exporters don't need bank credit lines, investors don't need bank accounts, and AI plus smart contracts replace the bank's risk, lending and clearing departments.
 >
-> **eBL 就是抵押物。智能合约就是结算。代码决定一切。**
+> **The eBL is the collateral. The smart contract is the settlement. Code decides everything.**
 >
-> AgentBL，Injective 新星计划。谢谢各位评委。
+> AgentBL, for the Injective Rising Star Program. Thank you, judges.
 
-**【全屏字幕 - 5 秒】**
+**[Full-screen Caption - 5 seconds]**
 ```
 AgentBL
 Web3-Native Trade Finance Protocol
 
-出口商上链提单 · AI 定价风险 · 投资者直接融资
+Exporters tokenize eBLs · AI prices risk · Investors fund directly
 
 Powered by:
-Injective × ENI × 丽讯科技
+Injective × ENI × Lixun Technology
 
 No bank. No intermediary.
 The AI prices. The chain enforces.
@@ -234,211 +231,202 @@ The AI prices. The chain enforces.
 
 ---
 
-## 🎬 演示操作指南（配合口播的画面操作）
+## 🎬 Demo Walkthrough (on-screen actions to match the voiceover)
 
-### 时间段 [0:00–0:35] 开场
-**操作**：
-- 展示对比图（可以是 PPT 或白板）
-- 不需要打开网页，用简单动画说明概念
+### Segment [0:00–0:35] Opening
+**Actions**:
+- Show the comparison graphic (can be a slide or a whiteboard)
+- No need to open the web page; use a simple animation to explain the concept
 
-### 时间段 [0:35–1:15] ENI 部分
-**操作**：
-1. 打开浏览器，访问 Dashboard 首页
-2. 点击右上角"Connect Wallet"（展示 MetaMask 连接）
-3. 导航到 eBL 管理页面（如果有的话）
-4. **关键展示**：指向某个 eBL 的 `cargoHash` 字段
-5. 画外音："这个哈希在链上注册，保证唯一性"
+### Segment [0:35–1:15] ENI Section
+**Actions**:
+1. Open the browser and go to the Dashboard home page
+2. Click "Connect Wallet" in the top-right corner (show the MetaMask connection)
+3. Navigate to the eBL management page (if there is one)
+4. **Key shot**: point to the `cargoHash` field of an eBL
+5. Voiceover: "This hash is registered on-chain, which guarantees uniqueness"
 
-**如果没有独立的 eBL 管理页面**：
-- 在终端运行 `npm run demo:once` 
-- 展示输出中的 `cargoHash` 和 `EBL uniqueness verified` 部分
+**If there is no separate eBL management page**:
+- Run `npm run demo:once` in the terminal 
+- Show the `cargoHash` and `EBL uniqueness verified` parts of the output
 
-### 时间段 [1:15–2:00] AI 定价部分
-**操作**：
-1. 在 Dashboard 顶部选择案例：**Clean copper · Singapore → Shanghai**
-2. 等待 AI Pricing Console 展开（自动或点击"展开定价细节"）
-3. **关键展示**：
-   - 瀑布图各层级
-   - Data Sources 部分（强调 LME API、xAPI、丽讯数据）
-   - 三档融资方案对比（FAST $0.80、BALANCED $0.85、SAFE $0.90）
-4. 点击"⛓️ 铸造 RWA 上链"按钮
-5. 展示 MetaMask 弹窗（确认交易）
-6. 等待交易确认，显示成功状态
+### Segment [1:15–2:00] AI Pricing Section
+**Actions**:
+1. At the top of the Dashboard, select the case: **Clean copper · Singapore → Shanghai**
+2. Wait for the AI Pricing Console to expand (automatically, or click "Expand pricing details")
+3. **Key shots**:
+   - Each layer of the waterfall chart
+   - The Data Sources section (emphasise the LME API, xAPI and Lixun data)
+   - The comparison of the three financing options (FAST $0.80, BALANCED $0.85, SAFE $0.90)
+4. Click the "⛓️ Mint RWA on-chain" button
+5. Show the MetaMask pop-up (confirm the transaction)
+6. Wait for the transaction to confirm and show the success state
 
-### 时间段 [2:00–2:35] 在途决策部分
-**操作**：
-1. 切换到"航运追踪"（Voyage Tracking）页面
-2. 当前案例应该显示为"In Transit"状态
-3. **关键操作**：点击"⚔️ 模拟霍尔木兹冲突升级"按钮
-4. **关键展示**：
-   - 风险维度卡片变红
-   - AI 重新定价过程（自动展开）
-   - 新报价显示：货值 haircut -21%、风险 1410bps
-   - 状态变为"PAUSED"
-5. 滚动到底部，显示链上交易哈希
-6. （如果时间充裕）点击交易哈希链接，跳转到 Injective 区块浏览器
+### Segment [2:00–2:35] In-Transit Decision Section
+**Actions**:
+1. Switch to the Voyage Tracking page
+2. The current case should show the "In Transit" status
+3. **Key action**: click the "⚔️ Simulate Strait of Hormuz conflict escalation" button
+4. **Key shots**:
+   - The risk dimension cards turn red
+   - The AI repricing process (expands automatically)
+   - The new quote is shown: cargo value haircut -21%, risk 1410bps
+   - The status changes to "PAUSED"
+5. Scroll to the bottom and show the on-chain transaction hash
+6. (If time allows) click the transaction hash link to jump to the Injective block explorer
 
-**备选方案**（如果网页不稳定）：
-- 终端运行 `npm run demo:default`
-- 展示三种结算结果的输出
-- 重点指向"战争尾部违约"那一段
+**Fallback plan** (if the web page is unstable):
+- Run `npm run demo:default` in the terminal
+- Show the output for the three settlement outcomes
+- Focus on the "war tail default" section
 
-### 时间段 [2:35–3:00] 收束
-**操作**：
-1. 回到 Dashboard 首页
-2. 显示页面底部的"Powered by Injective × ENI × 丽讯科技"标识
-3. 最后 5 秒：全屏显示 tagline（可以用 PPT 或简单的全屏字幕）
-
----
-
-## 🎯 必须强调的官方工具点（用于评分）
-
-### ① Injective 官方工具使用
-**强调次数**：至少 3 次
-- [0:30] "智能合约自动开盘"
-- [1:50] "自动在 **Injective 链上**创建发行池"
-- [2:25] "在 **Injective 链上执行 PAUSE**"
-- [2:45] "所有智能合约部署在 **Injective inEVM 测试网**"
-
-**演示证据**：
-- MetaMask 连接显示 Injective Testnet
-- 交易哈希指向 Injective 区块浏览器
-- 合约地址可追溯到 Injective
-
-### ② ENI 可信文件层
-**强调次数**：至少 2 次
-- [0:50] "**ENI 可信文件层**"（独立段落，35 秒）
-- [2:45] "**ENI 可信文件层**——电子提单的唯一性控制"
-
-**演示证据**：
-- cargoHash 字段展示
-- "ENI uniqueness verified" 状态
-- 文档中明确标注"Powered by ENI"
-
-### ③ 丽讯科技物流场景
-**强调次数**：至少 2 次
-- [1:35] "接入**丽讯科技物流系统**，获取航线历史数据"
-- [2:50] "**丽讯科技物流场景**——真实的物流数据和行业客户"
-
-**演示证据**：
-- AI 定价数据来源中标注"丽讯物流数据"
-- 案例描述中提到"丽讯科技提供的真实场景"
+### Segment [2:35–3:00] Wrap-up
+**Actions**:
+1. Return to the Dashboard home page
+2. Show the "Powered by Injective × ENI × Lixun Technology" badge at the bottom of the page
+3. Last 5 seconds: show the tagline full screen (a slide or a simple full-screen caption works)
 
 ---
 
-## 🏆 差异化竞争点（为什么能拿第一名）
+## 🎯 Official Tool Points That Must Be Emphasised (for scoring)
 
-### 与其他参赛项目的本质区别
+### 1. Use of Injective's Official Tools
+**Times to emphasise**: at least 3
+- [0:30] "A smart contract opens the offering automatically"
+- [1:50] "Automatically creates the offering pool **on the Injective chain**"
+- [2:25] "**Executes PAUSE on the Injective chain**"
+- [2:45] "All smart contracts are deployed on the **Injective inEVM testnet**"
 
-| 维度 | 典型 AI × Blockchain 项目 | AgentBL |
+**Demo evidence**:
+- The MetaMask connection shows Injective Testnet
+- Transaction hashes point to the Injective block explorer
+- Contract addresses can be traced on Injective
+
+### 2. ENI Trusted Document Layer
+**Times to emphasise**: at least 2
+- [0:50] "**ENI trusted document layer**" (its own segment, 35 seconds)
+- [2:45] "**The ENI trusted document layer** - uniqueness control for electronic bills of lading"
+
+**Demo evidence**:
+- Show the cargoHash field
+- The "ENI uniqueness verified" status
+- "Powered by ENI" clearly labelled in the documentation
+
+### 3. Lixun Technology Logistics Scenario
+**Times to emphasise**: at least 2
+- [1:35] "Connects to the **Lixun Technology logistics system** to get the route's historical data"
+- [2:50] "**The Lixun Technology logistics scenario** - real logistics data and industry customers"
+
+**Demo evidence**:
+- "Lixun logistics data" labelled among the AI pricing data sources
+- The case description mentions "a real scenario provided by Lixun Technology"
+
+---
+
+## 🏆 Competitive Differentiators (why we can take first place)
+
+### How We Fundamentally Differ from Other Entries
+
+| Dimension | Typical AI × Blockchain project | AgentBL |
 |------|--------------------------|---------|
-| **AI 角色** | 聊天机器人、推荐系统 | **承保人 + 风控官**——承担真实金融职能 |
-| **叙事** | "AI 辅助 DeFi" | **"取代银行的 Web3 原生协议"** |
-| **RWA 类型** | 房地产、艺术品、积分 | **电子提单**——全球 $5 万亿贸易的核心单据 |
-| **自主程度** | 用户触发 AI 响应 | **事件驱动 + 自主决策 + 链上执行** |
-| **官方工具深度** | 浅层集成（只部署合约） | **三位一体**：Injective（执行层）+ ENI（信任层）+ 丽讯（场景层） |
-| **产业资源** | 纯链上演示 | **真实物流场景 + 行业客户** |
+| **Role of AI** | Chatbots, recommendation systems | **Underwriter + risk officer** - performs real financial functions |
+| **Narrative** | "AI-assisted DeFi" | **"A Web3-native protocol that replaces the bank"** |
+| **RWA type** | Real estate, art, loyalty points | **Electronic bills of lading** - the core document behind $5 trillion of global trade |
+| **Degree of autonomy** | User triggers an AI response | **Event-driven + autonomous decisions + on-chain execution** |
+| **Depth of official tool use** | Shallow integration (contract deployment only) | **Three pillars**: Injective (execution layer) + ENI (trust layer) + Lixun (scenario layer) |
+| **Industry resources** | Purely on-chain demo | **Real logistics scenario + industry customers** |
 
-### 评委打分维度对应
+### Mapping to the Judges' Scoring Criteria
 
-| 评分维度（预测） | AgentBL 的亮点 |
+| Scoring criterion (predicted) | AgentBL highlights |
 |----------------|---------------|
-| **创新性** | ✅ 取代银行，不是服务银行<br>✅ AI 定价货物而非信用评分<br>✅ 自主决策 + 链上强制执行 |
-| **技术实现** | ✅ 完整的智能合约（5 个合约）<br>✅ 155 个自动化测试<br>✅ AI 定价引擎 + 多 Agent 系统 |
-| **官方工具使用** | ✅ Injective inEVM 部署（可验证）<br>✅ ENI 唯一性控制（核心功能）<br>✅ 丽讯物流数据（真实场景） |
-| **商业价值** | ✅ 解决 $2.5 万亿美元缺口<br>✅ 取代传统银行贸易融资<br>✅ 已有行业客户（丽讯） |
-| **演示完整性** | ✅ 端到端闭环（上链 → 定价 → 在途决策 → 结算）<br>✅ 极端场景压力测试（战争）<br>✅ 可追溯的链上证据 |
+| **Innovation** | ✅ Replaces the bank instead of serving it<br>✅ AI prices the cargo rather than a credit score<br>✅ Autonomous decisions + on-chain enforcement |
+| **Technical implementation** | ✅ Complete smart contracts (5 contracts)<br>✅ 155 automated tests<br>✅ AI pricing engine + multi-agent system |
+| **Use of official tools** | ✅ Injective inEVM deployment (verifiable)<br>✅ ENI uniqueness control (core feature)<br>✅ Lixun logistics data (real scenario) |
+| **Commercial value** | ✅ Addresses the US$2.5 trillion gap<br>✅ Replaces traditional bank trade finance<br>✅ Already has an industry customer (Lixun) |
+| **Demo completeness** | ✅ End-to-end loop (on-chain → pricing → in-transit decision → settlement)<br>✅ Extreme-scenario stress test (war)<br>✅ Traceable on-chain evidence |
 
 ---
 
-## 🔤 关键术语双语对照（制作字幕用）
+## 🔤 Key Terms Glossary (for subtitling)
 
-| 中文 | English |
+| Term | English |
 |-----|---------|
-| 电子提单 | Electronic Bill of Lading (eBL) |
-| 贸易融资 | Trade Finance |
-| 货权凭证 | Document of Title |
-| 一货多单 | Double Financing / Cargo Duplication Fraud |
-| 货值估算 | Cargo Valuation |
-| 战争溢价 | War Premium |
-| 战争除外条款 | War Exclusion Clause |
-| 折价发行 | Discounted Issuance |
-| 目标兑付价 | Target Redemption Price |
-| 风险基点 | Risk Basis Points (bps) |
-| 自主决策 | Autonomous Decision |
-| 链上执行 | On-chain Enforcement |
-| 可信文件层 | Trusted Document Layer |
-| 唯一性控制 | Uniqueness Control |
+| Electronic bill of lading | Electronic Bill of Lading (eBL) |
+| Trade finance | Trade Finance |
+| Document of title | Document of Title |
+| Multiple bills for one shipment | Double Financing / Cargo Duplication Fraud |
+| Cargo value estimate | Cargo Valuation |
+| War premium | War Premium |
+| War exclusion clause | War Exclusion Clause |
+| Discounted issuance | Discounted Issuance |
+| Target redemption price | Target Redemption Price |
+| Risk basis points | Risk Basis Points (bps) |
+| Autonomous decision | Autonomous Decision |
+| On-chain execution | On-chain Enforcement |
+| Trusted document layer | Trusted Document Layer |
+| Uniqueness control | Uniqueness Control |
 
 ---
 
-## 📊 数字清单（所有数字均可照念，来自真实测试）
+## 📊 Numbers Checklist (all numbers can be read out as-is; they come from real tests)
 
-- **$2.5 万亿**：全球贸易融资缺口
-- **30–45 天**：传统贸易融资回款周期
-- **$450 万**：案例货值（500 吨铜）
-- **$0.80 / $0.85 / $0.90**：三档发行价（FAST / BALANCED / SAFE）
-- **20% / 15% / 10%**：对应的折价率
-- **+25% / +17.9% / +11.1%**：投资者目标收益率
-- **21%**：战争场景货值 haircut
-- **1410 个基点**：战争场景风险分
-- **< 3 秒**：AI 从检测风险到链上执行的耗时
-
----
-
-## 🎤 录制建议
-
-### 语速与节奏
-- **0:00–0:35 开场**：稍快，抓住注意力
-- **0:35–1:15 ENI 部分**：中速，强调核心技术
-- **1:15–2:00 AI 定价**：中速，数据密集需清晰
-- **2:00–2:35 在途决策**：**放慢**，这是高潮段落
-- **2:35–3:00 收束**：稍快，有力收尾
-
-### 情绪与重音
-- **"取代银行"**：重音，这是核心叙事
-- **"ENI 可信文件层"**：清晰，突出官方工具
-- **"AI 自主决策"**：重音，这是技术亮点
-- **"代码决定一切"**：重音，Web3 精神
-
-### 备用方案
-如果网页演示出现问题：
-1. **Plan B**：全程用终端命令
-   - `npm run demo:once`（完整闭环）
-   - `npm run agent:value`（AI 工具调用）
-   - `npm run demo:default`（三种结算）
-2. **Plan C**：用 PPT + 架构图讲解
-   - 所有核心概念都可以用图示说明
-   - 数字和证据来自测试输出
+- **$2.5 trillion**: the global trade finance gap
+- **30–45 days**: the payment cycle for traditional trade finance
+- **$4.5 million**: the case cargo value (500 tonnes of copper)
+- **$0.80 / $0.85 / $0.90**: the three issue prices (FAST / BALANCED / SAFE)
+- **20% / 15% / 10%**: the corresponding discount rates
+- **+25% / +17.9% / +11.1%**: target investor returns
+- **21%**: cargo value haircut in the war scenario
+- **1410 basis points**: risk score in the war scenario
+- **< 3 seconds**: time for the AI to go from detecting the risk to executing on-chain
 
 ---
 
-## 🎬 最终检查清单（提交前）
+## 🎤 Recording Tips
 
-- [ ] 片头显示"Injective × Microsoft × Web3Labs 新星计划"
-- [ ] 至少 3 次提到"Injective"
-- [ ] 至少 2 次提到"ENI 可信文件层"
-- [ ] 至少 2 次提到"丽讯科技"
-- [ ] 演示中展示 Injective Testnet 连接
-- [ ] 演示中展示 cargoHash 唯一性
-- [ ] 演示中展示 AI 自主决策过程
-- [ ] 演示中展示链上交易哈希
-- [ ] 时长控制在 3 分钟 ± 10 秒
-- [ ] 英文字幕覆盖所有关键句
-- [ ] 最后 5 秒全屏显示 tagline
+### Pace and Rhythm
+- **0:00–0:35 Opening**: slightly fast, grab attention
+- **0:35–1:15 ENI section**: medium pace, emphasise the core technology
+- **1:15–2:00 AI pricing**: medium pace, data-heavy so keep it clear
+- **2:00–2:35 In-transit decision**: **slow down**, this is the climax
+- **2:35–3:00 Wrap-up**: slightly fast, finish strong
+
+### Tone and Emphasis
+- **"Replacing the bank"**: stress it, this is the core narrative
+- **"ENI trusted document layer"**: say it clearly, highlight the official tool
+- **"Autonomous AI decision"**: stress it, this is the technical highlight
+- **"Code decides everything"**: stress it, the Web3 spirit
+
+### Backup Plans
+If the web demo has problems:
+1. **Plan B**: use terminal commands throughout
+   - `npm run demo:once` (full end-to-end loop)
+   - `npm run agent:value` (AI tool calls)
+   - `npm run demo:default` (three settlement outcomes)
+2. **Plan C**: explain with slides + the architecture diagram
+   - Every core concept can be illustrated with a diagram
+   - Numbers and evidence come from the test output
 
 ---
 
-## 💡 金句总结（可用于社交媒体 / 宣传）
+## 🎬 Final Checklist (before submission)
 
-**中文版**：
-> AgentBL：出口商上链提单，AI 定价货物风险，全球投资者直接融资。无需银行。
+- [ ] Opening shows "Injective × Microsoft × Web3Labs Rising Star Program"
+- [ ] "Injective" mentioned at least 3 times
+- [ ] "ENI trusted document layer" mentioned at least 2 times
+- [ ] "Lixun Technology" mentioned at least 2 times
+- [ ] Demo shows the Injective Testnet connection
+- [ ] Demo shows cargoHash uniqueness
+- [ ] Demo shows the autonomous AI decision process
+- [ ] Demo shows on-chain transaction hashes
+- [ ] Length kept to 3 minutes ± 10 seconds
+- [ ] English subtitles cover all key lines
+- [ ] Last 5 seconds show the tagline full screen
 
-> 传统银行评估"你是谁"，AgentBL 只评估"这批货值多少、风险多大"。
+---
 
-> eBL 就是抵押物。智能合约就是结算。代码决定一切。
-
-> Powered by Injective × ENI × 丽讯科技：执行层 × 信任层 × 场景层。
+## 💡 Key Lines (for social media / promotion)
 
 **English**:
 > AgentBL: Exporters tokenize eBLs. AI prices cargo risk. Global investors fund directly. No bank required.
@@ -447,4 +435,4 @@ The AI prices. The chain enforces.
 
 > The eBL is the collateral. The smart contract is the settlement. Code enforces everything.
 
-> Powered by Injective × ENI × 丽讯科技: Execution Layer × Trust Layer × Real-World Scenario Layer.
+> Powered by Injective × ENI × Lixun Technology: Execution Layer × Trust Layer × Real-World Scenario Layer.

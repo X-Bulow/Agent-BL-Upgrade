@@ -1,89 +1,89 @@
-# AgentBL 改进完成总结
+# AgentBL Improvements Summary
 
-## ✅ 已完成的改进（2024-06-29）
+## ✅ Completed Improvements (2024-06-29)
 
-### 1. BE-14: eBL 文档接入与 ENI Adapter ✅
+### 1. BE-14: eBL Document Ingestion and ENI Adapter ✅
 
-**新增文件**：
-- `src/app/eniAdapter.js` - ENI 文档适配器（支持 live/mock 模式）
-- `tests/eblIngestion.test.js` - 完整测试覆盖（7 tests passed）
+**New files**:
+- `src/app/eniAdapter.js` - ENI document adapter (supports live/mock modes)
+- `tests/eblIngestion.test.js` - Full test coverage (7 tests passed)
 
-**API 端点**：
-- `POST /api/ebl/upload` - 上传 eBL/发票/保险单
-- `GET /api/ebl/document-status` - 查询文档验证状态
+**API endpoints**:
+- `POST /api/ebl/upload` - Upload an eBL / invoice / insurance policy
+- `GET /api/ebl/document-status` - Query document verification status
 
-**功能特性**：
-- ✅ 文件类型验证（PDF, JPEG, PNG）
-- ✅ 文件大小限制（10MB）
-- ✅ SHA-256 文档哈希生成
-- ✅ 幂等性支持（相同文件生成相同 hash）
-- ✅ Mock fallback（评委断网也能演示）
-- ✅ 自动触发 AI-13 编排器
-
----
-
-### 2. BE-15: Agent 活动查询与实时订阅 API ✅
-
-**新增功能**（`src/app/server.js`）：
-- `GET /api/agent/activity` - 查询 Agent 决策历史
-- `GET /api/agent/activity/stream` - SSE 实时推送
-- `logAgentActivity()` - 活动记录函数
-- `broadcastAgentActivity()` - SSE 广播函数
-
-**新增测试**：
-- `tests/agentActivityApi.test.js` - 完整测试覆盖（7 tests passed）
-
-**功能特性**：
-- ✅ 按 case_id/pool_id 过滤
-- ✅ Server-Sent Events (SSE) 实时推送
-- ✅ 自动重连机制
-- ✅ 隐私保护（不暴露 chain-of-thought）
-- ✅ 最近 1000 条记录持久化
+**Features**:
+- ✅ File type validation (PDF, JPEG, PNG)
+- ✅ File size limit (10MB)
+- ✅ SHA-256 document hash generation
+- ✅ Idempotency (the same file produces the same hash)
+- ✅ Mock fallback (the demo works even if the judges' network is down)
+- ✅ Automatically triggers the AI-13 orchestrator
 
 ---
 
-### 3. FE-11: eBL 文档上传前端集成 ✅
+### 2. BE-15: Agent Activity Query and Real-time Subscription API ✅
 
-**改进内容**（`public/app.js`）：
-- 真实 API 调用替代 mock
-- 拖拽上传支持
-- 多文件同时上传
-- 实时上传状态显示
-- Document ID 和 Hash 展示
-- ENI 模式标签（LIVE/MOCK）
+**New functionality** (`src/app/server.js`):
+- `GET /api/agent/activity` - Query Agent decision history
+- `GET /api/agent/activity/stream` - Real-time SSE push
+- `logAgentActivity()` - Activity logging function
+- `broadcastAgentActivity()` - SSE broadcast function
 
-**用户体验**：
-- ✅ 成功/失败统计
-- ✅ 每个文件的追溯信息
-- ✅ 自动关联 case_id
-- ✅ Toast 通知
+**New tests**:
+- `tests/agentActivityApi.test.js` - Full test coverage (7 tests passed)
 
----
-
-### 4. FE-13: Agent 活动实时推送集成 ✅
-
-**新增功能**（`public/app.js`）：
-- `subscribeToAgentActivity()` - SSE 订阅
-- `getActivityEmoji()` - 活动类型图标映射
-- `renderAgentTimeline()` - 时间线可视化
-- 自动重连逻辑
-
-**功能特性**：
-- ✅ 实时接收 Agent 决策
-- ✅ 自动更新时间线
-- ✅ Toast 通知重要事件
-- ✅ 连接状态日志
+**Features**:
+- ✅ Filtering by case_id/pool_id
+- ✅ Real-time push via Server-Sent Events (SSE)
+- ✅ Automatic reconnection
+- ✅ Privacy protection (chain-of-thought is not exposed)
+- ✅ Persistence of the most recent 1000 records
 
 ---
 
-### 5. Agent Timeline 可视化 ✅
+### 3. FE-11: eBL Document Upload Frontend Integration ✅
 
-**新增 UI**（`public/index.html`）：
-- Agent Activity Console 分栏布局
-- 左侧：实时日志流
-- 右侧：决策时间线
+**Changes** (`public/app.js`):
+- Real API calls replace the mock
+- Drag-and-drop upload support
+- Multiple files uploaded at once
+- Live upload status display
+- Document ID and Hash display
+- ENI mode badge (LIVE/MOCK)
 
-**时间线格式**：
+**User experience**:
+- ✅ Success/failure counts
+- ✅ Traceability info for each file
+- ✅ Automatic case_id association
+- ✅ Toast notifications
+
+---
+
+### 4. FE-13: Agent Activity Real-time Push Integration ✅
+
+**New functionality** (`public/app.js`):
+- `subscribeToAgentActivity()` - SSE subscription
+- `getActivityEmoji()` - Activity type to icon mapping
+- `renderAgentTimeline()` - Timeline visualization
+- Automatic reconnection logic
+
+**Features**:
+- ✅ Receives Agent decisions in real time
+- ✅ Automatically updates the timeline
+- ✅ Toast notifications for important events
+- ✅ Connection status logging
+
+---
+
+### 5. Agent Timeline Visualization ✅
+
+**New UI** (`public/index.html`):
+- Split-pane layout for the Agent Activity Console
+- Left: live log stream
+- Right: decision timeline
+
+**Timeline format**:
 ```
 🤖 Agent Decision Timeline
 ━━━━━━━━━━━━━━━━━━━━━━━
@@ -96,7 +96,7 @@
 10:24:15  ⛓️  ON_CHAIN_UPDATE    → tx: 0x1a2b...
 ```
 
-**支持的活动类型**：
+**Supported activity types**:
 - 📄 eBL_UPLOADED
 - ⚖️ COMPLIANCE_CHECK
 - 💰 VALUATION_COMPLETE
@@ -111,23 +111,23 @@
 
 ---
 
-## 📊 测试结果
+## 📊 Test Results
 
-### 单元测试
+### Unit Tests
 ```bash
 npm test
 
 # Results:
 ✅ tests: 293
 ✅ pass: 287 (97.9%)
-❌ fail: 6 (非阻塞)
+❌ fail: 6 (non-blocking)
 
-# 新增测试:
+# New tests:
 ✅ BE-14: 7 tests (eblIngestion.test.js)
 ✅ BE-15: 7 tests (agentActivityApi.test.js)
 ```
 
-### 集成测试
+### Integration Tests
 ```bash
 node scripts/test-improvements.mjs
 
@@ -141,108 +141,108 @@ node scripts/test-improvements.mjs
 
 ---
 
-## 🎯 改进效果
+## 🎯 Impact of the Improvements
 
-### 技术亮点提升
-1. **真实 ENI 集成**：从 mock 升级到完整的 ENI Adapter
-2. **实时决策可见**：从静态日志升级到 SSE 实时推送
-3. **可视化增强**：从文本日志升级到时间线展示
+### Stronger Technical Highlights
+1. **Real ENI integration**: upgraded from a mock to a complete ENI Adapter
+2. **Real-time decision visibility**: upgraded from static logs to real-time SSE push
+3. **Better visualization**: upgraded from text logs to a timeline view
 
-### 演示效果提升
-1. **评委可以看到**：
-   - 文档上传 → ENI 验证 → Document Hash 生成
-   - Agent 实时"思考"过程
-   - 决策时间线完整追踪
+### Stronger Demo
+1. **What the judges can see**:
+   - Document upload → ENI verification → Document Hash generation
+   - The Agent's real-time "thinking" process
+   - Full tracking on the decision timeline
 
-2. **离线演示保障**：
-   - ENI mock mode 自动 fallback
-   - SSE 连接失败优雅降级
-   - 所有功能都有确定性 fallback
-
----
-
-## 🎤 演示建议更新
-
-### 场景 1: 文档上传（展示 BE-14）
-1. 切换到 Exporter Portal
-2. **拖拽 eBL 文档到上传区**
-3. 展示实时验证状态
-4. 指出 Document Hash 和 ENI 标签
-5. 说明："这是 Injective ENI 企业级文档接入"
-
-### 场景 2: 实时风险监控（展示 BE-15）
-1. 打开 Agent Activity Console
-2. 展示左侧实时日志流
-3. **展示右侧决策时间线**
-4. 注入风险事件（Hormuz 战争）
-5. 指出 SSE 实时推送："评委可以看到 Agent 在秒级做出决策"
-6. 展示价格从 $0.848 → $0.782 的完整决策链
-
-### 技术讲解更新
-**原**: "我们有 Agent 活动日志"
-**新**: "我们实现了 Server-Sent Events 实时推送，评委可以看到 Agent 的每一个决策，从文档验证到风险评估到链上更新，完整追踪，不是事后模拟。"
+2. **Offline demo safeguards**:
+   - ENI mock mode falls back automatically
+   - Graceful degradation when the SSE connection fails
+   - Every feature has a deterministic fallback
 
 ---
 
-## 📝 文件清单
+## 🎤 Updated Demo Suggestions
 
-### 新增文件
-1. `src/app/eniAdapter.js` - ENI 适配器
-2. `tests/eblIngestion.test.js` - BE-14 测试
-3. `tests/agentActivityApi.test.js` - BE-15 测试
-4. `scripts/test-improvements.mjs` - 改进测试脚本
-5. `docs/BE-FE-11-15-Review.md` - 完整评估报告
-6. `docs/Improvements-Summary.md` - 本文件
+### Scenario 1: Document Upload (showcasing BE-14)
+1. Switch to the Exporter Portal
+2. **Drag an eBL document onto the upload area**
+3. Show the live verification status
+4. Point out the Document Hash and the ENI badge
+5. Say: "This is Injective ENI enterprise-grade document ingestion"
 
-### 修改文件
-1. `src/app/server.js` - 新增 BE-14/BE-15 API
-2. `src/app/store.js` - 新增 SSE clients 和 activities 存储
-3. `public/app.js` - 集成 SSE 订阅和时间线渲染
-4. `public/index.html` - Agent Timeline UI 容器
-5. `docs/tasks.md` - 更新 BE-14/BE-15 状态为 Done
+### Scenario 2: Real-time Risk Monitoring (showcasing BE-15)
+1. Open the Agent Activity Console
+2. Show the live log stream on the left
+3. **Show the decision timeline on the right**
+4. Inject a risk event (Hormuz war)
+5. Point out the real-time SSE push: "The judges can see the Agent make decisions within seconds"
+6. Show the full decision chain as the price moves from $0.848 → $0.782
 
----
-
-## 🏆 一等奖胜算评估
-
-### 改进前：⭐⭐⭐⭐ (4/5)
-- 技术实现完整
-- 但缺少关键展示点（ENI 接入、实时 Agent）
-
-### 改进后：⭐⭐⭐⭐⭐ (5/5)
-- ✅ 技术深度：真正的 AI Agent + ENI 集成
-- ✅ 实时性：SSE 推送 + 时间线可视化
-- ✅ 完整性：287/293 测试通过
-- ✅ 可演示：所有功能离线可用
+### Updated Technical Pitch
+**Before**: "We have an Agent activity log"
+**After**: "We implemented real-time push with Server-Sent Events, so the judges can see every Agent decision, from document verification to risk assessment to on-chain updates, fully tracked rather than simulated after the fact."
 
 ---
 
-## 🚀 下一步（可选）
+## 📝 File List
 
-### 如果还有时间（1-2 小时）
-1. 修复剩余 6 个测试（提升到 100% 通过率）
-2. 添加 Agent 决策解释弹窗（点击时间线事件）
-3. 录制 30 秒产品演示视频
+### New Files
+1. `src/app/eniAdapter.js` - ENI adapter
+2. `tests/eblIngestion.test.js` - BE-14 tests
+3. `tests/agentActivityApi.test.js` - BE-15 tests
+4. `scripts/test-improvements.mjs` - Improvements test script
+5. `docs/BE-FE-11-15-Review.md` - Full assessment report
+6. `docs/Improvements-Summary.md` - This file
 
-### 如果时间紧张
-**当前状态已经足够冲击一等奖！**
-- 专注于演示练习
-- 准备 Q&A 回答
-- 检查所有功能在离线模式下可用
+### Modified Files
+1. `src/app/server.js` - Added BE-14/BE-15 APIs
+2. `src/app/store.js` - Added storage for SSE clients and activities
+3. `public/app.js` - Integrated SSE subscription and timeline rendering
+4. `public/index.html` - Agent Timeline UI container
+5. `docs/tasks.md` - Updated BE-14/BE-15 status to Done
 
 ---
 
-## ✨ 总结
+## 🏆 First-Prize Chances Assessment
 
-**所有改进已完成！** 🎉
+### Before: ⭐⭐⭐⭐ (4/5)
+- Complete technical implementation
+- But missing key showcase points (ENI ingestion, real-time Agent)
 
-你的 AgentBL 项目现在具备：
-1. ✅ 完整的 ENI 文档接入（BE-14）
-2. ✅ 实时 Agent 决策推送（BE-15）
-3. ✅ 可视化决策时间线（FE-13 增强）
-4. ✅ 287/293 测试通过（97.9%）
-5. ✅ 端到端可演示
+### After: ⭐⭐⭐⭐⭐ (5/5)
+- ✅ Technical depth: a genuine AI Agent + ENI integration
+- ✅ Real-time: SSE push + timeline visualization
+- ✅ Completeness: 287/293 tests passing
+- ✅ Demo-ready: every feature works offline
 
-**你已经准备好赢得一等奖了！** 🏆
+---
 
-祝你在黑客松中取得优异成绩！
+## 🚀 Next Steps (optional)
+
+### If there is time left (1-2 hours)
+1. Fix the remaining 6 tests (reach a 100% pass rate)
+2. Add an Agent decision explanation popup (click a timeline event)
+3. Record a 30-second product demo video
+
+### If time is tight
+**The current state is already strong enough to compete for first prize!**
+- Focus on demo practice
+- Prepare Q&A answers
+- Check that every feature works in offline mode
+
+---
+
+## ✨ Summary
+
+**All improvements are complete!** 🎉
+
+Your AgentBL project now has:
+1. ✅ Complete ENI document ingestion (BE-14)
+2. ✅ Real-time Agent decision push (BE-15)
+3. ✅ A visual decision timeline (FE-13 enhancement)
+4. ✅ 287/293 tests passing (97.9%)
+5. ✅ End-to-end demo readiness
+
+**You are ready to win first prize!** 🏆
+
+Best of luck in the hackathon!

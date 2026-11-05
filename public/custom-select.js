@@ -36,19 +36,36 @@ function setupCustomSelect(selectEl) {
   wrapper.appendChild(trigger);
   wrapper.appendChild(dropdown);
 
+  // Options may carry data-short (text for the closed trigger) and data-detail
+  // (a second line in the open list); plain options just show their text.
   function renderOptions() {
     dropdown.innerHTML = '';
     const options = Array.from(selectEl.options);
-    
+
     const selectedOpt = options[selectEl.selectedIndex] || options[0];
-    const triggerText = selectedOpt ? selectedOpt.text : 'Select...';
-    trigger.innerHTML = `<span>${triggerText}</span><span class="custom-arrow"></span>`;
+    const label = document.createElement('span');
+    label.className = 'custom-select-label';
+    label.textContent = selectedOpt ? (selectedOpt.dataset.short || selectedOpt.text) : 'Select...';
+    const arrow = document.createElement('span');
+    arrow.className = 'custom-arrow';
+    trigger.replaceChildren(label, arrow);
+    trigger.title = selectedOpt ? selectedOpt.text : '';
 
     options.forEach((opt, index) => {
       const item = document.createElement('div');
       item.className = 'custom-select-item';
       if (index === selectEl.selectedIndex) item.classList.add('selected');
-      item.textContent = opt.text;
+      if (opt.dataset.detail) {
+        const title = document.createElement('span');
+        title.className = 'custom-select-item-title';
+        title.textContent = opt.dataset.short || opt.text;
+        const detail = document.createElement('span');
+        detail.className = 'custom-select-item-detail';
+        detail.textContent = opt.dataset.detail;
+        item.append(title, detail);
+      } else {
+        item.textContent = opt.text;
+      }
       
       item.addEventListener('click', (e) => {
         e.stopPropagation();

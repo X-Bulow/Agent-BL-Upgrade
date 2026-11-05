@@ -1,5 +1,7 @@
-const { expect } = require('chai');
-const { ethers } = require('hardhat');
+import { expect } from 'chai';
+import { network } from 'hardhat';
+
+const { ethers } = await network.create();
 
 // Off-chain pricing_action codes (docs/contracts.md §2.3) mirrored by the enum.
 const ACTION = {
@@ -100,5 +102,14 @@ describe('AgentBLRWA (browser demo contract)', () => {
     try { await rwa.reprice(99, 1n, ACTION.REPRICE_DOWN, 0, 0, evidenceHash, 'x'); }
     catch (err) { reverted = /pool missing/.test(err.message); }
     expect(reverted).to.equal(true);
+  });
+
+  it('only lets the creator reprice an offering', async () => {
+    const { other, rwa } = await deploy();
+    await (await rwa.tokenize('EBL-OWNED', PRICE_E6, SUPPLY, FINANCING, COLLATERAL, 1180, 2, quoteHash, evidenceHash)).wait();
+    await expect(
+      rwa.connect(other).reprice(1, 700000n, ACTION.REPRICE_DOWN, 2000, 3, ethers.id('hostile'), 'x')
+    ).to.be.revertedWith('not creator');
+    expect((await rwa.offeringOf(1)).issuePriceE6).to.equal(PRICE_E6);
   });
 });

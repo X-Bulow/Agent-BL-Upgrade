@@ -2,9 +2,13 @@
   "name": "agentbl-contracts",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Minimal Hardhat contracts for AgentBL eBL-backed RWA offering (WEB3-6 ~ WEB3-9).",
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
-    "compile": "hardhat compile",
+    "compile": "hardhat build",
     "test": "hardhat test",
     "deploy:injective": "hardhat run scripts/deploy-agentbl.js --network injective_testnet",
     "deploy:payment-oracle": "hardhat run scripts/deploy-payment-oracle.js --network injective_testnet",
@@ -12,16 +16,16 @@
     "deploy:all": "npm run deploy:protocol && npm run deploy:payment-oracle"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-ethers": "^3.0.8",
-    "chai": "^4.5.0",
+    "@nomicfoundation/hardhat-ethers": "^4.2.0",
+    "@nomicfoundation/hardhat-ethers-chai-matchers": "^3.0.12",
+    "@nomicfoundation/hardhat-mocha": "^4.0.0",
+    "chai": "^6.3.0",
     "dotenv": "^16.4.7",
     "ethers": "^6.13.4",
-    "hardhat": "^2.22.17"
+    "hardhat": "^3.19.0",
+    "mocha": "^12.0.3"
   },
   "allowScripts": {
     "keccak@3.0.4": true
-  },
-  "dependencies": {
-    "agentbl-agent-starter": "file:.."
   }
 }

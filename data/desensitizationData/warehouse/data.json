@@ -6,16 +6,16 @@
     "validUntil": "2025-12-31",
     "status": "ISSUED",
     "shipper": {
-      "name": "华南国际贸易有限公司",
-      "businessPerson": "业务负责人",
+      "name": "South China International Trade Co., Ltd.",
+      "businessPerson": "Business lead",
       "employeeId": "EMP-2023001"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 1200,
-      "unit": "吨",
-      "warehouse": "无锡示范仓A",
-      "warehouseSupplier": "无锡华储仓储有限公司",
+      "unit": "MT",
+      "warehouse": "Wuxi Demo Warehouse A",
+      "warehouseSupplier": "Wuxi Huachu Warehousing Co., Ltd.",
       "supplierCode": "SUP-100886"
     },
     "storageFee": {
@@ -28,9 +28,9 @@
       "start": "2023-01-01",
       "end": "2025-12-31"
     },
-    "remarks": "示范仓储服务合同",
+    "remarks": "Demo warehousing service contract",
     "metadata": {
-      "contractName": "无锡华储仓储有限公司仓储合同"
+      "contractName": "Wuxi Huachu Warehousing Co., Ltd. warehousing contract"
     }
   },
   {
@@ -40,16 +40,16 @@
     "validUntil": "2025-12-31",
     "status": "ISSUED",
     "shipper": {
-      "name": "华南国际贸易有限公司",
-      "businessPerson": "业务负责人",
+      "name": "South China International Trade Co., Ltd.",
+      "businessPerson": "Business lead",
       "employeeId": "EMP-2023001"
     },
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 1800,
-      "unit": "吨",
-      "warehouse": "无锡示范仓B",
-      "warehouseSupplier": "无锡联运物流有限公司",
+      "unit": "MT",
+      "warehouse": "Wuxi Demo Warehouse B",
+      "warehouseSupplier": "Wuxi Lianyun Logistics Co., Ltd.",
       "supplierCode": "SUP-100472"
     },
     "storageFee": {
@@ -62,7 +62,7 @@
       "start": "2023-01-01",
       "end": "2025-12-31"
     },
-    "remarks": "示范仓储服务合同"
+    "remarks": "Demo warehousing service contract"
   },
   {
     "blNumber": "eBL-SIM-2022-WL-1003-001",
@@ -71,11 +71,11 @@
     "validUntil": "2025-12-31",
     "status": "ISSUED",
     "cargo": {
-      "description": "铝锭",
+      "description": "Aluminum ingot",
       "quantity": 2000,
-      "unit": "吨",
-      "warehouse": "无锡示范仓C",
-      "warehouseSupplier": "中储示范无锡物流中心",
+      "unit": "MT",
+      "warehouse": "Wuxi Demo Warehouse C",
+      "warehouseSupplier": "Zhongchu Demo Wuxi Logistics Center",
       "supplierCode": "SUP-100258"
     },
     "storageFee": {
@@ -91,8 +91,8 @@
     "issueDate": "2026-07-13",
     "validUntil": "2025-12-31",
     "cargo": {
-      "warehouse": "重庆示范物流园",
-      "warehouseSupplier": "重庆集运物流有限公司",
+      "warehouse": "Chongqing Demo Logistics Park",
+      "warehouseSupplier": "Chongqing Jiyun Logistics Co., Ltd.",
       "supplierCode": "SUP-101002"
     },
     "storageFee": {
@@ -105,8 +105,8 @@
     "contractRef": "2024-SIM-AL-3001",
     "issueDate": "2026-07-13",
     "cargo": {
-      "warehouse": "浙示范物流中心",
-      "warehouseSupplier": "浙商拓达物流科技有限公司",
+      "warehouse": "Zhejiang Demo Logistics Center",
+      "warehouseSupplier": "Zheshang Tuoda Logistics Technology Co., Ltd.",
       "supplierCode": "SUP-101939"
     },
     "storageFee": {
@@ -117,8 +117,8 @@
     "blNumber": "eBL-SIM-2023-WL-4001-001",
     "contractRef": "2023-SIM-WL-4001",
     "cargo": {
-      "warehouse": "宁波示范仓储",
-      "warehouseSupplier": "浙江国储物流宁波分公司",
+      "warehouse": "Ningbo Demo Warehousing",
+      "warehouseSupplier": "Zhejiang Guochu Logistics Ningbo Branch",
       "supplierCode": "SUP-103832"
     },
     "storageFee": {
@@ -129,8 +129,8 @@
     "blNumber": "eBL-SIM-2022-WL-1004-001",
     "contractRef": "2022-SIM-WL-1004",
     "cargo": {
-      "warehouse": "无锡五矿示范仓",
-      "warehouseSupplier": "五矿无锡物流园有限公司",
+      "warehouse": "Wuxi Minmetals Demo Warehouse",
+      "warehouseSupplier": "Minmetals Wuxi Logistics Park Co., Ltd.",
       "supplierCode": "SUP-100339"
     },
     "storageFee": {
@@ -141,8 +141,8 @@
     "blNumber": "eBL-SIM-2022-WL-1005-001",
     "contractRef": "2022-SIM-WL-1005",
     "cargo": {
-      "warehouse": "中部陆港示范区",
-      "warehouseSupplier": "示范物流集团中部陆港有限公司",
+      "warehouse": "Central Inland Port Demo Zone",
+      "warehouseSupplier": "Demo Logistics Group Central Inland Port Co., Ltd.",
       "supplierCode": "SUP-330083"
     },
     "storageFee": {
@@ -153,8 +153,8 @@
     "blNumber": "eBL-SIM-2022-WL-1006-001",
     "contractRef": "2022-SIM-WL-1006",
     "cargo": {
-      "warehouse": "中州示范仓储",
-      "warehouseSupplier": "示范物流集团中州有限公司",
+      "warehouse": "Zhongzhou Demo Warehousing",
+      "warehouseSupplier": "Demo Logistics Group Zhongzhou Co., Ltd.",
       "supplierCode": "SUP-317389"
     },
     "storageFee": {
@@ -165,8 +165,8 @@
     "blNumber": "eBL-SIM-2022-WL-1007-001",
     "contractRef": "2022-SIM-WL-1007",
     "cargo": {
-      "warehouse": "巩义示范仓",
-      "warehouseSupplier": "华南仓储有限公司巩义分公司",
+      "warehouse": "Gongyi Demo Warehouse",
+      "warehouseSupplier": "South China Warehousing Co., Ltd. Gongyi Branch",
       "supplierCode": "SUP-104318"
     },
     "storageFee": {

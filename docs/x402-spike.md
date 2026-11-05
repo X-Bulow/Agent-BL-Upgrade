@@ -1,31 +1,31 @@
-# Injective x402 兼容性 Spike（X402-1）
+# Injective x402 Compatibility Spike (X402-1)
 
-> 核验时间：2026-06-29 04:50–05:05 CST（UTC+8）  
-> 结论状态：**SDK 兼容；Injective Testnet facilitator 可发现；Mainnet facilitator 未验证**
+> Verified: 2026-06-29 04:50–05:05 CST (UTC+8)  
+> Conclusion: **SDK compatible; Injective Testnet facilitator is discoverable; Mainnet facilitator not verified**
 
-## 1. 结论与项目决策
+## 1. Conclusions and Project Decisions
 
-AgentBL 可以采用官方 `@injectivelabs/x402`，但必须区分“SDK 支持”和“facilitator 已支持”：
+AgentBL can adopt the official `@injectivelabs/x402`, but must distinguish between "the SDK supports it" and "a facilitator already supports it":
 
-| 层级 | 核验结论 | AgentBL 决策 |
+| Layer | Verification result | AgentBL decision |
 |---|---|---|
-| npm SDK | `latest=0.0.1`，`next=0.1.0-rc.1`；内置 `eip155:1776` 与 `eip155:1439` | X402-2 锁定稳定版 `0.0.1`，不使用 RC |
-| Runtime | npm 包要求 Node `>=20`；AgentBL 实测 Node `v22.9.0` | 接入时把项目 `engines.node` 从 `>=18.18.0` 提升到 `>=20` |
-| Web framework | `express` 是 optional peer dependency，允许 `^4 || ^5`，不会随包自动安装 | 使用官方 middleware 时必须显式安装并锁定 Express；不要假设已有 `node:http` server 已满足依赖 |
-| Testnet | 官方 Demo 的 `/supported` 实际返回 `exact + eip155:1439 + Testnet USDC + EIP-3009` | 允许用一次性测试钱包做真实测试网 smoke，并在 UI/CLI 显示 `TESTNET` |
-| Mainnet | 文档示例使用 `eip155:1776`，SDK 也内置主网；但本次没有发现可通过 `/supported` 验证的 HTTPS 生产 facilitator | 先保留 mainnet 配置能力，默认禁用；X402-15 前必须重新验活，不能宣称主网实付 |
-| Demo settlement | 不依赖 facilitator，不是真实链上支付 | 必须显示 `DEMO SETTLEMENT · NOT ONCHAIN`；不得生成可点击的伪 tx/explorer 链接 |
+| npm SDK | `latest=0.0.1`, `next=0.1.0-rc.1`; ships with `eip155:1776` and `eip155:1439` built in | X402-2 pins the stable `0.0.1`; do not use the RC |
+| Runtime | The npm package requires Node `>=20`; AgentBL measured Node `v22.9.0` | When integrating, raise the project's `engines.node` from `>=18.18.0` to `>=20` |
+| Web framework | `express` is an optional peer dependency allowing `^4 || ^5`; it is not installed automatically with the package | When using the official middleware, Express must be installed and pinned explicitly; do not assume the existing `node:http` server satisfies the dependency |
+| Testnet | The official Demo's `/supported` actually returns `exact + eip155:1439 + Testnet USDC + EIP-3009` | Real testnet smoke tests with a disposable test wallet are allowed, and the UI/CLI shows `TESTNET` |
+| Mainnet | Doc examples use `eip155:1776` and the SDK has mainnet built in; but this check found no HTTPS production facilitator verifiable via `/supported` | Keep mainnet configuration capability but disabled by default; must be re-verified live before X402-15; mainnet real payments must not be claimed |
+| Demo settlement | Does not depend on a facilitator; not a real on-chain payment | Must display `DEMO SETTLEMENT · NOT ONCHAIN`; must not generate clickable fake tx/explorer links |
 
-因此，当前实施路线是：
+The current implementation path is therefore:
 
-1. 默认开发链路：`eip155:1439` + Testnet USDC + 官方 V2/EIP-3009 challenge。
-2. CI 和离线路演：显式 Demo settlement，所有 receipt 使用 `demo_` 前缀且 `onchain=false`。
-3. Mainnet live：只有当 HTTPS facilitator 的 `/supported` 同时返回 `eip155:1776`、正确 USDC 地址和 `exact/eip3009` 时才能开启。
-4. 当前发现的测试网 facilitator 是 staging 明文 HTTP ELB，只允许隔离的一次性测试钱包；不得承载主网签名、生产密钥或真实资金。
+1. Default development path: `eip155:1439` + Testnet USDC + the official V2/EIP-3009 challenge.
+2. CI and offline demos: explicit Demo settlement; every receipt uses a `demo_` prefix and `onchain=false`.
+3. Mainnet live: may only be enabled when an HTTPS facilitator's `/supported` returns `eip155:1776`, the correct USDC address and `exact/eip3009` together.
+4. The testnet facilitator found so far is a staging plaintext-HTTP ELB; only isolated disposable test wallets are allowed with it. It must not carry mainnet signatures, production keys or real funds.
 
-## 2. 版本与依赖核验
+## 2. Version and Dependency Verification
 
-执行：
+Run:
 
 ```powershell
 node --version
@@ -33,7 +33,7 @@ npm.cmd --version
 npm.cmd view @injectivelabs/x402 version dist-tags engines dependencies peerDependencies exports repository time --json
 ```
 
-实际摘要：
+Actual summary:
 
 ```text
 Node: v22.9.0
@@ -51,26 +51,26 @@ npm:  11.17.0
   module: ESM only
 ```
 
-`0.0.1` 和 `0.1.0-rc.1` 均于 2026-05-13 发布。`0.0.1` 的 Express peer dependency 被标为 optional，原因是 core/client/facilitator exports 不一定使用 Express；但导入 `@injectivelabs/x402/middleware` 时，应用仍必须自己提供 Express。
+Both `0.0.1` and `0.1.0-rc.1` were published on 2026-05-13. In `0.0.1` the Express peer dependency is marked optional because the core/client/facilitator exports do not necessarily use Express; however, when importing `@injectivelabs/x402/middleware`, the application must still provide Express itself.
 
-### 文档与包约束冲突
+### Conflict Between Docs and Package Constraints
 
-Injective x402 教程写的是 Node.js 18+，已发布 npm 包的 `engines` 却是 Node `>=20`。实现必须服从可执行包的更严格约束，即 **Node >=20**。AgentBL 当前运行环境满足；`package.json` 中原有的 `>=18.18.0` 只在 X402-2 安装依赖时调整，本 spike 不改运行时依赖。
+The Injective x402 tutorial says Node.js 18+, yet the published npm package's `engines` is Node `>=20`. The implementation must follow the stricter constraint of the executable package, i.e. **Node >=20**. AgentBL's current runtime satisfies this; the existing `>=18.18.0` in `package.json` is only adjusted when X402-2 installs dependencies; this spike does not change runtime dependencies.
 
-## 3. 网络与资产矩阵
+## 3. Network and Asset Matrix
 
-| 环境 | CAIP-2 | Chain ID | USDC | Decimals | EIP-3009 | RPC | Explorer |
+| Environment | CAIP-2 | Chain ID | USDC | Decimals | EIP-3009 | RPC | Explorer |
 |---|---|---:|---|---:|---|---|---|
-| Mainnet | `eip155:1776` | 1776 | `0xa00C59fF5a080D2b954d0c75e46E22a0c371235a` | 6 | 是，EIP-712 version `2` | `https://sentry.evm-rpc.injective.network` | `https://blockscout.injective.network` |
-| Testnet | `eip155:1439` | 1439 | `0x0C382e685bbeeFE5d3d9C29e29E341fEE8E84C5d` | 6 | 是，EIP-712 version `2` | `https://k8s.testnet.json-rpc.injective.network` | `https://testnet.blockscout.injective.network` |
+| Mainnet | `eip155:1776` | 1776 | `0xa00C59fF5a080D2b954d0c75e46E22a0c371235a` | 6 | Yes, EIP-712 version `2` | `https://sentry.evm-rpc.injective.network` | `https://blockscout.injective.network` |
+| Testnet | `eip155:1439` | 1439 | `0x0C382e685bbeeFE5d3d9C29e29E341fEE8E84C5d` | 6 | Yes, EIP-712 version `2` | `https://k8s.testnet.json-rpc.injective.network` | `https://testnet.blockscout.injective.network` |
 
-官方包的网络注册表同时包含两条链，并明确把两份 USDC 标记为 Circle FiatTokenV2_2、`TransferWithAuthorization`。USDT、WINJ 和旧 IBC USDC 不具备 EIP-3009，不能替换为 x402 支付资产。
+The official package's network registry includes both chains and explicitly marks both USDC tokens as Circle FiatTokenV2_2 with `TransferWithAuthorization`. USDT, WINJ and the legacy IBC USDC do not support EIP-3009 and cannot be substituted as the x402 payment asset.
 
-## 4. 实际 HTTP 请求与响应
+## 4. Actual HTTP Requests and Responses
 
-以下是现场请求的关键字段；支付 challenge 的 Base64 header 只保留标记，解码内容来自同一响应 JSON。
+Below are the key fields of the live requests; for the payment challenge's Base64 header only a placeholder is kept, and the decoded content comes from the JSON of the same response.
 
-### 4.1 官方 Demo 状态
+### 4.1 Official Demo Status
 
 ```http
 GET https://agents.injective.com/api/x402/status
@@ -96,9 +96,9 @@ Content-Type: application/json
 }
 ```
 
-结论：官方 Demo 当前实际运行在 Testnet，不是教程示例中的 Mainnet；公开状态端点暴露的是 staging HTTP facilitator。
+Conclusion: the official Demo currently runs on Testnet, not on the Mainnet used in the tutorial examples; the public status endpoint exposes a staging HTTP facilitator.
 
-### 4.2 未支付资源返回标准 V2 challenge
+### 4.2 Unpaid Resource Returns a Standard V2 Challenge
 
 ```http
 GET https://agents.injective.com/api/x402/perps/market-data
@@ -109,7 +109,7 @@ Payment-Required: <base64 omitted>
 Content-Type: application/json
 ```
 
-响应中的核心 payment requirements：
+Core payment requirements in the response:
 
 ```json
 {
@@ -138,7 +138,7 @@ Content-Type: application/json
 }
 ```
 
-这证明 402、V2 headers、CAIP-2、Testnet USDC 和 EIP-3009 challenge 均已由官方 Demo 实际返回；它不证明结算成功，真实 settlement tx 仍由 X402-15 验收。
+This proves that the 402, V2 headers, CAIP-2, Testnet USDC and EIP-3009 challenge are all actually returned by the official Demo; it does not prove that settlement succeeds. A real settlement tx is still to be accepted under X402-15.
 
 ### 4.3 Facilitator `/supported`
 
@@ -180,9 +180,9 @@ x-request-id: dc77196a-ac21-4e12-8665-c88f33d3b967
 }
 ```
 
-判定：**1439 支持；1776 未列出。** `/supported` 是运行时真相，SDK 里存在 `eip155:1776` 常量不能替代这项验证。
+Verdict: **1439 is supported; 1776 is not listed.** `/supported` is the runtime source of truth; the existence of an `eip155:1776` constant in the SDK cannot replace this check.
 
-### 4.4 负向可用性探测
+### 4.4 Negative Availability Probes
 
 ```text
 GET https://x402-staging-alb-1300061645.us-east-1.elb.amazonaws.com/supported
@@ -192,36 +192,36 @@ GET https://x402.injective.network/supported
 => curl: (6) Could not resolve host: x402.injective.network
 ```
 
-因此当前发现的 facilitator 不能作为 AgentBL 的生产依赖。X402-3 必须允许配置 URL；X402-4/6 启动或执行前必须调用 `/supported` fail closed，而不是硬编码或静默回退为“成功”。
+The facilitator found so far therefore cannot be a production dependency of AgentBL. X402-3 must allow the URL to be configured; X402-4/6 must call `/supported` and fail closed before starting or executing, rather than hard-coding it or silently falling back to "success".
 
-## 5. X402-2/3/4 的实施约束
+## 5. Implementation Constraints for X402-2/3/4
 
-### 依赖选择
+### Dependency Choice
 
 ```text
-必须：@injectivelabs/x402@0.0.1
-必须（使用官方 middleware 时）：express，版本锁在官方 peer range 内
-暂不加入：@x402/core / @x402/evm / @x402/fetch
+Required: @injectivelabs/x402@0.0.1
+Required (when using the official middleware): express, pinned within the official peer range
+Not added for now: @x402/core / @x402/evm / @x402/fetch
 ```
 
-只有官方客户端能力缺失并有测试证明时，才引入 x402 Foundation 包，避免两套协议对象和 headers 并存。
+x402 Foundation packages are only introduced when a capability is missing from the official client and a test proves it, to avoid two sets of protocol objects and headers coexisting.
 
-### 启动门禁
+### Startup Gate
 
-Live mode 启动必须满足：
+Starting Live mode requires all of:
 
 ```text
 GET {facilitatorUrl}/supported == 200
-kinds 包含 x402Version=2
+kinds contains x402Version=2
 scheme == exact
-network == 配置的 CAIP-2
-supportedAssets 包含配置的 USDC 地址（忽略大小写）
+network == the configured CAIP-2
+supportedAssets contains the configured USDC address (case-insensitive)
 decimals == 6
 assetTransferMethod == eip3009
-HTTPS：mainnet 强制；testnet staging 只允许显式 ALLOW_INSECURE_TESTNET=true
+HTTPS: mandatory on mainnet; testnet staging only with an explicit ALLOW_INSECURE_TESTNET=true
 ```
 
-任一条件不满足就拒绝 Live mode，不得自动伪装为已结算。Demo mode 可以继续运行，但返回结构必须包含：
+If any condition fails, Live mode is refused and must not automatically pretend to have settled. Demo mode may keep running, but its response must include:
 
 ```json
 {
@@ -233,24 +233,24 @@ HTTPS：mainnet 强制；testnet staging 只允许显式 ALLOW_INSECURE_TESTNET=
 }
 ```
 
-### Live 支持矩阵
+### Live Support Matrix
 
-| 模式 | 当前允许 | 对外文案 | 真实 tx 要求 |
+| Mode | Currently allowed | Public wording | Real tx requirement |
 |---|---|---|---|
-| Demo | 是，默认 | `Demo settlement · not onchain` | 无，且不得伪造 |
-| Testnet 1439 | 条件允许 | `Injective Testnet payment` | X402-15 保存 Testnet explorer tx；一次性钱包；允许 insecure staging 必须显式 opt-in |
-| Mainnet 1776 | 否，默认关闭 | 不展示 `live` / `paid onchain` | HTTPS `/supported` 验出 1776 + 主网 USDC 后，再做小额实付 |
+| Demo | Yes, default | `Demo settlement · not onchain` | None, and it must not be faked |
+| Testnet 1439 | Conditionally | `Injective Testnet payment` | X402-15 records a Testnet explorer tx; disposable wallet; allowing insecure staging requires an explicit opt-in |
+| Mainnet 1776 | No, off by default | Do not show `live` / `paid onchain` | Only after HTTPS `/supported` verifies 1776 + mainnet USDC, then make a small real payment |
 
-## 6. 已知风险
+## 6. Known Risks
 
-1. npm 包还是 `0.0.1`，API 稳定性较低；必须锁版本并用 contract tests 固定 challenge/settlement schema。
-2. 官方教程的 Node 18+ 与 npm 的 Node >=20 不一致；CI 以 >=20 为准。
-3. 官方教程突出 Mainnet，但官方 Demo 当前返回 Testnet；路演必须展示响应中的实际 network。
-4. staging facilitator 只有 HTTP，签名 payload 可能被监听或抢先提交；只限无价值测试资产和一次性钱包。
-5. `/supported` 未列出 1776；在生产 facilitator 可验证前，主网只算 SDK/config 支持，不算已集成。
-6. Demo 页面当前链接的 `InjectiveLabs/x402-facilitator-injective` 公共仓库返回 404；不要把不可访问源码写成“已审计开源 facilitator”。
+1. The npm package is still `0.0.1`, so API stability is low; the version must be pinned and contract tests must lock down the challenge/settlement schema.
+2. The official tutorial's Node 18+ disagrees with npm's Node >=20; CI uses >=20.
+3. The official tutorial highlights Mainnet, but the official Demo currently returns Testnet; demos must show the actual network from the response.
+4. The staging facilitator is HTTP only, so signed payloads may be intercepted or front-run; restrict it to worthless test assets and disposable wallets.
+5. `/supported` does not list 1776; until a production facilitator can be verified, mainnet counts only as SDK/config support, not as integrated.
+6. The public `InjectiveLabs/x402-facilitator-injective` repository currently linked from the Demo page returns 404; do not describe inaccessible source code as an "audited open-source facilitator".
 
-## 7. 复验命令
+## 7. Re-verification Commands
 
 ```powershell
 npm.cmd view @injectivelabs/x402 version dist-tags engines dependencies peerDependencies --json
@@ -259,15 +259,15 @@ curl.exe -sS -D - --max-time 30 https://agents.injective.com/api/x402/perps/mark
 curl.exe -sS -D - --max-time 30 http://x402-staging-alb-1300061645.us-east-1.elb.amazonaws.com/supported
 ```
 
-facilitator 是外部运行时依赖，以上探测结果有时效性。X402-15 和每次路演 preflight 都必须重新执行，不能仅引用本文件的历史响应。
+The facilitator is an external runtime dependency, so the probe results above are time-sensitive. X402-15 and every demo preflight must re-run them; do not just cite the historical responses in this file.
 
-## 8. 资料来源
+## 8. Sources
 
-- [Injective x402 官方教程](https://docs.injective.network/developers-ai/x402)
+- [Official Injective x402 tutorial](https://docs.injective.network/developers-ai/x402)
 - [Injective EVM Network Information](https://docs.injective.network/developers-evm/network-information)
 - [USDC on Injective](https://docs.injective.network/developers-defi/usdc-stablecoin)
 - [npm: @injectivelabs/x402](https://www.npmjs.com/package/@injectivelabs/x402)
-- [已发布包的 network registry](https://unpkg.com/@injectivelabs/x402@0.0.1/dist/networks/index.js)
-- [Injective 官方 x402 Demo](https://agents.injective.com/x402/)
+- [Network registry of the published package](https://unpkg.com/@injectivelabs/x402@0.0.1/dist/networks/index.js)
+- [Official Injective x402 Demo](https://agents.injective.com/x402/)
 - [x402 Network & Token Support](https://docs.x402.org/core-concepts/network-and-token-support)
 

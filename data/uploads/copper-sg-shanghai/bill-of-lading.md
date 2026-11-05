@@ -1,13 +1,13 @@
 # NEGOTIABLE ELECTRONIC BILL OF LADING (eBL)
 
-> 拟真样例数据，用于 AgentBL demo。以下所有公司、人名、船名、单号、地址均为**虚构**，不指向任何真实实体或真实货运。
+> Simulated sample data for the AgentBL demo. All companies, people, vessels, document numbers and addresses below are **fictional** and do not refer to any real entity or real shipment.
 > Issued as a sole electronic original on an MLETR-compliant eBL platform.
 
 | | |
 |---|---|
 | **Carrier** | BlueStrait Container Lines Pte. Ltd. (SCAC: BSCL) |
 | **B/L No.** | BSCL/SIN/SHA/2026/04417 |
-| **B/L Type** | Negotiable — "To Order" (货权可转让) |
+| **B/L Type** | Negotiable — "To Order" (transferable document of title) |
 | **eBL Platform** | WaveBL (MLETR / Singapore ETA 2021 compliant) |
 | **eBL Token / Title Ref** | WAVE-EBL-7F3A91C4 |
 | **Booking No.** | BSCL-BK-2026-118840 |
@@ -93,5 +93,5 @@ BSLU2210223 / Seal CN8841019    BSLU2210239 / Seal CN8841020
 
 ---
 
-> 说明（给团队）：本提单对应商业发票 `commercial-invoice.md` 与结构化案例 `data/cases/copper-sg-shanghai.case.json`。
-> 货权凭证 (To Order)、可背书转让，正是它能作为 RWA 抵押物的法律基础。
+> Note (for the team): this bill of lading matches the commercial invoice `commercial-invoice.md` and the structured case `data/cases/copper-sg-shanghai.case.json`.
+> It is a document of title (To Order) that can be endorsed and transferred, which is exactly the legal basis that lets it serve as RWA collateral.

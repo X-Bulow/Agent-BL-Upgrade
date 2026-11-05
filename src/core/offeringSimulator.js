@@ -1,13 +1,18 @@
 // RWA offering lifecycle simulator (BE-4).
 //
-// Drives an eBL-backed RWA offering through its on-chain states using the AI
-// PricingQuote, and shows what happens when risk escalates mid-transit: the
+// Drives an eBL-backed RWA offering through RWAOfferingPool's states using the
+// AI PricingQuote, and shows what happens when risk escalates mid-transit: the
 // RiskPricingOracle reprices the pool, pauses it, or it settles and redeems.
+// It mirrors the contract's fund flow: subscriptions are escrowed in the pool,
+// the escrow is disbursed to the exporter only once the book is full, an
+// undersubscribed offering is cancelled and refunded, and repayments or
+// liquidation proceeds are redeemed pro rata across every RWA sold.
 //
 //   Created -> Priced -> Open -> Subscribed -> Funded -> InTransit
 //             -> (Repriced | Paused | Frozen)
 //             -> Repaid -> Redeemed                     (importer pays: investors earn the discount)
-//             -> Defaulted -> Liquidation               (importer defaults: investors recover < paid)
+//             -> Liquidation                            (importer defaults: investors recover < paid)
+//   Created -> Priced -> Open -> Subscribed -> Cancelled  (book never fills: investors are refunded)
 //
 // Pure / deterministic / offline (built on quoteFromCase).
 
@@ -54,6 +59,18 @@ function applyEvents(caseData, events) {
   return merged;
 }
 
+/** An undersubscribed offering is cancelled before disbursement and refunded in full. */
+function settleByRefund(subscription) {
+  return {
+    outcome: 'REFUNDED',
+    redemption_value_per_token: subscription.tokens > 0 ? round(subscription.raised_usd / subscription.tokens, 4) : 0,
+    investor_capital_usd: subscription.raised_usd,
+    investor_proceeds_usd: subscription.raised_usd,
+    investor_pnl_usd: 0,
+    investor_return_pct: 0
+  };
+}
+
 /**
  * Healthy settlement: importer pays, exporter repays the pool, investors redeem
  * at the target. The investor's gain is the discount they bought at.
@@ -90,10 +107,13 @@ function settleByDefault(quote, subscription, opts = {}) {
   );
   const realizationRate = clamp(Number(opts.recovery_rate ?? autoRate), 0, 1);
 
+  // Liquidation happens at pool level: the cargo backs every RWA sold, and the
+  // contract caps proceeds at (RWA sold x target), then shares them pro rata.
   const recoverableValue = round(collateral * realizationRate, 2); // cargo sale + insurance, net of costs
-  const owed = round(subscription.tokens * quote.target_redemption_value_usd, 2);
+  const tokensSold = subscription.offering_tokens_sold;
+  const owed = round(tokensSold * quote.target_redemption_value_usd, 2);
   const recoveredToPool = round(Math.min(recoverableValue, owed), 2);
-  const recoveryPerToken = subscription.tokens > 0 ? round(recoveredToPool / subscription.tokens, 4) : 0;
+  const recoveryPerToken = tokensSold > 0 ? round(recoveredToPool / tokensSold, 4) : 0;
   const proceeds = round(subscription.tokens * recoveryPerToken, 2);
   const pnl = round(proceeds - subscription.raised_usd, 2);
 
@@ -117,7 +137,11 @@ function settleByDefault(quote, subscription, opts = {}) {
 /**
  * Simulate the full RWA offering lifecycle for a case.
  * @param {object} caseData
- * @param {object} [opts] { payout_speed, requested_cash_usd, subscription_usd, events, settlement, recovery_rate, default_reason }
+ * @param {object} [opts] { payout_speed, requested_cash_usd, subscription_usd, book, events, settlement, recovery_rate, default_reason }
+ *   subscription_usd: this investor's order (default: the exporter's expected cash, i.e. the whole book).
+ *   book: 'FILLED' (default) — other investors take the rest of the supply, so the offering
+ *     funds and disburses; 'UNDERSUBSCRIBED' — the book never fills, so the offering is
+ *     cancelled before disbursement and the investor is refunded.
  *   events: [{ category:'macro'|'shipment', type, severity, region?, description?, ... }]
  *   settlement: 'REPAID' (default) | 'IMPORTER_DEFAULT' — force the terminal outcome.
  *   recovery_rate: 0..1 fraction of AI-verified collateral realized at liquidation
@@ -143,19 +167,44 @@ export function simulateOffering(caseData, opts = {}) {
   if (NON_OPENING_ACTIONS.has(initialQuote.pricing_action)) {
     const state = STATE_BY_PRICING_ACTION[initialQuote.pricing_action];
     push(state, 'RiskPricingOracle', `Offering not opened — ${initialQuote.investor_explanation}`);
-    return finalize(initialQuote, initialQuote, { requested_usd: 0, raised_usd: 0, tokens: 0 }, state, steps);
+    return finalize(initialQuote, initialQuote, {
+      requested_usd: 0, raised_usd: 0, tokens: 0, book: 'NOT_OPENED', offering_tokens_sold: 0, offering_raised_usd: 0
+    }, state, steps);
   }
 
   push('Open', 'Contract',
     `RWA offering opens at ${usd(initialQuote.final_issue_price_usd)}/token for ${initialQuote.recommended_token_supply.toLocaleString('en-US')} tokens (1.00 target redemption, not guaranteed)`);
 
+  const price = initialQuote.final_issue_price_usd;
+  const supply = initialQuote.recommended_token_supply;
   const subscriptionUsd = Number(opts.subscription_usd ?? initialQuote.expected_cash_to_exporter_usd);
-  const tokens = Math.floor(Math.min(subscriptionUsd / initialQuote.final_issue_price_usd, initialQuote.recommended_token_supply));
-  const raised = round(tokens * initialQuote.final_issue_price_usd, 2);
-  push('Subscribed', 'Investors', `Permissioned investors subscribe ${usd(raised)} for ${tokens.toLocaleString('en-US')} RWA`);
-  push('Funded', 'Contract', `${usd(raised)} released to exporter; eBL held as pool collateral`);
+  const tokens = Math.floor(Math.min(subscriptionUsd / price, supply));
+  const raised = round(tokens * price, 2);
+  const fillsBook = tokens >= supply;
+  const book = fillsBook || String(opts.book ?? 'FILLED').toUpperCase() !== 'UNDERSUBSCRIBED' ? 'FILLED' : 'UNDERSUBSCRIBED';
+  push('Subscribed', 'Investors',
+    `Investor subscribes ${usd(raised)} for ${tokens.toLocaleString('en-US')} RWA; payment is held in pool escrow until the book fills`);
+
+  if (book === 'UNDERSUBSCRIBED') {
+    const subscription = {
+      requested_usd: round(subscriptionUsd, 2), raised_usd: raised, tokens,
+      book, offering_tokens_sold: tokens, offering_raised_usd: raised
+    };
+    push('Cancelled', 'Platform',
+      `Book closes undersubscribed (${tokens.toLocaleString('en-US')} / ${supply.toLocaleString('en-US')} RWA): the offering is cancelled before any disbursement and the eBL pledge is released`);
+    push('Cancelled', 'Investors', `Investors refund exactly what they paid: ${usd(raised)} returned and their RWA burned`);
+    return finalize(initialQuote, initialQuote, subscription, 'Cancelled', steps, settleByRefund(subscription));
+  }
+
+  const offeringRaised = round(supply * price, 2);
+  push('Funded', 'Contract', fillsBook
+    ? `Investor fills the book: escrow of ${usd(offeringRaised)} disbursed to the exporter in one transfer; eBL stays pledged as collateral`
+    : `Other investors fill the remaining ${(supply - tokens).toLocaleString('en-US')} RWA: escrow of ${usd(offeringRaised)} disbursed to the exporter in one transfer; eBL stays pledged as collateral`);
   push('InTransit', 'Carrier', 'Cargo in transit; AI Pricing & Risk Agent monitors macro and shipment risk');
-  const subscription = { requested_usd: round(subscriptionUsd, 2), raised_usd: raised, tokens };
+  const subscription = {
+    requested_usd: round(subscriptionUsd, 2), raised_usd: raised, tokens,
+    book, offering_tokens_sold: supply, offering_raised_usd: offeringRaised
+  };
 
   let finalQuote = initialQuote;
   let endState = 'InTransit';
@@ -198,17 +247,17 @@ export function simulateOffering(caseData, opts = {}) {
     const reason = opts.default_reason
       ?? 'importer walks from the contract after the cargo is re-marked below the invoice price';
     const verdict = settlement.investor_pnl_usd < 0 ? 'net LOSS' : 'net gain';
-    push('Defaulted', 'Importer', `Importer default — ${reason}; the repayment chain breaks`);
+    push('Liquidation', 'RiskPricingOracle', `Importer default — ${reason}; the oracle triggers TRIGGER_LIQUIDATION`);
     push('Liquidation', 'Pool',
-      `Pool seizes the pledged eBL and liquidates: AI-verified collateral ${usd(liq.ai_verified_collateral_value_usd)} realizes ${usd(liq.recoverable_value_usd)} (${Math.round(liq.realization_rate * 100)}% — forced sale under ${finalQuote.risk_level} stress) against ${usd(liq.amount_owed_usd)} owed to RWA holders`);
+      `Pool liquidates the pledged eBL: AI-verified collateral ${usd(liq.ai_verified_collateral_value_usd)} realizes ${usd(liq.recoverable_value_usd)} (${Math.round(liq.realization_rate * 100)}% — forced sale under ${finalQuote.risk_level} stress); ${usd(liq.recovered_to_pool_usd)} is deposited for the ${usd(liq.amount_owed_usd)} owed to RWA holders and the eBL pledge is released`);
     push('Liquidation', 'Investors',
-      `Investors recover ${settlement.redemption_value_per_token.toFixed(3)}/token vs ${pricePaid.toFixed(3)} paid — ${verdict} ${usd(Math.abs(settlement.investor_pnl_usd))} (${(settlement.investor_return_pct * 100).toFixed(1)}% on ${usd(settlement.investor_capital_usd)} subscribed)`);
+      `RWA holders redeem pro rata at ${settlement.redemption_value_per_token.toFixed(3)}/token vs ${pricePaid.toFixed(3)} paid — ${verdict} ${usd(Math.abs(settlement.investor_pnl_usd))} (${(settlement.investor_return_pct * 100).toFixed(1)}% on ${usd(settlement.investor_capital_usd)} subscribed)`);
     endState = 'Liquidation';
   } else if (endState === 'InTransit' || endState === 'Repriced') {
     settlement = settleByRepayment(finalQuote, subscription);
-    push('Repaid', 'Exporter', 'Importer pays the exporter for the delivered cargo; the exporter repays the pool, releasing the pledged eBL — pool receives funds');
+    push('Repaid', 'Exporter', 'Importer pays the exporter for the delivered cargo; the repayment is deposited into the pool and the pledged eBL is released');
     push('Redeemed', 'Investors',
-      `Investors redeem RWA at the ${finalQuote.target_redemption_value_usd.toFixed(2)} target — net gain ${usd(settlement.investor_pnl_usd)} (${(settlement.investor_return_pct * 100).toFixed(1)}% on ${usd(settlement.investor_capital_usd)}); the discount they earned was the exporter's ${usd(finalQuote.financing_cost_usd)} financing cost`);
+      `RWA holders burn their RWA for a pro-rata share of the repayment at the ${finalQuote.target_redemption_value_usd.toFixed(2)} target — net gain ${usd(settlement.investor_pnl_usd)} (${(settlement.investor_return_pct * 100).toFixed(1)}% on ${usd(settlement.investor_capital_usd)}); the discount they earned was the exporter's ${usd(finalQuote.financing_cost_usd)} financing cost`);
     endState = 'Redeemed';
   }
 

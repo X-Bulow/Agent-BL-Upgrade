@@ -1,6 +1,6 @@
 {
   "name": "alu-warehouse-risk-pause",
-  "description": "南方有色佛山铝锭仓单 - 保守估值：大额仓单（1,014吨）+ 佛山地区历史仓单风险 + 低LTV（55%），定价偏低但仍在可融资区间。",
+  "description": "SouthMet Foshan aluminum ingot warehouse receipt - conservative valuation: a large receipt (1,014 MT) + historical warehouse receipt risk in the Foshan area + a low LTV (55%); the price is on the low side but still within the financeable range.",
   "base_case": "data/cases/alu-fs-wh-00014.case.json",
   "overrides": {
     "financing": { "payout_speed": "BALANCED", "max_ltv": 0.55 }

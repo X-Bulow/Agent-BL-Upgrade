@@ -1,28 +1,28 @@
 # AgentBL Dockerfile
 FROM node:20-alpine
 
-# 设置工作目录
+# Set the working directory
 WORKDIR /app
 
-# 复制 package 文件
+# Copy package files
 COPY package*.json ./
 
-# 安装依赖
+# Install dependencies
 RUN npm ci --only=production
 
-# 复制源代码
+# Copy the source code
 COPY . .
 
-# 暴露端口
+# Expose the port
 EXPOSE 3000
 
-# 设置环境变量
+# Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# 健康检查
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# 启动应用
+# Start the application
 CMD ["node", "src/app/server.js"]

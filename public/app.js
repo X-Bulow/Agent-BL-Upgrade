@@ -14,6 +14,8 @@ import { $, el, clear, toast, setBusy } from './dom.js';
 import * as f from './format.js';
 import * as api from './api.js';
 import * as web3 from './web3.js';
+import * as protocol from './protocol.js';
+import { CASE_CATEGORIES, caseCategory, caseSearchFields, matchesSearch } from './catalog.js';
 import { t, tData, toggleLang, onLangChange, applyStaticI18n } from './i18n.js';
 import { initVoyage, renderVoyage, startVoyageClock, stopVoyageClock } from './voyage.js';
 import { initPopupAssistant } from './popup-assistant.js';
@@ -45,55 +47,30 @@ async function networkName() {
 state.categoryFilter = 'all';
 state.searchQuery = '';
 
-/** Map cargo names to category keys. */
-const CATEGORY_MAP = {
-  energy_chemical: ['crude', 'oil', 'refined', 'rubber', 'petroleum', 'chemical'],
-  metal: ['copper', 'iron', 'aluminum', 'aluminium', 'steel'],
-  ore: ['ore', 'concentrate']
-};
-
-function getCaseCategory(caseItem) {
-  const bl = caseItem.case?.bill_of_lading ?? {};
-  const cargo = (bl.cargo || caseItem.cargo || '').toLowerCase();
-  const cats = [];
-  if (CATEGORY_MAP.ore.some(k => cargo.includes(k.toLowerCase()))) cats.push('ore');
-  if (CATEGORY_MAP.metal.some(k => cargo.includes(k.toLowerCase()))) cats.push('metal');
-  if (CATEGORY_MAP.energy_chemical.some(k => cargo.includes(k.toLowerCase()))) cats.push('energy_chemical');
-  return cats.length ? cats : ['all'];
+/** Everything a case can be found by: its data, the displayed translation and its category. */
+function searchFieldsFor(caseItem) {
+  const fields = caseSearchFields(caseItem);
+  const category = caseCategory(caseItem);
+  // Include the displayed translation so Chinese queries work in the Chinese UI.
+  return [...fields, ...fields.map((value) => tData(value)), category, t(`cat_${category}`)];
 }
 
-/** Return cases filtered by current category + search query + AI match. */
-function visibleCases() {
+/** Cases matching the search query (and the AI match, when that interface is used). */
+function searchedCases() {
   let cases = state.cases;
-
-  // AI-matched IDs from natural-language filtering.
   if (state._aiMatchedIds) {
-    cases = cases.filter(c => state._aiMatchedIds.has(c.case_id));
+    cases = cases.filter((c) => state._aiMatchedIds.has(c.case_id));
+  } else if (state.searchQuery.trim()) {
+    cases = cases.filter((c) => matchesSearch(searchFieldsFor(c), state.searchQuery));
   }
-
-  // Category filter
-  if (state.categoryFilter !== 'all') {
-    cases = cases.filter(c => {
-      const cats = getCaseCategory(c);
-      return cats.includes(state.categoryFilter);
-    });
-  }
-
-  // Keyword search (skip when AI filter is active — AI already understands intent)
-  if (!state._aiMatchedIds && state.searchQuery.trim()) {
-    const q = state.searchQuery.trim().toLowerCase();
-    cases = cases.filter(c => {
-      const bl = c.case?.bill_of_lading ?? {};
-      const searchable = [
-        c.label, c.cargo, c.route, c.risk_hint, c.case_id,
-        bl.cargo, bl.port_of_loading, bl.port_of_discharge,
-        bl.bl_id, bl.vessel_name
-      ].filter(Boolean).join(' ').toLowerCase();
-      return searchable.includes(q);
-    });
-  }
-
   return cases;
+}
+
+/** Return cases filtered by the current category and search query. */
+function visibleCases() {
+  const cases = searchedCases();
+  if (state.categoryFilter === 'all') return cases;
+  return cases.filter((c) => caseCategory(c) === state.categoryFilter);
 }
 
 // ===========================================================================
@@ -120,6 +97,7 @@ async function boot() {
     toast(t('t_load_cases_fail', { msg: e.message }), true);
     return;
   }
+  highlightCategoryBtn();
   renderCaseSelector();
   renderSpeedSelector();
   await selectCase(state.cases[0]?.case_id);
@@ -530,6 +508,7 @@ function renderMarketCard(entry, comparison) {
   const cName = (bl.cargo || entry.cargo || '').toLowerCase();
   const match = (kw) => cId.includes(kw) || cName.includes(kw);
 
+  // The Chinese keywords below are intentional: they also match Chinese cargo names / input.
   if (match('copper') || match('cuconc') || match('-cu-') || match('铜')) cargoType = 'copper';
   else if (match('crude') || match('refined') || match('-oil-') || match('oil') || match('petroleum') || match('油')) cargoType = 'oil';
   else if (match('ironore') || match('iron ore') || match('铁')) cargoType = 'ore';
@@ -672,7 +651,9 @@ function renderMarketDetail() {
         onclick: onMarketSubscribe
       }, paused ? t('market_paused_btn') : t('market_subscribe_btn'))
     ),
+    el('p', { id: 'market-mode-note', class: 'market-mode-note' }),
     el('div', { id: 'market-subscribe-readout', class: 'market-subscribe-readout' }),
+    el('div', { id: 'market-onchain', class: 'market-onchain', hidden: true }),
     el('div', { class: 'market-detail-actions' },
       el('button', { class: 'btn ghost sm', onclick: () => setView('mint') }, t('market_open_pricing')),
       el('button', { class: 'btn ghost sm', onclick: () => openDealDetailModal(state.caseId) }, t('market_open_voyage'))
@@ -680,6 +661,181 @@ function renderMarketDetail() {
   );
 
   renderMarketSubscribeReadout(quote);
+  renderProtocolPanel();
+  if (!state.protocolViews[state.caseId]) loadProtocolView(state.caseId);
+}
+
+// ---- On-chain offering (full protocol) ---------------------------------------
+
+/** 'chain' when the selected case's offering can be bought with the connected MetaMask wallet. */
+function marketSubscribeMode() {
+  const view = state.protocolViews[state.caseId]?.view;
+  if (!view || !web3.evmSession()) return 'sim';
+  return protocol.availableActions(view).subscribe ? 'chain' : 'chain-closed';
+}
+
+/** The on-chain issue price while subscribing on-chain, otherwise the AI quote. */
+function marketEffectivePrice(quote) {
+  return marketSubscribeMode() === 'chain'
+    ? state.protocolViews[state.caseId].view.issuePrice
+    : quote.final_issue_price_usd;
+}
+
+async function loadProtocolView(caseId) {
+  if (!caseId) return;
+  const previous = state.protocolViews[caseId];
+  state.protocolViews[caseId] = { ...previous, loading: true };
+  if (caseId === state.caseId) renderProtocolPanel();
+  try {
+    const offering = await protocol.protocolOfferingFor(caseId);
+    state.protocolViews[caseId] = offering
+      ? { view: await protocol.readProtocolOffering(caseId) }
+      : { none: true };
+  } catch (error) {
+    state.protocolViews[caseId] = { error: error.message || String(error) };
+  }
+  if (caseId === state.caseId) {
+    renderProtocolPanel();
+    renderMarketSubscribeReadout(selectedQuote());
+  }
+}
+
+function refreshMarketSubscribeControls() {
+  const btn = $('#market-subscribe-btn');
+  const note = $('#market-mode-note');
+  const quote = selectedQuote();
+  if (!btn || !quote) return;
+  const mode = marketSubscribeMode();
+  const view = state.protocolViews[state.caseId]?.view;
+  if (mode === 'chain') {
+    btn.disabled = false;
+    btn.textContent = t('market_chain_subscribe_btn');
+  } else if (mode === 'chain-closed') {
+    btn.disabled = true;
+    btn.textContent = t('market_chain_closed_btn', { state: view.state });
+  } else {
+    const paused = PAUSED_ACTIONS.has(quote.pricing_action);
+    btn.disabled = paused;
+    btn.textContent = paused ? t('market_paused_btn') : t('market_subscribe_btn');
+  }
+  if (note) note.textContent = mode === 'sim' ? t('market_mode_sim') : t('market_mode_chain');
+}
+
+function renderProtocolPanel() {
+  const box = $('#market-onchain');
+  refreshMarketSubscribeControls();
+  if (!box) return;
+  clear(box);
+  const entry = state.protocolViews[state.caseId];
+  box.hidden = !entry || entry.none;
+  if (box.hidden) return;
+  if (entry.error) {
+    box.append(
+      el('p', { class: 'sub-foot muted', text: t('market_chain_error', { msg: entry.error }) }),
+      el('button', { class: 'btn ghost sm', onclick: () => loadProtocolView(state.caseId) }, t('market_chain_retry'))
+    );
+    return;
+  }
+  if (!entry.view) {
+    box.append(el('p', { class: 'sub-foot muted', text: t('market_chain_loading') }));
+    return;
+  }
+
+  const view = entry.view;
+  const actions = protocol.availableActions(view);
+  const fill = view.tokenSupply > 0 ? view.subscribed / view.tokenSupply : 0;
+  box.append(
+    el('div', { class: 'market-onchain-head' },
+      el('strong', { text: t('market_chain_h', { id: view.poolId }) }),
+      el('span', { class: `badge sm tone-${f.stateTone(view.state)}`, text: view.state })
+    ),
+    renderMarketFunding({
+      raised: view.subscribed * view.issuePrice,
+      target: view.tokenSupply * view.issuePrice,
+      fill
+    }, false),
+    el('div', { class: 'readout-grid market-readout-grid' },
+      miniKv(t('market_chain_price'), `$${f.price(view.issuePrice)}`),
+      miniKv(t('market_chain_sold'), `${f.int(view.subscribed)} / ${f.int(view.tokenSupply)} RWA`)
+    )
+  );
+
+  if (!view.position) {
+    box.append(el('p', { class: 'sub-foot muted', text: t('market_chain_connect') }));
+    return;
+  }
+  const position = view.position;
+  box.append(
+    el('div', { class: 'readout-grid market-readout-grid' },
+      miniKv(t('market_chain_my_rwa'), f.int(position.tokens), position.tokens > 0 ? 'gain' : undefined),
+      miniKv(t('market_chain_paid'), f.usd(position.paidUsd)),
+      miniKv(t('market_chain_balance'), f.usd(position.usdcBalanceUsd))
+    ),
+    el('div', { class: 'market-onchain-actions' },
+      el('button', { class: 'btn ghost sm', onclick: (event) => runProtocolAction(event, 'faucet') }, t('market_chain_faucet')),
+      actions.redeem
+        ? el('button', { class: 'btn sm', onclick: (event) => runProtocolAction(event, 'redeem') },
+          t('market_chain_redeem', { usd: f.usd(position.estimatedPayoutUsd) }))
+        : null,
+      actions.refund
+        ? el('button', { class: 'btn sm', onclick: (event) => runProtocolAction(event, 'refund') },
+          t('market_chain_refund', { usd: f.usd(position.paidUsd) }))
+        : null,
+      el('button', { class: 'btn ghost sm', onclick: () => loadProtocolView(state.caseId) }, t('market_chain_refresh'))
+    )
+  );
+}
+
+function protocolErrorText(error) {
+  if (error?.code === 'INSUFFICIENT_USDC') return t('market_chain_need_usdc');
+  if (error?.code === 'REJECTED') return t('market_chain_rejected');
+  return t('market_chain_fail', { msg: error?.message || error });
+}
+
+async function runProtocolAction(event, action) {
+  const btn = event?.currentTarget;
+  const caseId = state.caseId;
+  if (btn) btn.disabled = true;
+  try {
+    if (action === 'faucet') {
+      await protocol.claimTestUsdc(100_000);
+      toast(t('market_chain_faucet_done'));
+    } else if (action === 'redeem') {
+      await protocol.redeemOnChain(caseId);
+      toast(t('market_chain_redeemed'));
+    } else if (action === 'refund') {
+      await protocol.refundOnChain(caseId);
+      toast(t('market_chain_refunded'));
+    }
+  } catch (error) {
+    toast(protocolErrorText(error), true);
+  } finally {
+    if (btn) btn.disabled = false;
+    await loadProtocolView(caseId);
+  }
+}
+
+async function subscribeMarketOnChain(amountUsd) {
+  const caseId = state.caseId;
+  const view = state.protocolViews[caseId].view;
+  const remaining = view.tokenSupply - view.subscribed;
+  const tokens = Math.min(protocol.tokensForBudget(amountUsd, view.issuePriceE6), remaining);
+  if (tokens <= 0) { toast(t('market_chain_too_small'), true); return; }
+
+  const btn = $('#market-subscribe-btn');
+  if (btn) { btn.disabled = true; btn.textContent = t('market_chain_approving'); }
+  try {
+    const result = await protocol.subscribeOnChain(caseId, tokens, {
+      onStatus: (status) => {
+        if (btn) btn.textContent = t(status === 'approving' ? 'market_chain_approving' : 'market_chain_subscribing');
+      }
+    });
+    toast(t('market_chain_subscribed', { n: f.int(result.tokens), usd: f.usd(result.costUsd) }));
+  } catch (error) {
+    toast(protocolErrorText(error), true);
+  } finally {
+    await loadProtocolView(caseId);
+  }
 }
 
 function renderMarketSubscribeReadout(quote) {
@@ -687,7 +843,8 @@ function renderMarketSubscribeReadout(quote) {
   if (!box || !quote) return;
   clear(box);
   const amount = Number(state.marketSubscriptionUsd) || 0;
-  const tokens = quote.final_issue_price_usd > 0 ? Math.floor(amount / quote.final_issue_price_usd) : 0;
+  const price = marketEffectivePrice(quote);
+  const tokens = price > 0 ? Math.floor(amount / price) : 0;
   const redemption = tokens;
   box.append(
     el('div', { class: 'market-readout-line' }, t('market_readout_receive') + ' ',
@@ -695,7 +852,7 @@ function renderMarketSubscribeReadout(quote) {
       ` RWA · ${t('market_readout_target')} ${f.usd(redemption)}`
     ),
     el('div', { class: 'readout-grid market-readout-grid' },
-      miniKv(t('mr_price'), `$${f.price(quote.final_issue_price_usd)}`),
+      miniKv(t('mr_price'), `$${f.price(price)}`),
       miniKv(t('mr_invest'), f.usd(amount)),
       miniKv(t('mr_redeem'), f.usd(redemption), 'gain'),
       miniKv(t('mr_upside'), f.usd(Math.max(0, redemption - amount)), 'gain')
@@ -714,9 +871,12 @@ function renderMarketSubscribeReadout(quote) {
 
 async function onMarketSubscribe() {
   const quote = selectedQuote();
-  if (!quote || PAUSED_ACTIONS.has(quote.pricing_action)) return;
+  if (!quote) return;
   const amount = Number(state.marketSubscriptionUsd) || 0;
   if (amount <= 0) { toast(t('market_need_amount'), true); return; }
+  const mode = marketSubscribeMode();
+  if (mode === 'chain') { await subscribeMarketOnChain(amount); return; }
+  if (mode === 'chain-closed' || PAUSED_ACTIONS.has(quote.pricing_action)) return;
 
   const btn = $('#market-subscribe-btn');
   const old = btn?.textContent;
@@ -828,8 +988,19 @@ function renderCaseSelector() {
     onchange: (event) => selectCase(event.target.value)
   });
   for (const c of cases) {
-    const risk = c.risk_hint ? ` · ${f.riskLabel(c.risk_hint)}` : '';
-    select.append(el('option', { value: c.case_id, text: shortLabel(c) + risk }));
+    const bl = c.case?.bill_of_lading ?? {};
+    const route = bl.port_of_loading && bl.port_of_discharge
+      ? `${tData(bl.port_of_loading)} → ${tData(bl.port_of_discharge)}`
+      : null;
+    const risk = c.risk_hint ? f.riskLabel(c.risk_hint) : null;
+    // custom-select.js shows data-short on the closed picker and data-detail as a
+    // second line in the open list; the option text stays the full label.
+    select.append(el('option', {
+      value: c.case_id,
+      text: [shortLabel(c), risk].filter(Boolean).join(' · '),
+      'data-short': caseName(c),
+      'data-detail': [route, risk, c.case_id].filter(Boolean).join(' · ')
+    }));
   }
   box.append(select);
   highlightCase();
@@ -841,6 +1012,14 @@ function shortLabel(c) {
   const load = tData(bl.port_of_loading);
   const disch = tData(bl.port_of_discharge);
   return load && disch ? `${cargo} · ${load} → ${disch}` : cargo;
+}
+
+/** Short display name of a case's cargo, preferring the structured commodity. */
+function caseName(c) {
+  const commodity = c.case?.cargo?.commodity;
+  if (commodity) return tData(commodity);
+  const bl = c.case?.bill_of_lading ?? {};
+  return shortCargoName(tData(bl.cargo || c.cargo || c.case_id));
 }
 
 function shortCargoName(value) {
@@ -892,27 +1071,43 @@ function onCategoryClick(cat) {
   }
 }
 
+/** Render the category buttons with the number of matching cases; hide categories with no cases at all. */
 function highlightCategoryBtn() {
-  document.querySelectorAll('#category-filter .cat-btn').forEach((b) =>
-    b.classList.toggle('active', b.dataset.cat === state.categoryFilter));
+  const box = $('#category-filter');
+  if (!box) return;
+  clear(box);
+  const present = new Set(state.cases.map(caseCategory));
+  const searched = searchedCases();
+  const countOf = (cat) => (cat === 'all' ? searched.length : searched.filter((c) => caseCategory(c) === cat).length);
+  for (const cat of ['all', ...CASE_CATEGORIES.filter((key) => present.has(key))]) {
+    box.append(el('button', {
+      class: `cat-btn${cat === state.categoryFilter ? ' active' : ''}`,
+      'data-cat': cat,
+      onclick: () => onCategoryClick(cat)
+    }, t(`cat_${cat}`), ' ', el('span', { class: 'cat-count', text: String(countOf(cat)) })));
+  }
 }
 
 // ===========================================================================
 // Search + AI natural language filter
 // ===========================================================================
 let searchDebounce = null;
+function applySearch() {
+  clearTimeout(searchDebounce);
+  state.searchQuery = $('#search-input')?.value || '';
+  state._aiMatchedIds = null; // a typed query replaces any AI match
+  highlightCategoryBtn();
+  renderCaseSelector();
+  renderMarket();
+  const visible = visibleCases();
+  if (visible.length && !visible.find(c => c.case_id === state.caseId)) {
+    selectCase(visible[0].case_id);
+  }
+}
+
 function onSearchInput() {
   clearTimeout(searchDebounce);
-  searchDebounce = setTimeout(() => {
-    state.searchQuery = $('#search-input')?.value || '';
-    state._aiMatchedIds = null; // clear AI filter on manual input
-    renderCaseSelector();
-    renderMarket();
-    const visible = visibleCases();
-    if (visible.length && !visible.find(c => c.case_id === state.caseId)) {
-      selectCase(visible[0].case_id);
-    }
-  }, 300);
+  searchDebounce = setTimeout(applySearch, 250);
 }
 
 async function onAiSearch() {
@@ -1407,7 +1602,12 @@ async function reflectChainStatus() {
   if (!elx) return;
   const real = await web3.isRealChainConfigured();
   const net = await networkName();
-  elx.textContent = real ? t('chain_deployed', { network: net }) : t('chain_not_deployed');
+  // A dot with a short label keeps the sub-bar on one row; the full text is the tooltip.
+  const message = real ? t('chain_deployed', { network: net }) : t('chain_not_deployed');
+  elx.textContent = real ? t('chain_deployed_short') : t('chain_not_deployed_short');
+  elx.title = message;
+  elx.setAttribute('aria-label', message);
+  elx.setAttribute('role', 'status');
   elx.className = `chain-status tone-${real ? 'ok' : 'muted'}`;
 }
 
@@ -1427,6 +1627,8 @@ async function onNetworkChange(event) {
   try {
     await web3.selectNetwork(event.target.value);
     _cachedNetworkName = null;
+    state.protocolViews = {};
+    if (state.caseId) loadProtocolView(state.caseId);
     await reflectChainStatus();
     await renderProtocolEvidence();
   } catch (error) {
@@ -2679,7 +2881,28 @@ function renderAgentTimeline() {
 // ===========================================================================
 // Wiring
 // ===========================================================================
+/**
+ * Publish the real topbar and sub-bar heights as CSS variables so sticky
+ * elements sit right below them; both bars change height when they wrap.
+ */
+function trackStickyBarHeights() {
+  const bars = { '--topbar-h': document.querySelector('.topbar'), '--subbar-h': document.querySelector('.subbar') };
+  const apply = () => {
+    for (const [name, node] of Object.entries(bars)) {
+      if (node) document.documentElement.style.setProperty(name, `${node.offsetHeight}px`);
+    }
+  };
+  apply();
+  if (typeof ResizeObserver === 'function') {
+    const observer = new ResizeObserver(apply);
+    Object.values(bars).forEach((node) => node && observer.observe(node));
+  } else {
+    window.addEventListener('resize', apply);
+  }
+}
+
 function wireStaticHandlers() {
+  trackStickyBarHeights();
   document.querySelectorAll('#nav .nav-tab').forEach((b) =>
     b.addEventListener('click', () => {
       setView(b.dataset.view);
@@ -2696,6 +2919,9 @@ function wireStaticHandlers() {
   window.addEventListener('agentbl:walletchange', (event) => {
     if (!event.detail?.address) state.wallet = null;
     refreshWalletUi();
+    // Positions belong to the wallet, so reload the selected case's on-chain view.
+    state.protocolViews = {};
+    if (state.caseId) loadProtocolView(state.caseId);
   });
   window.addEventListener('agentbl:portfoliochange', renderPortfolio);
   // Close the wallet menu on an outside click or Escape.
@@ -2994,20 +3220,19 @@ function wireStaticHandlers() {
     $('#agent-activity-console').classList.toggle('collapsed');
   });
 
-  // Category filter buttons
-  document.querySelectorAll('#category-filter .cat-btn').forEach((b) =>
-    b.addEventListener('click', () => onCategoryClick(b.dataset.cat)));
+  // Category buttons are rendered by highlightCategoryBtn(), which wires their clicks.
 
-  // Search input
+  // Search input: filters as you type; Enter applies immediately.
   const searchInput = $('#search-input');
   if (searchInput) {
     searchInput.addEventListener('input', onSearchInput);
     searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') onAiSearch();
+      if (e.key === 'Enter') applySearch();
     });
   }
 
-  // AI search button
+  // The natural-language AI filter (onAiSearch) is kept for a future LLM backend but
+  // has no button in the UI; it is only wired if an #ai-search-btn element exists.
   $('#ai-search-btn')?.addEventListener('click', onAiSearch);
 
   $('#market-sort')?.addEventListener('change', (e) => {

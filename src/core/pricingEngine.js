@@ -16,7 +16,7 @@
 //
 //   - payout speed sets the BASE share given up for speed (the "reasonable ratio"):
 //         FAST 0.50   BALANCED 0.33   LOW_COST 0.20
-//     => "很快到账" sacrifices more margin for speed; "正常到账" keeps more margin.
+//     => "fast payout" sacrifices more margin for speed; "normal payout" keeps more margin.
 //   - trade risk (war / volatility / shipment / docs) ADDS to the share, so a
 //     riskier deal is priced lower (investors are paid more to take it).
 //   - AI-verified collateral CAPS the safe redemption exposure: a hard price floor.

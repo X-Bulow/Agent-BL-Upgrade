@@ -1,6 +1,6 @@
-# 海运货物保险单 (Marine Cargo Insurance Policy)
+# Marine Cargo Insurance Policy
 
-> 拟真样例数据，用于 AgentBL demo。
+> Simulated sample data for the AgentBL demo.
 
 | | |
 |---|---|
@@ -13,7 +13,7 @@
 ## Insured
 
 **Beijing Agricultural Trading Co., Ltd.**
-北京市朝阳区建国路88号，中国北京
+88 Jianguo Road, Chaoyang District, Beijing, China
 
 ---
 
@@ -83,5 +83,5 @@ Authorized Signatory: Chen (Marine Underwriter)
 
 ---
 
-> 说明（给团队）：保险金额 = CIF 货值 × 110% = $2,600,000 × 1.10 = $2,860,000。
-> ICC(A) 是最高等级海运货物险，"仓至仓"覆盖。USD 10,000 免赔额。
+> Note (for the team): insured amount = CIF cargo value × 110% = $2,600,000 × 1.10 = $2,860,000.
+> ICC(A) is the highest tier of marine cargo insurance, with "warehouse-to-warehouse" cover. USD 10,000 deductible.

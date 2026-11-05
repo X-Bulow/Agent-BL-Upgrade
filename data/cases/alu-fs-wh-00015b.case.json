@@ -1,7 +1,7 @@
 {
   "case_id": "CASE-EWR-2025-ALU-FS-WH-00015B",
   "model": "ai-dynamic-pricing-rwa-v0.2",
-  "note": "拟真样例数据（虚构）：南方有色佛山 × 瑞达通金属（广东）有限公司 铝锭现货采购 2025-FS-ALX-CG-00015。金额按~7.25汇率折算USD。 铝合金锭（ADC12），不同于纯铝锭 P1020。用于压铸行业，溢价高于普通铝锭。",
+  "note": "Simulated sample data (fictional): SouthMet Foshan × Ruidatong Metals (Guangdong) Co., Ltd. aluminum ingot spot purchase 2025-FS-ALX-CG-00015. Amounts converted to USD at a rate of ~7.25. Aluminum alloy ingot (ADC12), unlike pure aluminum ingot P1020. Used in the die-casting industry, so it carries a higher premium than standard aluminum ingot.",
   "uploaded_documents": {
     "warehouse_receipt_file": "data/uploads/alu-fs-wh-00015b/warehouse-receipt.md",
     "commercial_invoice_file": "data/uploads/alu-fs-wh-00015b/commercial-invoice.md"
@@ -10,20 +10,20 @@
     "bl_id": "EWR-2025-FS-ALX-CG-00015",
     "bl_no": "FS/WH/AL0/00015",
     "bl_type": "electronic_warehouse_receipt",
-    "ebl_platform": "AgentBL ENI (数字仓单)",
+    "ebl_platform": "AgentBL ENI (digital warehouse receipt)",
     "ebl_title_ref": "ENI-EWR-AL0-00015-2115",
-    "shipper": "瑞达通金属（广东）有限公司 (Ruidatong Metals (Guangdong) Co., Ltd.)",
-    "consignee": "南方有色金属贸易有限公司 (SouthMet International Trade Co., Ltd.)",
-    "notify_party": "南方有色金属贸易有限公司，广东省佛山市南海区",
-    "carrier": "佛山南海正源仓储物流有限公司（指定交割库）",
-    "vessel": "N/A（库内交货）",
+    "shipper": "Ruidatong Metals (Guangdong) Co., Ltd.",
+    "consignee": "SouthMet International Trade Co., Ltd.",
+    "notify_party": "SouthMet International Trade Co., Ltd., Nanhai District, Foshan, Guangdong Province",
+    "carrier": "Foshan Nanhai Zhengyuan Warehousing & Logistics Co., Ltd. (designated delivery warehouse)",
+    "vessel": "N/A (in-warehouse delivery)",
     "voyage_no": "N/A",
-    "port_of_loading": "佛山南海指定仓库（入库单号 WH-FS-00015)",
-    "port_of_discharge": "佛山南海指定仓库（出库单号 WH-FS-00015)",
-    "incoterms": "EXW 供方仓库（自提）",
-    "cargo": "ADC12 / A380 级别，铝合金锭",
+    "port_of_loading": "Nanhai, Foshan designated warehouse (inbound receipt no. WH-FS-00015)",
+    "port_of_discharge": "Nanhai, Foshan designated warehouse (outbound receipt no. WH-FS-00015)",
+    "incoterms": "EXW supplier's warehouse (self-pickup)",
+    "cargo": "ADC12 / A380 grade, aluminum alloy ingot",
     "quantity_mt": 66,
-    "containers": "N/A（散货仓库堆存）",
+    "containers": "N/A (bulk warehouse storage)",
     "declared_value_usd": 185255,
     "issue_date": "2025-01-17",
     "shipped_on_board": "2025-01-17",
@@ -34,9 +34,9 @@
     "invoice_no": "JY-AL0-INV-00015",
     "invoice_date": "2025-01-17",
     "sales_contract": "2025-FS-ALX-CG-00015",
-    "incoterms": "EXW 供方仓库（自提）",
-    "payment_terms": "先货后款（验收后7个工作日内）",
-    "pricing_basis": "SMM 佛山铝锭现货价 + 华南升贴水",
+    "incoterms": "EXW supplier's warehouse (self-pickup)",
+    "payment_terms": "Payment after delivery (within 7 business days of acceptance)",
+    "pricing_basis": "SMM Foshan aluminum ingot spot price + South China premium/discount",
     "smm_reference_price_cny_per_mt": 20260,
     "regional_premium_cny_per_mt": 90,
     "unit_price_cny_per_mt": 20350,
@@ -50,17 +50,17 @@
     "vat_amount_cny": 174603
   },
   "cargo": {
-    "commodity": "Aluminum Alloy Ingot（铝合金锭）",
-    "grade": "ADC12 / A380 级别，铝合金锭，GB/T 1196-2017",
+    "commodity": "Aluminum Alloy Ingot",
+    "grade": "ADC12 / A380 grade, aluminum alloy ingot, GB/T 1196-2017",
     "hs_code": "760120",
     "quantity": 66,
     "unit": "MT",
-    "brand": "西南铝业 / 锦源铝业（国产主流品牌）",
-    "warehouse": "佛山南海有色金属指定交割仓库"
+    "brand": "Southwest Aluminum / Jinyuan Aluminum (mainstream domestic brands)",
+    "warehouse": "Nanhai, Foshan Designated Non-Ferrous Metals Delivery Warehouse"
   },
   "insurance": {
-    "provider": "中国人保财险佛山分公司（PICC Foshan）",
-    "policy_type": "国内货运险 + 仓至仓条款",
+    "provider": "PICC Property and Casualty, Foshan Branch (PICC Foshan)",
+    "policy_type": "Domestic cargo insurance + warehouse-to-warehouse clause",
     "coverage_ratio": 1,
     "insured_value_cny": 1343100,
     "insured_value_usd": 185255,
@@ -75,7 +75,7 @@
     "expected_gross_profit_cny": 122100,
     "expected_gross_profit_usd": 16841,
     "gross_margin_pct": 0.0909,
-    "note": "瑞达通金属（广东）有限公司生产成本~18,500元/吨，铝合金锭（ADC12），不同于纯铝锭 P1020。用于压铸行业，溢价高于普通铝锭。，售价20,350元/吨，毛利率约9.1%。"
+    "note": "Ruidatong Metals (Guangdong) Co., Ltd. production cost ~18,500 CNY/MT. Aluminum alloy ingot (ADC12), unlike pure aluminum ingot P1020. Used in the die-casting industry, so it carries a higher premium than standard aluminum ingot. Selling price 20,350 CNY/MT, gross margin about 9.1%."
   },
   "financing": {
     "requested_cash_cny": 805860,
@@ -85,11 +85,11 @@
     "redemption_coverage_limit": 0.9,
     "max_ltv": 0.6,
     "currency": "USDC",
-    "note": "仓单质押融资，初始LTV 60%。供方先货后款，买方融资压力较小，LTV偏保守。"
+    "note": "Warehouse receipt pledge financing, initial LTV 60%. The supplier delivers before being paid, so the buyer faces less financing pressure; LTV is set conservatively."
   },
   "market": {
-    "commodity": "Aluminum Alloy（铝合金）",
-    "benchmark": "SMM 佛山铝锭现货价 (A00铝)",
+    "commodity": "Aluminum Alloy",
+    "benchmark": "SMM Foshan aluminum ingot spot price (A00 aluminum)",
     "price_unit": "CNY/MT",
     "reference_price_cny_per_mt": 20260,
     "reference_price_usd_per_mt": 2794,
@@ -99,19 +99,19 @@
     "lme_aluminium_cash_usd_per_mt": 2195,
     "shfe_aluminium_cny_per_mt": 20100,
     "as_of": "2025-01-17",
-    "source": "SMM / LME / SHFE 2025年1月行情"
+    "source": "SMM / LME / SHFE market data, January 2025"
   },
   "shipment_events": [
     {
       "date": "2025-01-17",
       "type": "warehouse_receipt_issued",
-      "description": "66吨ADC12 / A380 级别，铝合金锭入库完毕，佛山南海指定仓库签发电子仓单。",
+      "description": "66 MT of ADC12 / A380 grade, aluminum alloy ingot fully received into storage; the Nanhai, Foshan designated warehouse issued an electronic warehouse receipt.",
       "severity": "info"
     },
     {
       "date": "2025-01-17",
       "type": "ownership_transfer",
-      "description": "买卖双方完成先货后款结算，仓单所有权由瑞达通金属（广东）有限公司转移至南方有色佛山。",
+      "description": "Buyer and seller completed settlement (payment after delivery); ownership of the warehouse receipt transferred from Ruidatong Metals (Guangdong) Co., Ltd. to SouthMet Foshan.",
       "severity": "info"
     }
   ],
@@ -119,16 +119,16 @@
     {
       "date": "2025-01-17",
       "type": "domestic_aluminum_market",
-      "region": "中国 / 华南",
+      "region": "China / South China",
       "severity": "medium",
-      "description": "2025年1月佛山铝锭社会库存约22万吨，处于年内中性水平。春节前下游备货需求温和，华南现货升水稳定在60-90元/吨。"
+      "description": "In January 2025, social inventories of aluminum ingot in Foshan stood at about 220,000 MT, a neutral level for the year. Downstream pre-Spring Festival stocking demand was moderate, and the South China spot premium held steady at 60-90 CNY/MT."
     },
     {
       "date": "2025-01-17",
       "type": "seasonal_demand",
-      "region": "中国",
+      "region": "China",
       "severity": "low",
-      "description": "临近春节假期，下游加工企业陆续停产放假，现货采购节奏放缓。预计节后复工需求回暖。"
+      "description": "With the Spring Festival holiday approaching, downstream processors are gradually halting production for the break, slowing the pace of spot purchases. Demand is expected to recover once work resumes after the holiday."
     }
   ]
 }

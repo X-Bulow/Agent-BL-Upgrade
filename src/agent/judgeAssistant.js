@@ -95,6 +95,7 @@ const INTENTS = [
   {
     id: 'not-guaranteed',
     label: 'Is this principal-protected / a guaranteed return?',
+    // '保本' (principal-protected) recognises Chinese user input.
     keywords: ['guarantee', 'guaranteed', 'principal', 'protected', 'protection', 'safe', 'risk-free', 'risk free', 'capital', 'lose', 'loss', '保本', 'guarantor'],
     retrieval: 'is the 1.00 target redemption a guaranteed principal protection',
     answer: (ctx, docs) =>

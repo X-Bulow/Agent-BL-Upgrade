@@ -1,5 +1,7 @@
-const { expect } = require('chai');
-const { ethers } = require('hardhat');
+import { expect } from 'chai';
+import { network } from 'hardhat';
+
+const { ethers } = await network.create();
 
 const ACTION = {
   OPEN: 0,
@@ -29,14 +31,23 @@ async function expectRevert(promise, pattern) {
   expect(message).to.match(pattern);
 }
 
+// Give every test signer a large mUSDC balance and an unlimited allowance to the pool.
+async function fundSigners(usdc, pool, signers) {
+  for (const signer of signers) {
+    await (await usdc.mint(signer.address, 1_000_000_000_000_000n)).wait();
+    await (await usdc.connect(signer).approve(await pool.getAddress(), ethers.MaxUint256)).wait();
+  }
+}
+
 async function deployStack() {
   const [owner, investor, outsider, agent] = await ethers.getSigners();
   const Registry = await ethers.getContractFactory('EBLRegistry');
   const registry = await Registry.deploy();
   const Token = await ethers.getContractFactory('RWAToken');
   const token = await Token.deploy();
+  const usdc = await ethers.deployContract('MockUSDC');
   const Pool = await ethers.getContractFactory('RWAOfferingPool');
-  const pool = await Pool.deploy(await registry.getAddress(), await token.getAddress());
+  const pool = await Pool.deploy(await registry.getAddress(), await token.getAddress(), await usdc.getAddress());
   const Oracle = await ethers.getContractFactory('RiskPricingOracle');
   const oracle = await Oracle.deploy(await pool.getAddress());
   const Gate = await ethers.getContractFactory('InvestorComplianceGate');
@@ -48,7 +59,8 @@ async function deployStack() {
   await (await token.setPool(await pool.getAddress())).wait();
   await (await pool.setOracle(await oracle.getAddress())).wait();
   await (await pool.setAgentExecutor(agent.address, true)).wait();
-  return { owner, investor, outsider, agent, registry, token, pool, oracle, gate };
+  await fundSigners(usdc, pool, [owner, investor, outsider, agent]);
+  return { owner, investor, outsider, agent, registry, token, pool, oracle, gate, usdc };
 }
 
 async function createOffering(ctx, suffix = '1', supply = 100n) {
@@ -98,6 +110,7 @@ describe('RWAOfferingPool autonomous state machine (WEB3-15/16)', () => {
   it('requires payment and arrival proofs before settlement and rejects duplicates', async () => {
     const ctx = await deployStack();
     const poolId = await createOffering(ctx);
+    await (await ctx.pool.connect(ctx.investor).subscribe(poolId, 100n)).wait();
     await expectRevert(ctx.pool.connect(ctx.agent).settle(poolId, 100n), /settlement proof missing/u);
     await (await ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('payment'), 100n)).wait();
     await expectRevert(
@@ -144,6 +157,11 @@ describe('RWAOfferingPool autonomous state machine (WEB3-15/16)', () => {
     const poolId = await createOffering(ctx);
     await expectRevert(ctx.pool.connect(ctx.outsider).recordCargoArrival(poolId, ethers.id('arrival')), /not executor/u);
     await expectRevert(ctx.pool.connect(ctx.agent).markInTransit(poolId, ethers.id('departure')), /not funded/u);
+    await expectRevert(
+      ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('payment'), 100n),
+      /not funded/u
+    );
+    await (await ctx.pool.connect(ctx.investor).subscribe(poolId, 100n)).wait();
     await (await ctx.pool.connect(ctx.agent).recordImporterPayment(poolId, ethers.id('payment'), 100n)).wait();
     await (await ctx.pool.connect(ctx.agent).recordCargoArrival(poolId, ethers.id('arrival'))).wait();
     await expectRevert(ctx.pool.connect(ctx.agent).settle(poolId, 99n), /repayment mismatch/u);

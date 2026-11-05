@@ -1,45 +1,46 @@
 # AgentBL Web3 Contract Interface
 
-状态：WEB3-1 ~ WEB3-4 设计冻结  
-命名来源：以 `docs/PRD.md` v0.2 和 `docs/tasks.md` 为准  
-范围：先定义可被 JS contract mock、Hardhat 合约和前端共同复用的最小接口，不做公开募资、不做 AMM、不承诺保本收益。
+Status: WEB3-1 ~ WEB3-4 design frozen  
+Naming source: `docs/PRD.md` v0.2 and `docs/tasks.md` are authoritative  
+Scope: first define the minimal interface that the JS contract mock, the Hardhat contracts and the frontend can all reuse. No public fundraising, no AMM, and no promise of principal-protected returns.
 
-## 1. 设计目标
+## 1. Design Goals
 
-Web3 / Contract 层只解决一件事：
+The Web3 / Contract layer solves exactly one problem:
 
 ```text
-AI Pricing & Risk Agent 输出 PricingQuote / RiskReport
-→ RiskPricingOracle 记录价格、风险动作和证据哈希
-→ RWAOfferingPool 根据动作开放认购、改价、暂停、冻结或清算
-→ 前端和测试能验证链上事件与状态变化
+AI Pricing & Risk Agent outputs PricingQuote / RiskReport
+→ RiskPricingOracle records the price, risk action and evidence hash
+→ RWAOfferingPool opens subscription, reprices, pauses, freezes or liquidates according to the action
+→ the frontend and tests can verify on-chain events and state changes
 ```
 
-MVP 不追求复杂金融合约，优先保证：
+The MVP does not aim for complex financial contracts; it prioritises:
 
-1. eBL 质押关系可记录；
-2. RWA 份额凭证可 mint；
-3. RWA offering 状态机可跑通；
-4. AI 定价与风险证据可通过 event 审计；
-5. 所有接口能被现有 Harness 和后续 Hardhat 测试验证。
+1. eBL pledge relationships can be recorded;
+2. RWA share tokens can be minted;
+3. the RWA offering state machine runs end to end;
+4. AI pricing and risk evidence can be audited through events;
+5. every interface can be verified by the existing Harness and the later Hardhat tests.
 
-## 2. 共同约定
+## 2. Shared Conventions
 
-### 2.1 金额与价格单位
+### 2.1 Amount and Price Units
 
-Solidity 实现中避免浮点数：
+Avoid floating point in the Solidity implementation:
 
-| 字段 | 建议单位 |
+| Field | Suggested unit |
 |---|---|
-| `issuePrice` | 6 decimals，例如 `0.80 USD` 记为 `800000` |
-| `targetRedemptionValue` | 6 decimals，例如 `1.00 USD` 记为 `1000000` |
-| `tokenSupply` / `amount` | RWA token 最小单位，MVP 可按 whole token 处理 |
+| `issuePrice` | 6 decimals, e.g. `0.80 USD` is stored as `800000` |
+| `targetRedemptionValue` | 6 decimals, e.g. `1.00 USD` is stored as `1000000` |
+| `tokenSupply` / `amount` | smallest RWA token unit; the MVP may treat these as whole tokens |
+| `paidAmount` / `repaymentAmount` / `proceeds` | smallest unit of the payment token (USDC, 6 decimals). Subscription amount due = `amount * issuePrice`, e.g. 10 RWA × 0.80 USD = `8000000` |
 
-JS mock 可以保留人类可读的 `0.8` / `1`，但 Hardhat 合约测试应使用整数单位。
+The JS mock may keep human-readable `0.8` / `1`, but the Hardhat contract tests should use integer units.
 
-### 2.2 风险等级枚举
+### 2.2 Risk Level Enum
 
-链上用 `uint8 riskLevel`，JS 层负责把字符串映射为数字。
+On-chain uses `uint8 riskLevel`; the JS layer is responsible for mapping strings to numbers.
 
 | uint8 | Risk level |
 |---:|---|
@@ -48,34 +49,34 @@ JS mock 可以保留人类可读的 `0.8` / `1`，但 Hardhat 合约测试应使
 | 2 | WARNING |
 | 3 | CRITICAL |
 
-### 2.3 定价动作枚举
+### 2.3 Pricing Action Enum
 
-链上用 `uint8 action`，JS 层维护 `contract_action` / `pricing_action` 映射。
+On-chain uses `uint8 action`; the JS layer maintains the `contract_action` / `pricing_action` mapping.
 
-| uint8 | PRD `pricing_action` | Harness `contract_action` | 链上语义 |
+| uint8 | PRD `pricing_action` | Harness `contract_action` | On-chain meaning |
 |---:|---|---|---|
-| 0 | OPEN_OFFERING | APPROVE_FINANCING | 开放认购 |
-| 1 | OPEN_WITH_WARNING | CONTINUE_WITH_WARNING | 带警告继续 |
-| 2 | REPRICE_DOWN | TRIGGER_MARGIN_CALL | 降价 / 追加保证金 |
-| 3 | PAUSE_OFFERING | FREEZE_POOL | 暂停发行 |
-| 4 | FREEZE_POOL | FREEZE_POOL | 冻结池子 |
-| 5 | TRIGGER_LIQUIDATION | TRIGGER_LIQUIDATION | 进入清算 |
+| 0 | OPEN_OFFERING | APPROVE_FINANCING | Open subscription |
+| 1 | OPEN_WITH_WARNING | CONTINUE_WITH_WARNING | Continue with a warning |
+| 2 | REPRICE_DOWN | TRIGGER_MARGIN_CALL | Reprice down / margin call |
+| 3 | PAUSE_OFFERING | FREEZE_POOL | Pause the offering |
+| 4 | FREEZE_POOL | FREEZE_POOL | Freeze the pool |
+| 5 | TRIGGER_LIQUIDATION | TRIGGER_LIQUIDATION | Enter liquidation |
 
-### 2.4 哈希字段
+### 2.4 Hash Fields
 
-| 字段 | 类型 | 含义 |
+| Field | Type | Meaning |
 |---|---|---|
-| `evidenceHash` | `bytes32` | AI 定价 / 风险证据包哈希 |
-| `quoteHash` | `bytes32` | `PricingQuote` 结构化输出哈希 |
-| `metadataHash` | `bytes32` | eBL 元数据 / 文件摘要 |
+| `evidenceHash` | `bytes32` | Hash of the AI pricing / risk evidence bundle |
+| `quoteHash` | `bytes32` | Hash of the structured `PricingQuote` output |
+| `metadataHash` | `bytes32` | eBL metadata / document digest |
 
-所有哈希在 JS 中应表现为 `0x` + 64 位 hex。
+In JS every hash should be represented as `0x` + 64 hex characters.
 
-## 3. WEB3-1：EBLRegistry
+## 3. WEB3-1: EBLRegistry
 
-### 3.1 目的
+### 3.1 Purpose
 
-`EBLRegistry` 记录电子提单凭证和质押关系。它不是 NFT 市场，也不处理真实 eBL 平台法律转让；MVP 只做可验证的登记、质押和解除质押状态。
+`EBLRegistry` records electronic bill of lading tokens and pledge relationships. It is not an NFT marketplace and does not handle legal transfer on a real eBL platform; the MVP only provides verifiable registration, pledge and pledge-release state.
 
 ### 3.2 Interface
 
@@ -115,19 +116,19 @@ interface IEBLRegistry {
 }
 ```
 
-### 3.3 权限和约束
+### 3.3 Permissions and Constraints
 
-| 操作 | 权限 | 约束 |
+| Operation | Permission | Constraint |
 |---|---|---|
 | `mintEBL` | registry owner / authorized issuer | `metadataHash != 0`, `holder != address(0)` |
-| `pledge` | eBL holder 或授权 pool factory | eBL 必须存在，不能重复质押 |
-| `releasePledge` | 当前 pledgee pool 或 registry owner | eBL 必须已质押 |
+| `pledge` | eBL holder or authorized pool factory | eBL must exist and cannot be pledged twice |
+| `releasePledge` | current pledgee pool or registry owner | eBL must already be pledged |
 
-## 4. WEB3-2：RWAToken
+## 4. WEB3-2: RWAToken
 
-### 4.1 目的
+### 4.1 Purpose
 
-`RWAToken` 表示投资者认购某个 RWA offering 后获得的份额凭证。它不是公开交易代币；MVP 中只允许 `RWAOfferingPool` mint，并保留 permissioned transfer 的扩展口。
+`RWAToken` represents the share token an investor receives after subscribing to an RWA offering. It is not a publicly traded token: only `RWAOfferingPool` can mint / burn; investors can only transfer between accounts on the owner's whitelist, and only after that offering has disbursed (refunds before disbursement are computed per payer).
 
 ### 4.2 Interface
 
@@ -139,12 +140,25 @@ interface IRWAToken {
         uint256 amount
     );
 
+    event RWABurned(uint256 indexed poolId, address indexed investor, uint256 amount);
+
+    event RWATransferred(
+        uint256 indexed poolId,
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
     event TransferPermissionSet(
         address indexed account,
         bool allowed
     );
 
     function mint(uint256 poolId, address investor, uint256 amount) external;
+
+    function burn(uint256 poolId, address investor, uint256 amount) external;
+
+    function transfer(uint256 poolId, address to, uint256 amount) external;
 
     function balanceOf(uint256 poolId, address investor)
         external
@@ -159,20 +173,22 @@ interface IRWAToken {
 }
 ```
 
-### 4.3 权限和约束
+### 4.3 Permissions and Constraints
 
-| 操作 | 权限 | 约束 |
+| Operation | Permission | Constraint |
 |---|---|---|
-| `mint` | only `RWAOfferingPool` | investor 必须是 permissioned，amount > 0 |
-| `setTransferPermission` | owner / compliance operator | MVP 可只记录，不开放二级市场 |
+| `mint` | only `RWAOfferingPool` | investor must be permissioned, amount > 0 |
+| `burn` | only `RWAOfferingPool` | used for refunds and redemption; balance must be sufficient |
+| `transfer` | holder | both sender and recipient are on the whitelist; the pool has disbursed (`transfersEnabled`) |
+| `setTransferPermission` | owner / compliance operator | sets the transfer whitelist |
 
-## 5. WEB3-3：RWAOfferingPool
+## 5. WEB3-3: RWAOfferingPool
 
-### 5.1 目的
+### 5.1 Purpose
 
-`RWAOfferingPool` 管理 eBL-backed RWA 的发行、认购、改价、暂停和结算状态。它消费 AI 定价结果，但不自己计算风险。
+`RWAOfferingPool` manages the issuance, subscription, repricing, pausing and settlement state of eBL-backed RWAs, and escrows the entire fund flow: it collects subscription payments, disburses to the exporter once fully subscribed, refunds on cancellation, and collects repayment or liquidation proceeds and pays them out pro rata to RWA holders. It consumes AI pricing results but does not compute risk itself.
 
-### 5.2 状态机
+### 5.2 State Machine
 
 ```text
 Created
@@ -239,6 +255,14 @@ interface IRWAOfferingPool {
 
     event OfferingSettled(uint256 indexed poolId, uint256 repaymentAmount);
 
+    event FundsDisbursed(uint256 indexed poolId, address indexed issuer, uint256 amount);
+    event OfferingCancelled(uint256 indexed poolId, bytes32 reasonHash);
+    event Refunded(uint256 indexed poolId, address indexed investor, uint256 amount, uint256 tokensBurned);
+    event LiquidationSettled(uint256 indexed poolId, uint256 proceeds, bytes32 proceedsProof);
+    event Redeemed(uint256 indexed poolId, address indexed investor, uint256 tokensBurned, uint256 payout);
+
+    // constructor(address eblRegistry, address rwaToken, address paymentToken)
+
     function createOffering(
         uint256 eblId,
         uint256 tokenSupply,
@@ -258,38 +282,79 @@ interface IRWAOfferingPool {
         bytes32 quoteHash
     ) external;
 
+    function cancelOffering(uint256 poolId, bytes32 reasonHash) external;
+
+    function refund(uint256 poolId) external;
+
+    function recordImporterPayment(uint256 poolId, bytes32 paymentProof, uint256 repaymentAmount) external;
+
     function settle(uint256 poolId, uint256 repaymentAmount) external;
+
+    function recordLiquidationProceeds(uint256 poolId, uint256 proceeds, bytes32 proceedsProof) external;
+
+    function redeem(uint256 poolId) external;
+
+    function unfreezeOffering(uint256 poolId, bytes32 evidenceHash) external;
+
+    function transfersEnabled(uint256 poolId) external view returns (bool);
 
     function stateOf(uint256 poolId) external view returns (OfferingState);
 }
 ```
 
-### 5.4 权限和约束
+### 5.4 Permissions and Constraints
 
-| 操作 | 权限 | 约束 |
+| Operation | Permission | Constraint |
 |---|---|---|
-| `createOffering` | pool factory / exporter operator | eBL 必须已登记，issuePrice > 0 |
-| `subscribe` | permissioned investor | pool 必须 Open / Repriced，amount > 0 |
-| `pauseOffering` | owner / oracle / risk operator | pool 不能已结算 |
-| `applyPricingAction` | only `RiskPricingOracle` 或 risk operator | action 必须合法，hash 必须非空 |
-| `settle` | pool operator | pool 必须 Funded / InTransit / Repaid path |
+| `createOffering` | pool factory / exporter operator | eBL must be registered, issuePrice > 0 |
+| `subscribe` | permissioned investor | pool must be Open / Repriced / Subscribed and not yet disbursed, amount > 0; must first approve `amount * issuePrice` USDC |
+| `pauseOffering` | owner / oracle / risk operator | pool must not already be settled |
+| `applyPricingAction` | only `RiskPricingOracle` or risk operator | action must be valid, hashes must be non-empty |
+| `cancelOffering` | owner | not yet disbursed; releases the eBL pledge |
+| `refund` | investor | pool is Cancelled; returns the amount the caller actually paid and burns their RWA |
+| `markInTransit` | executor | already disbursed |
+| `recordImporterPayment` | executor | already disbursed; repayment ≤ sold RWA × targetRedemptionValue; transfers USDC in from the caller |
+| `settle` | executor | both payment proof and arrival proof are present; releases the eBL pledge |
+| `recordLiquidationProceeds` | executor | pool is in Liquidation and already disbursed; can be recorded only once (may be 0); releases the eBL pledge |
+| `redeem` | RWA holder | Repaid, or Liquidation with proceeds already recorded; moves to Redeemed once fully paid out |
+| `unfreezeOffering` | owner | pool is Frozen; restores the state before the freeze (or before an earlier pause) |
 
-### 5.5 Action 到状态转换
+### 5.5 Action to State Transition
 
-| action | 目标状态 |
+| action | Target state |
 |---|---|
 | OPEN_OFFERING | Open |
-| OPEN_WITH_WARNING | Open 或 Repriced |
+| OPEN_WITH_WARNING | Open or Repriced |
 | REPRICE_DOWN | Repriced |
 | PAUSE_OFFERING | Paused |
 | FREEZE_POOL | Frozen |
 | TRIGGER_LIQUIDATION | Liquidation |
 
-## 6. WEB3-4：RiskPricingOracle
+### 5.6 Fund Flow
 
-### 6.1 目的
+The payment token is passed in at construction (the testnet uses `MockUSDC`, 6 decimals, mintable by anyone).
 
-`RiskPricingOracle` 把 AI 的 `PricingQuote` 和风险动作写成链上事件，并把动作转发给 `RWAOfferingPool`。它不负责生成 AI 结果，只负责记录、鉴权和触发状态变化。
+```text
+investor subscribe ──USDC──▶ pool escrow (records paidOf per investor)
+        │
+        ├─ fully subscribed (Funded) ──▶ one-time disbursement to the eBL holder at creation (exporter)
+        │                    only after this can RWA be transferred within the whitelist
+        └─ owner cancelOffering before disbursement ──▶ Cancelled, investors refund to reclaim paidOf
+
+executor recordImporterPayment ──USDC──▶ pool ──settle──▶ Repaid
+executor recordLiquidationProceeds ──USDC──▶ pool (Liquidation)
+        │
+        └─ RWA holder redeem: claims remaining funds pro rata by holding / total unredeemed and burns RWA
+           (the last claimant receives the rounding remainder; Repaid moves to Redeemed once fully paid out)
+```
+
+If repayment is short (partial default) or liquidation proceeds are below the target redemption value, holders bear the loss pro rata; neither repayment nor liquidation proceeds may exceed `sold RWA × targetRedemptionValue`.
+
+## 6. WEB3-4: RiskPricingOracle
+
+### 6.1 Purpose
+
+`RiskPricingOracle` writes the AI's `PricingQuote` and risk action as on-chain events and forwards the action to `RWAOfferingPool`. It does not generate AI results; it only records, authorises and triggers state changes.
 
 ### 6.2 Interface
 
@@ -326,29 +391,29 @@ interface IRiskPricingOracle {
 }
 ```
 
-### 6.3 权限和约束
+### 6.3 Permissions and Constraints
 
-| 操作 | 权限 | 约束 |
+| Operation | Permission | Constraint |
 |---|---|---|
-| `updatePricing` | authorized AI pricing updater | poolId 必须存在，issuePrice > 0，hash 非空 |
+| `updatePricing` | authorized AI pricing updater | poolId must exist, issuePrice > 0, hashes non-empty |
 | `setUpdater` | owner / governance | updater != address(0) |
 
-### 6.4 与 RWAOfferingPool 的关系
+### 6.4 Relationship with RWAOfferingPool
 
-`updatePricing` 应做两件事：
+`updatePricing` should do two things:
 
-1. emit `PricingUpdated`，把 `issuePrice`、`riskLevel`、`action`、`evidenceHash`、`quoteHash` 留痕；
-2. 调用或允许后续调用 `RWAOfferingPool.applyPricingAction(...)`，让 offering 状态变化。
+1. emit `PricingUpdated`, leaving a record of `issuePrice`, `riskLevel`, `action`, `evidenceHash` and `quoteHash`;
+2. call, or allow a later call to, `RWAOfferingPool.applyPricingAction(...)` so the offering state changes.
 
-MVP 可以先把第 2 步放在 JS mock 或测试脚本中完成；Solidity 最小版本优先保证 event 可测。
+The MVP may perform step 2 in the JS mock or a test script first; the minimal Solidity version prioritises making the event testable.
 
-## 7. WEB3-1 ~ WEB3-4 完成定义
+## 7. WEB3-1 ~ WEB3-4 Definition of Done
 
-| ID | 完成定义 | Evidence |
+| ID | Definition of done | Evidence |
 |---|---|---|
-| WEB3-1 | `EBLRegistry` interface、事件、权限、约束明确 | `docs/contracts.md` §3 |
-| WEB3-2 | `RWAToken` interface、mint 权限、permissioned 约束明确 | `docs/contracts.md` §4 |
-| WEB3-3 | `RWAOfferingPool` interface、状态机、action 转换明确 | `docs/contracts.md` §5 |
-| WEB3-4 | `RiskPricingOracle` interface、`PricingUpdated` event、updater 权限明确 | `docs/contracts.md` §6 |
+| WEB3-1 | `EBLRegistry` interface, events, permissions and constraints are specified | `docs/contracts.md` §3 |
+| WEB3-2 | `RWAToken` interface, mint permission and permissioned constraints are specified | `docs/contracts.md` §4 |
+| WEB3-3 | `RWAOfferingPool` interface, state machine and action transitions are specified | `docs/contracts.md` §5 |
+| WEB3-4 | `RiskPricingOracle` interface, `PricingUpdated` event and updater permission are specified | `docs/contracts.md` §6 |
 
-后续 WEB3-5 的 JS contract mock 和 WEB3-6 ~ WEB3-9 的 Hardhat 合约必须对齐本文件。
+The JS contract mock in WEB3-5 and the Hardhat contracts in WEB3-6 ~ WEB3-9 must align with this document.

@@ -1,166 +1,164 @@
-# AgentBL 5 分钟故事型 To B 路演大纲｜Mystery Voyage 亮点版
+# AgentBL 5-Minute Story-Driven To-B Pitch Outline | Mystery Voyage Highlight Edition
 
-> 版本：2026-07-24  
-> 定位：Top10 Demo Day / 投资人 / 产业合作方  
-> 核心原则：保留“一批在途货物如何获得融资”的原故事主线，只把 Mystery Voyage 作为资金发现、风险教育和 To B 分发能力的亮点嵌入其中。  
-> 目标：故事流畅、Demo 完整、盲盒有记忆点、To B 价值和产业资源有说服力。
+> Version: 2026-07-24  
+> Audience: Top 10 Demo Day / investors / industry partners  
+> Core principle: keep the original storyline of "how one shipment in transit gets financed", and embed Mystery Voyage only as a highlight for capital discovery, risk education and To-B distribution.  
+> Goal: a smooth story, a complete demo, a memorable blind box, and persuasive To-B value and industry resources.
 
 ---
 
-## 1. 故事主线不变
+## 1. The storyline stays the same
 
-### 1.1 唯一主线
+### 1.1 The single storyline
 
-> **一批货已经离港，但出口商的钱还没有回来。AgentBL 让 AI 在货物航行期间持续理解风险，把它变成企业和资金方都能使用的融资价格与行动建议。**
+> **A shipment has already left port, but the exporter's money has not come back yet. AgentBL lets AI keep understanding the risk while the cargo is at sea, and turns it into a financing price and action recommendation that both businesses and capital providers can use.**
 
-整场仍然只跟随同一批货：
-
-```text
-500 吨铜已经离港，出口商等待回款
-→ AI 核验单据、货物和保险，给出融资报价
-→ Mystery Voyage 让资金方按自己的风险边界发现这批货
-→ x402 解锁 AI Risk Passport，并验证揭晓公平性
-→ 用户另行确认是否认购
-→ 航运风险变化，AI 立即重定价并暂停交易
-→ 企业把整套能力嵌入物流、eBL、银行和 RWA 业务
-```
-
-Mystery Voyage 不另起一个故事，它回答原故事中的关键问题：
-
-> **出口商的资产已经被 AI 定价，但它如何被全球资金发现、理解并转化？**
-
-### 1.2 盲盒在故事中的角色
+The whole pitch still follows just one shipment:
 
 ```text
-AI Pricing       解决“这批货今天值多少钱”
-Mystery Voyage   解决“合适的资金为什么愿意先研究它”
-Risk Monitoring  解决“世界变化后还应不应该继续”
+500 tonnes of copper have left port; the exporter is waiting to be paid
+→ AI verifies the documents, cargo and insurance and gives a financing quote
+→ Mystery Voyage lets capital providers discover this shipment within their own risk boundaries
+→ x402 unlocks the AI Risk Passport and the fairness of the reveal is verified
+→ The user separately confirms whether to subscribe
+→ Shipping risk changes; the AI immediately reprices and pauses the deal
+→ Businesses embed the whole capability into logistics, eBL, banking and RWA operations
 ```
 
-所以不要把 Mystery Voyage 讲成一个孤立的消费者功能，而要讲成：
+Mystery Voyage does not start a separate story; it answers a key question in the original one:
 
-> **连接真实贸易资产与全球资金的可验证发现层。**
+> **The exporter's asset has been priced by AI, but how does global capital discover it, understand it and turn it into funding?**
 
-### 1.3 全场三句记忆点
+### 1.2 The blind box's role in the story
 
-1. **AI 不只生成报告，它必须给出价格、额度和行动。**
-2. **Mystery Voyage 盲的是航线，不盲风险。**
-3. **开盒购买的是 AI 尽调报告，不是随机购买 RWA；投资需要第二次独立确认。**
+```text
+AI Pricing       answers "what is this shipment worth today?"
+Mystery Voyage   answers "why would the right capital be willing to study it first?"
+Risk Monitoring  answers "should we keep going after the world changes?"
+```
 
-### 1.4 最终口号
+So do not present Mystery Voyage as an isolated consumer feature; present it as:
+
+> **A verifiable discovery layer connecting real trade assets with global capital.**
+
+### 1.3 Three lines to remember from the whole pitch
+
+1. **AI doesn't just generate reports; it must produce a price, a limit and an action.**
+2. **Mystery Voyage hides the route, not the risk.**
+3. **Opening the box buys an AI due-diligence report, not a random RWA; investing requires a second, independent confirmation.**
+
+### 1.4 Closing slogan
 
 ```text
 AgentBL turns every shipment into an AI-priced financial opportunity.
-让每一批在途货物，都拥有一个实时、可信、可融资的风险价格。
 ```
 
-盲盒辅助口号：
+Supporting slogan for the blind box:
 
 ```text
 The voyage is a surprise. The risk is not.
-航线可以是惊喜，风险绝不能是秘密。
 ```
 
 ---
 
-## 2. 5 分钟结构
+## 2. 5-minute structure
 
-| 页 | 时间 | 内容 | 形式 |
+| Slide | Time | Content | Format |
 |---|---:|---|---|
-| 1 | 0:00–0:15 | 一批货的现金流困境 | 故事开场 |
-| 2 | 0:15–0:35 | 传统体系为什么慢 | 痛点 + 方案 |
-| 3 | 0:35–1:25 | Demo 第一幕：出口商获得 AI 报价 | 真实业务 Demo |
-| 4 | 1:25–2:35 | Demo 第二幕：Mystery Voyage 发现并理解这批货 | 核心亮点 Demo |
-| 5 | 2:35–3:10 | Demo 第三幕：风险突变，AI 暂停交易 | 行动闭环 Demo |
-| 6 | 3:10–3:50 | To B：企业为什么愿意付费 | 产品 + 商业价值 |
-| 7 | 3:50–4:35 | 产业资源与全球落地路径 | 壁垒 + GTM |
-| 8 | 4:35–5:00 | 12 个月目标、合作诉求与收束 | 愿景 + Ask |
+| 1 | 0:00–0:15 | One shipment's cash-flow squeeze | Story opening |
+| 2 | 0:15–0:35 | Why the traditional system is slow | Pain point + solution |
+| 3 | 0:35–1:25 | Demo act 1: the exporter gets an AI quote | Real-business demo |
+| 4 | 1:25–2:35 | Demo act 2: Mystery Voyage discovers and explains this shipment | Core highlight demo |
+| 5 | 2:35–3:10 | Demo act 3: risk shifts, the AI pauses the deal | Action-loop demo |
+| 6 | 3:10–3:50 | To B: why businesses will pay | Product + business value |
+| 7 | 3:50–4:35 | Industry resources and global rollout path | Moat + GTM |
+| 8 | 4:35–5:00 | 12-month goals, partnership ask and close | Vision + Ask |
 
-总计：`300 秒`。
+Total: `300 seconds`.
 
-> Slide 3–5 连续展示同一批铜，不返回 PPT。盲盒不是插播，而是同一笔交易从资产端切换到资金端的自然桥梁。
+> Slides 3–5 show the same copper shipment continuously without returning to the slides. The blind box is not an interlude; it is the natural bridge that moves the same deal from the asset side to the capital side.
 
 ---
 
-## 3. 逐页内容与口播
+## 3. Slide-by-slide content and script
 
-### Slide 1｜一艘船已经离港，下一笔生意却被卡住了
+### Slide 1 | A ship has already left port, but the next deal is stuck
 
-**时间：0:00–0:15｜15 秒**
+**Time: 0:00–0:15 | 15 seconds**
 
-#### 屏幕只放
+#### Screen shows only
 
 ```text
 500 MT Copper Cathode
 Singapore → Shanghai
 
-货已经离港，现金还要等 30–45 天。
+The cargo has left port; the cash is still 30–45 days away.
 ```
 
-背景使用货船或港口图，并标出新加坡到上海的航线。不要在封面放产品功能和技术 Logo。
+Use a cargo ship or port image as the background and mark the route from Singapore to Shanghai. Do not put product features or technology logos on the cover.
 
-#### 口播
+#### Script
 
-> 这是一批从新加坡运往上海的 500 吨铜。货已经离港，但出口商还要等 30 到 45 天才能回款；下一批采购、工资和运费，却今天就要支付。价值数百万美元的资产就在海上，真正缺少的是一个足够快、足够可信的风险价格。
+> This is 500 tonnes of copper shipped from Singapore to Shanghai. The cargo has left port, but the exporter still has to wait 30 to 45 days to get paid, while the next purchase order, payroll and freight are due today. Millions of dollars of assets are on the water; what is really missing is a risk price that is fast enough and credible enough.
 
-#### 观众应该产生的问题
+#### The question the audience should ask
 
-> 如果货物、提单和路线都可以被验证，为什么不能现在就获得资金？
+> If the cargo, the bill of lading and the route can all be verified, why can't he get funded right now?
 
 ---
 
-### Slide 2｜传统系统先看企业，AgentBL 先看这一批货
+### Slide 2 | Traditional systems look at the company first; AgentBL looks at this shipment first
 
-**时间：0:15–0:35｜20 秒**
+**Time: 0:15–0:35 | 20 seconds**
 
-#### 屏幕内容
+#### Screen content
 
-| 传统流程 | AgentBL |
+| Traditional process | AgentBL |
 |---|---|
-| 人工核对多份单据 | AI 交叉核验 eBL、发票、保险 |
-| 用企业规模判断能不能融 | 用货物、路线和实时风险决定价格 |
-| 风险变化后人工追踪 | AI 在途监控并触发改价或暂停 |
+| Manual cross-checking of many documents | AI cross-verifies the eBL, invoice and insurance |
+| Company size decides whether you can be financed | Cargo, route and real-time risk decide the price |
+| Manual tracking after risk changes | AI monitors in transit and triggers repricing or pausing |
 
-底部一句：
+One line at the bottom:
 
 ```text
-AI 不能只回答“安全吗？”
-它必须回答“值多少钱、能融多少、现在该不该继续？”
+The AI can't just answer "Is it safe?"
+It must answer "What is it worth, how much can be financed, and should we keep going right now?"
 ```
 
-#### 口播
+#### Script
 
-> 传统贸易融资先看企业有没有足够的规模和信用历史，真实货物反而要经过漫长人工审核。AgentBL 换了判断对象：我们持续理解这一批货、这一条路线和这一组单据，让 AI 最终给出价格、额度和行动，而不只是一份摘要。
+> Traditional trade finance first asks whether a company has enough scale and credit history, and real cargo has to go through a long manual review. AgentBL changes what is being judged: we continuously understand this shipment, this route and this set of documents, so the AI ends up producing a price, a limit and an action, not just a summary.
 
-#### 转场
+#### Transition
 
-> 不用再讲概念，我们直接看这批铜如何获得融资。
+> Enough concepts; let's watch this copper get financed.
 
 ---
 
-### Slide 3｜Demo 第一幕：三份单据，变成一份融资报价
+### Slide 3 | Demo act 1: three documents become one financing quote
 
-**时间：0:35–1:25｜50 秒**
+**Time: 0:35–1:25 | 50 seconds**
 
-#### Demo 画面
+#### Demo screen
 
-切到 `提单上链 · 铸造 RWA` 页面，预先选中：
+Switch to the `Pricing & Mint` page, with the following preselected:
 
 ```text
-阴极铜 · 新加坡 → 中国，上海（洋山港）
+Copper Cathode · Singapore → Shanghai, China (Yangshan Port)
 EBL-2026-CU-04417
 MV Marina Star · 500 MT
 ```
 
-#### 操作顺序
+#### Click sequence
 
-1. 指向 eBL、商业发票、保险单三个输入，不现场选择文件。
-2. 指向 `AI 核验抵押货值 $6,531,250`。
-3. 快速扫过单据、保险、货价、战争、天气、港口六类风险。
-4. 停在三档方案：FAST `$0.800`、BALANCED `$0.848`、LOW_COST `$0.889`。
-5. 选中 AI 推荐的 BALANCED：出口商现在获得 `$3.300M`，发行价 `$0.848`。
+1. Point to the three inputs: eBL, commercial invoice and insurance policy. Do not pick files live.
+2. Point to `AI-verified collateral value $6,531,250`.
+3. Quickly sweep through the six risk categories: documents, insurance, commodity price, war, weather, port.
+4. Stop at the three options: FAST `$0.800`, BALANCED `$0.848`, LOW_COST `$0.889`.
+5. Select the AI-recommended BALANCED option: the exporter gets `$3.300M` now, at an issue price of `$0.848`.
 
-#### 屏幕放大区域
+#### Zoomed-in screen area
 
 ```text
 Declared value          $6.875M
@@ -170,41 +168,41 @@ AI-recommended price    $0.848
 Action                  OPEN
 ```
 
-#### 口播
+#### Script
 
-> 出口商提交电子提单、发票和保险单。AgentBL 检查数量、货值、航线和保险是否互相一致，再把商品价格、物流和世界风险合并。这里 AI 将 687.5 万美元的申报货值保守核验为 653.1 万，并给出三种现金速度。
+> The exporter submits the electronic bill of lading, the invoice and the insurance policy. AgentBL checks that quantity, value, route and insurance are consistent with each other, then combines commodity prices, logistics and world risk. Here the AI conservatively verifies the declared value of $6.875 million as $6.531 million and offers three cash speeds.
 
-> AI 推荐均衡方案：出口商现在获得 330 万美元，对应 0.848 的发行价。每一个数字都能追溯到单据、来源和风险证据。
+> The AI recommends the balanced option: the exporter gets $3.3 million now, at an issue price of 0.848. Every number can be traced back to documents, sources and risk evidence.
 
-#### 关键转场：引出 Mystery Voyage
+#### Key transition: bringing in Mystery Voyage
 
-报价出现后停顿一秒，说：
+After the quote appears, pause for a second and say:
 
-> **这批货已经被 AI 定价。但融资还有另一半：在拥有 22 个项目的市场里，合适的资金怎样发现它，并愿意先理解它？**
+> **This shipment has been priced by AI. But financing has another half: in a marketplace with 22 deals, how does the right capital find it, and why would it be willing to understand it first?**
 
-然后点击 `投资市场`，进入 Mystery Voyage。
+Then click `Investment Marketplace` and enter Mystery Voyage.
 
 ---
 
-### Slide 4｜Demo 第二幕：Mystery Voyage 让合适的资金发现这批货
+### Slide 4 | Demo act 2: Mystery Voyage lets the right capital discover this shipment
 
-**时间：1:25–2:35｜70 秒｜核心亮点**
+**Time: 1:25–2:35 | 70 seconds | Core highlight**
 
-这一幕由三段组成：风险偏好、可验证揭晓、独立认购。动作必须连贯，不返回项目列表。
+This act has three parts: risk preference, verifiable reveal, independent subscription. The actions must flow continuously, without going back to the deal list.
 
-#### 第一段：先选择风险边界（15 秒）
+#### Part 1: choose the risk boundary first (15 seconds)
 
-操作：
+Actions:
 
-1. 市场首屏定位 `Mystery Voyage · x402`。
-2. 选择 `Balanced Risk Passport`。
-3. 指向候选数量、潜在收益区间、压力损失区间和 `0.001 USDC` 报告费。
+1. On the marketplace's first screen, locate `Mystery Voyage · x402`.
+2. Select `Balanced Risk Passport`.
+3. Point to the candidate count, the implied return range, the stress-loss range and the `0.001 USDC` report fee.
 
-口播：
+Script:
 
-> 用户不需要先读完 22 份报告，只需要先告诉 AgentBL 自己能承受什么风险。我选择均衡型 Risk Passport。系统只会从满足最大风险、最大压力损失和最低抵押覆盖的项目中生成候选。
+> The user doesn't have to read 22 reports first; they only need to tell AgentBL what risk they can bear. I choose the Balanced Risk Passport. The system only generates candidates from deals that satisfy the maximum risk, maximum stress loss and minimum collateral coverage.
 
-屏幕必须可见：
+Must be visible on screen:
 
 ```text
 Balanced Risk Passport
@@ -214,25 +212,25 @@ Report fee: 0.001 USDC
 Opening does not subscribe to an RWA
 ```
 
-#### 第二段：支付、揭晓与公平验证（35 秒）
+#### Part 2: payment, reveal and fairness verification (35 seconds)
 
-操作：
+Actions:
 
-1. 点击 `创建公平轮次 / Open Mystery Voyage`。
-2. 连续展示 `Commit → HTTP 402 → Settlement → Reveal → Verify`。
-3. 集装箱开封，揭晓同一批 `500 MT Copper · Singapore → Shanghai`。
-4. 展开 `AI Risk Passport`。
-5. 点击浏览器本地 `Verify`，停在绿色验证结果。
+1. Click `Create fair round / Open Mystery Voyage`.
+2. Show `Commit → HTTP 402 → Settlement → Reveal → Verify` in one continuous run.
+3. The container opens, revealing the same `500 MT Copper · Singapore → Shanghai`.
+4. Expand the `AI Risk Passport`.
+5. Click the browser-local `Verify` and stop on the green verification result.
 
-口播：
+Script:
 
-> 系统先冻结合格候选集并提交承诺，之后才通过 x402 支付 0.001 USDC。现在集装箱打开——揭晓的正是刚才那批 500 吨铜。
+> The system first freezes the eligible candidate set and submits a commitment, and only then is 0.001 USDC paid via x402. Now the container opens, and what is revealed is exactly that 500 tonnes of copper we just saw.
 
-> 盲的是具体航线，不盲候选数量、概率、风险边界和最坏损失。浏览器还会重新计算候选集、承诺和选中结果，任何字段被修改都会验证失败。
+> What is blind is the specific route, not the candidate count, the odds, the risk boundaries or the worst-case loss. The browser also recomputes the candidate set, the commitment and the selection; if any field is tampered with, verification fails.
 
-> 这次付款购买的是一份 AI 尽调报告。报告解释为什么它适合均衡型风险偏好、抵押覆盖如何、压力情景可能损失多少，以及证据是否足够新鲜。
+> This payment buys an AI due-diligence report. The report explains why this deal fits a balanced risk preference, what the collateral coverage is, how much could be lost in a stress scenario, and whether the evidence is fresh enough.
 
-屏幕必须出现：
+Must appear on screen:
 
 ```text
 Commit → 402 → Settlement → Reveal → Verify
@@ -242,43 +240,43 @@ AI Risk Passport
 VERIFIED
 ```
 
-#### 第三段：报告购买与投资分离（20 秒）
+#### Part 3: separating the report purchase from the investment (20 seconds)
 
-操作：
+Actions:
 
-1. 揭晓后保持 `查看报告` 与 `认购` 两个 CTA 同时可见。
-2. 点击 `认购`，打开独立确认弹窗。
-3. 输入预设金额 `$260,000`。
-4. 指向风险、压力损失与“不保本”，再完成第二次确认。
+1. After the reveal, keep both CTAs, `View report` and `Subscribe`, visible at the same time.
+2. Click `Subscribe` to open the independent confirmation dialog.
+3. Enter the preset amount `$260,000`.
+4. Point to the risk, the stress loss and "not principal-protected", then complete the second confirmation.
 
-口播：
+Script:
 
-> 但开盒没有自动买入任何资产。用户只有在看完报告，再次确认金额、压力损失和不保本提示后，才会进入许可型认购流程。惊喜负责吸引注意力，绝不能替代投资判断。
+> But opening the box did not automatically buy any asset. Only after reading the report, and confirming the amount, stress loss and not-principal-protected notice a second time, does the user enter the permissioned subscription flow. The surprise is there to capture attention; it must never replace the investment decision.
 
-#### 这一幕的收束句
+#### Closing line for this act
 
-> **多数盲盒同时隐藏价值和风险；AgentBL 只隐藏航线，从不隐藏风险。**
+> **Most blind boxes hide both the value and the risk; AgentBL hides only the route, never the risk.**
 
-#### 这一幕证明什么
+#### What this act proves
 
-- 盲盒不是另一个故事，而是同一批铜从资产端进入资金端的发现入口。
-- AI 与真实世界贸易结合，不是通用 Agent 或纯链上交易。
-- x402 不只是付款展示，而是 AI 风险情报的按次分发方式。
-- commit-reveal 与本地 verifier 让“发现”过程可复核。
-- 报告购买与认购隔离，避免“开盒即投资”的误导。
+- The blind box is not another story; it is the discovery entry point through which the same copper moves from the asset side to the capital side.
+- AI combined with real-world trade, not a generic agent or a purely on-chain transaction.
+- x402 is not just a payment showcase; it is a per-call distribution channel for AI risk intelligence.
+- Commit-reveal and the local verifier make the "discovery" process auditable.
+- Report purchase and subscription are separated, avoiding the misleading idea that "opening the box means investing".
 
 ---
 
-### Slide 5｜Demo 第三幕：货还在海上，世界已经变了
+### Slide 5 | Demo act 3: the cargo is still at sea, but the world has changed
 
-**时间：2:35–3:10｜35 秒**
+**Time: 2:35–3:10 | 35 seconds**
 
-#### 操作顺序
+#### Click sequence
 
-1. 认购结果出现后点击铜项目的 `追踪`。
-2. 展示当前状态：`$0.848 / 350 bps / OPEN`。
-3. 点击 `⚔ 霍尔木兹冲突升级`，口播明确说“模拟事件”。
-4. 停在变化后的核心结果：
+1. After the subscription result appears, click `Track` on the copper deal.
+2. Show the current status: `$0.848 / 350 bps / OPEN`.
+3. Click `⚔ Strait of Hormuz escalation` and say clearly in the script that it is a "simulated event".
+4. Stop on the key changed results:
 
 ```text
 Issue price   $0.848 → $0.792
@@ -287,51 +285,51 @@ Status        OPEN → PAUSED
 New evidence  0x9966a785…
 ```
 
-#### 口播
+#### Script
 
-> 资金进入以后，风险不会停止。现在我们模拟一次冲突升级。普通价格系统可能只看到铜价上涨，AgentBL 同时看到航线、保险、制裁和未来回收风险正在恶化。
+> Once the money is in, risk does not stop. Now we simulate an escalation of conflict. An ordinary pricing system might only see copper prices rising; AgentBL sees routing, insurance, sanctions and future recovery risk all deteriorating at the same time.
 
-> AI 将风险从 350 提升到 1,100 个基点，把价格从 0.848 调整到 0.792，并暂停新的认购。它没有只生成一封预警邮件，而是在正确时刻阻止更多资本进入一笔已经改变的交易。
+> The AI raises the risk from 350 to 1,100 basis points, adjusts the price from 0.848 to 0.792, and pauses new subscriptions. It doesn't just generate a warning email; at the right moment, it stops more capital from flowing into a deal that has already changed.
 
-#### 全场 Demo 高潮句
+#### Climax line of the whole demo
 
-> **AgentBL 先让资产被发现，让风险被理解，最后在世界变化时改变企业动作。**
+> **AgentBL first gets the asset discovered, then gets the risk understood, and finally changes what the business does when the world changes.**
 
 ---
 
-### Slide 6｜To B：我们卖的不是盲盒，而是企业的风险决策与分发能力
+### Slide 6 | To B: we don't sell a blind box, we sell a business's risk-decision and distribution capability
 
-**时间：3:10–3:50｜40 秒**
+**Time: 3:10–3:50 | 40 seconds**
 
-#### 屏幕上半部分：企业客户与采购内容
+#### Top half of the screen: enterprise customers and what they buy
 
-| 谁会采购 | 采购什么 | 为什么愿意付费 |
+| Who buys | What they buy | Why they pay |
 |---|---|---|
-| 物流 / 货代 / 供应链平台 | 白标 Mystery Voyage + eBL 融资模块 | 激活现有客户，增加金融服务收入 |
-| eBL / 贸易数字化平台 | 风险定价 API | 从“文件电子化”升级为“文件可融资” |
-| 银行 / 保理 / 产业资金方 | AI 预审与持续监控 | 缩短人工尽调，统一风险口径 |
-| 保险机构 | 航线、货物与保单风险报告 | 提前识别保障缺口与重大事件 |
-| RWA / 投资平台 | 风险护照 + 可验证资产发现 | 降低教育成本，筛选合格资金线索 |
+| Logistics / freight forwarders / supply-chain platforms | White-label Mystery Voyage + eBL financing module | Activates existing customers and adds financial-services revenue |
+| eBL / trade digitisation platforms | Risk pricing API | Upgrades from "digitised documents" to "financeable documents" |
+| Banks / factoring / industrial capital | AI pre-screening and continuous monitoring | Shortens manual due diligence and unifies the risk view |
+| Insurers | Route, cargo and policy risk reports | Spots coverage gaps and major events early |
+| RWA / investment platforms | Risk Passport + verifiable asset discovery | Lowers education costs and filters qualified capital leads |
 
-#### 屏幕下半部分：Mystery Voyage 的 To B 价值漏斗
+#### Bottom half of the screen: Mystery Voyage's To-B value funnel
 
 ```text
-现有企业客户或平台流量
-→ Risk Passport 采集真实风险偏好
-→ Mystery Voyage 激活第一次尽调
-→ x402 按次销售 AI 风险情报
-→ Verified Reveal 建立信任
-→ 独立认购筛选合格资金
-→ Analytics 优化资产与转化
+Existing enterprise customers or platform traffic
+→ Risk Passport captures real risk preferences
+→ Mystery Voyage triggers the first due diligence
+→ x402 sells AI risk intelligence per call
+→ Verified Reveal builds trust
+→ Independent subscription filters qualified capital
+→ Analytics optimises assets and conversion
 ```
 
-#### 口播
+#### Script
 
-> AgentBL 的 To B 优势是，我们不要求企业替换现有系统。物流和 eBL 平台可以嵌入白标融资入口，银行和保理机构可以采购 AI 预审与监控，保险机构可以购买航线与保单风险，RWA 平台可以使用 Risk Passport 和 Mystery Voyage 降低客户教育成本。
+> AgentBL's To-B advantage is that we don't ask businesses to replace their existing systems. Logistics and eBL platforms can embed a white-label financing entry point, banks and factoring firms can buy AI pre-screening and monitoring, insurers can buy route and policy risk, and RWA platforms can use the Risk Passport and Mystery Voyage to lower customer education costs.
 
-> 对企业而言，盲盒不是游戏功能，而是获客入口、风险教育、付费情报和合格线索筛选器。我们先卖风险判断和白标模块，再承接许可型融资交易。
+> For businesses, the blind box is not a game feature; it is a customer-acquisition entry point, a risk-education tool, paid intelligence and a qualified-lead filter. We sell risk judgement and white-label modules first, then take on permissioned financing transactions.
 
-#### 三层企业产品
+#### Three layers of enterprise product
 
 ```text
 Embedded Risk API
@@ -339,308 +337,304 @@ White-label Mystery Voyage & eBL Financing
 Permissioned RWA Infrastructure
 ```
 
-#### 三类收入
+#### Three revenue streams
 
-1. **企业授权与白标部署费**：年度合同或项目制。
-2. **按量 API / AI 报告费**：按单据、报告、航线或监控事件计费。
-3. **融资基础设施服务费**：在许可型资金池中按成功融资规模收费。
+1. **Enterprise licence and white-label deployment fees**: annual contracts or project-based.
+2. **Usage-based API / AI report fees**: billed per document, report, route or monitoring event.
+3. **Financing infrastructure service fees**: charged on successfully financed volume in the permissioned pool.
 
-> Demo 中的 `0.001 USDC` 只证明机器支付闭环，不是正式企业定价。
+> The `0.001 USDC` in the demo only proves the machine-payment loop; it is not formal enterprise pricing.
 
-#### 北极星指标
+#### North-star metric
 
-不要只讲“开盒次数”，要讲：
+Don't just talk about "number of box openings"; talk about:
 
 ```text
 Qualified Report-to-Investment Conversion
-完成风险披露的合格用户中，从报告揭晓进入独立认购确认的比例
+Among qualified users who have completed risk disclosure, the share who go from report reveal to independent subscription confirmation
 ```
 
 ---
 
-### Slide 7｜产业资源：我们站在真实文件、物流客户和资金入口之间
+### Slide 7 | Industry resources: we stand between real documents, logistics customers and capital entry points
 
-**时间：3:50–4:35｜45 秒**
+**Time: 3:50–4:35 | 45 seconds**
 
-#### 屏幕内容
+#### Screen content
 
-不要排列普通 Logo 墙，而要展示资源如何进入产品：
+Don't show an ordinary logo wall; show how the resources flow into the product:
 
 ```text
-丽讯科技 / 物流数字化资源
-客户入口 · 货代/供应链场景 · 系统集成 · 业务流程
+Lixun Technology / logistics digitisation resources
+Customer access · forwarder/supply-chain scenarios · system integration · business processes
                          ↓
-ENI / 可信文件能力 → AgentBL → 银行、RWA 与跨境金融资源
-唯一性 · 控制权      AI 风险定价      资金与合规试点
-完整性 · 审计              ↓
-                Mystery Voyage 分发层
-                风险教育 · 报告变现 · 合格线索
+ENI / trusted-document capability → AgentBL → bank, RWA and cross-border finance resources
+Uniqueness · control      AI risk pricing      capital and compliance pilots
+Integrity · audit              ↓
+                Mystery Voyage distribution layer
+                Risk education · report monetisation · qualified leads
                          ↓
              Microsoft Azure + Injective
-             企业级 AI · 全球支付与可编程结算
+             Enterprise AI · global payment and programmable settlement
 ```
 
-中央标题：
+Central headline:
 
 ```text
-真实单据 × 真实物流场景 × 真实资金入口
+Real documents × real logistics scenarios × real capital entry points
 ```
 
-#### 口播
+#### Script
 
-> 贸易金融最难的不是写一个模型，而是同时获得三样东西：真实文件、真实物流场景和真实资金入口。我们的产业资源正好覆盖这三端。
+> The hardest part of trade finance is not writing a model; it is getting three things at once: real documents, real logistics scenarios and real access to capital. Our industry resources cover exactly these three ends.
 
-> 丽讯科技相关资源让我们接近物流、货代和供应链企业的客户与系统集成场景；ENI 方向的能力为 eBL 提供唯一性、控制权、完整性和审计基础；团队的银行、RWA 和跨境金融资源帮助我们设计资金与合规试点。
+> Resources related to Lixun Technology bring us close to the customers and system-integration scenarios of logistics, freight-forwarding and supply-chain companies; capabilities on the ENI side give the eBL its foundation of uniqueness, control, integrity and audit; and the team's banking, RWA and cross-border finance resources help us design capital and compliance pilots.
 
-> Mystery Voyage 再把后端风险能力变成企业可以白标使用的客户入口。Microsoft Azure 提供企业级 AI 推理、评估和追踪；Injective 提供 x402、全球支付和可编程结算。因此我们更接近客户入口、数据入口和交易入口，而不是只多一个模型。
+> Mystery Voyage then turns the back-end risk capability into a customer entry point that businesses can white-label. Microsoft Azure provides enterprise-grade AI inference, evaluation and tracing; Injective provides x402, global payment and programmable settlement. So we are closer to the customer entry point, the data entry point and the transaction entry point, rather than just having one more model.
 
-#### 产业资源的证据边界
+#### Evidence boundaries for industry resources
 
-| 当前证据 | PPT 可以怎样表达 |
+| Current evidence | How it may be described on the slide |
 |---|---|
-| 已签合同 / LOI / Pilot | `合作伙伴 / 联合试点`，标明具体范围 |
-| 已有 API schema / sandbox / 样例 ID | `技术对接中 / sandbox integration` |
-| 有明确联系人和共同方案，尚未签署 | `产业资源 / co-design network / pilot pipeline` |
-| 只有目标名单 | `下一阶段目标伙伴`，不能放入伙伴 Logo 墙 |
+| Signed contract / LOI / pilot | `Partner / joint pilot`, with the specific scope stated |
+| Existing API schema / sandbox / sample ID | `Technical integration in progress / sandbox integration` |
+| A named contact and a joint plan, not yet signed | `Industry resources / co-design network / pilot pipeline` |
+| Only a target list | `Next-stage target partners`; must not go on the partner logo wall |
 
-如果路演前没有可展示的 LOI、API 或 sandbox 证据，本页标题使用“**产业资源与共建路径**”，不能说“已经生产接入”。
+If there is no LOI, API or sandbox evidence to show before the pitch, title this slide "**Industry resources and co-build path**" and do not say "already integrated in production".
 
-#### To B 落地路径
+#### To-B rollout path
 
 ```text
-第 1 步：风险报告 API Pilot
-验证报价速度、异常发现和报告付费意愿
+Step 1: Risk report API pilot
+Validate quote speed, exception detection and willingness to pay for reports
         ↓
-第 2 步：白标 Mystery Voyage + eBL 预承销
-帮助物流/eBL/RWA 平台激活现有客户
+Step 2: White-label Mystery Voyage + eBL pre-underwriting
+Help logistics/eBL/RWA platforms activate their existing customers
         ↓
-第 3 步：许可型融资池
-持牌机构、KYC/AML、合格资金方共同参与
+Step 3: Permissioned financing pool
+Licensed institutions, KYC/AML and qualified capital providers participate together
         ↓
-第 4 步：跨航线风险情报网络
-用运输、结算和回收结果持续校准风险价格
+Step 4: Cross-route risk intelligence network
+Continuously calibrate risk prices with shipping, settlement and recovery outcomes
 ```
 
 ---
 
-### Slide 8｜从一批铜开始，成为全球贸易的 AI 风险层
+### Slide 8 | Starting from one copper shipment, becoming the AI risk layer of global trade
 
-**时间：4:35–5:00｜25 秒**
+**Time: 4:35–5:00 | 25 seconds**
 
-#### 屏幕内容
+#### Screen content
 
-左侧只放三个 12 个月结果：
+Left: only three 12-month outcomes:
 
 ```text
-1–2 个真实物流 / eBL Pilot
-2–3 家机构风险数据客户
-1 个合规许可型融资 Corridor
+1–2 real logistics / eBL pilots
+2–3 institutional risk-data customers
+1 compliant permissioned financing corridor
 ```
 
-右侧 Ask：
+Right, the Ask:
 
 ```text
 We are looking for:
-· 产业与白标试点伙伴
-· 贸易、保险与物流数据伙伴
-· 合规资金方
-· [融资金额] Pre-seed / Strategic Round
+· Industry and white-label pilot partners
+· Trade, insurance and logistics data partners
+· Compliant capital providers
+· [Funding amount] Pre-seed / Strategic Round
 ```
 
-底部收束：
+Closing at the bottom:
 
 ```text
 Today: AI prices one shipment.
 Tomorrow: AgentBL prices global trade risk.
 ```
 
-#### 口播
+#### Script
 
-> 我们从一批铜开始，但目标不是再做一个 RWA 市场，而是成为全球贸易的 AI 风险层。未来 12 个月，我们要完成真实物流与 eBL 试点、获得第一批机构风险数据客户，并在一个合规贸易走廊中验证融资闭环。
+> We start with one copper shipment, but the goal is not to build yet another RWA marketplace; it is to become the AI risk layer of global trade. Over the next 12 months we will complete real logistics and eBL pilots, win our first institutional risk-data customers, and validate the financing loop in one compliant trade corridor.
 
-> 我们正在寻找产业试点、数据伙伴、合规资金与战略投资。AgentBL，让每一批在途货物都拥有一个实时、可信、可融资的风险价格。航线可以是惊喜，风险绝不能是秘密。谢谢。
+> We are looking for industry pilots, data partners, compliant capital and strategic investment. AgentBL: giving every shipment in transit a real-time, trusted, financeable risk price. The voyage can be a surprise; the risk must never be a secret. Thank you.
 
 ---
 
-## 4. Demo Day 一镜到底点击剧本
+## 4. Demo Day one-take click script
 
-### 4.1 上台前固定状态
+### 4.1 Fixed state before going on stage
 
-1. 明确使用 `Demo Mode` 或 `Live Mode`，页面、数据源和口播必须一致。
-2. 中文界面；Mint 页预选 500 吨铜案例。
-3. 重置铜项目为 `$0.848 / 350 bps / OPEN`。
-4. 市场首屏可直接看到 `Mystery Voyage · x402`。
-5. `Balanced Risk Passport` 有稳定的合格候选集。
-6. Demo Mode 下固定揭晓铜案例时，页面必须明确标记 Demo，不冒充真实随机 Live 结果。
-7. 连续验证 `Commit → 402 → Settlement → Reveal → Verify` 至少 3 次。
-8. 揭晓后的 AI Risk Passport 已准备完整内容。
-9. 认购金额预填 `$260,000`，但第二次风险确认不能预勾选。
-10. 准备 90–120 秒录屏，覆盖报价、盲盒、验证、认购和风险暂停。
+1. Explicitly use `Demo Mode` or `Live Mode`; the page, data sources and script must agree.
+2. Chinese UI (button names in this document are given as their English UI labels); preselect the 500-tonne copper case on the Mint page.
+3. Reset the copper deal to `$0.848 / 350 bps / OPEN`.
+4. `Mystery Voyage · x402` is visible directly on the marketplace's first screen.
+5. `Balanced Risk Passport` has a stable eligible candidate set.
+6. If Demo Mode is fixed to reveal the copper case, the page must be clearly labelled Demo and must not pose as a genuinely random Live result.
+7. Run `Commit → 402 → Settlement → Reveal → Verify` successfully at least 3 times in a row.
+8. The AI Risk Passport shown after the reveal has its full content prepared.
+9. Pre-fill the subscription amount `$260,000`, but the second risk confirmation must not be pre-ticked.
+10. Prepare a 90–120 second screen recording covering the quote, blind box, verification, subscription and risk pause.
 
-### 4.2 精确点击表
+### 4.2 Precise click sheet
 
-| 时间 | 操作 | 必须出现的反馈 |
+| Time | Action | Feedback that must appear |
 |---:|---|---|
-| 0:35 | 已在 Mint 页 | 500 MT、eBL、发票、保险 |
-| 0:55 | 指向 AI 核验 | $6.531M 抵押货值 |
-| 1:08 | 指向 BALANCED | $3.300M cash、$0.848 |
-| 1:25 | 点击 `投资市场` | Mystery Voyage 位于首屏 |
-| 1:30 | 选择 Balanced Risk Passport | 候选数、风险/压力损失区间、0.001 USDC |
-| 1:42 | 创建公平轮次 | 候选集冻结、commitment |
-| 1:49 | 点击 Open Mystery Voyage | HTTP 402 → Settlement |
-| 1:58 | 完成 Reveal | 500 MT 铜、新加坡→上海 |
-| 2:08 | 展开 AI Risk Passport | 适配、压力损失、抵押覆盖、证据 |
-| 2:17 | 点击 Verify | 浏览器显示 VERIFIED |
-| 2:25 | 点击认购并二次确认 | $260,000、不保本、目标兑付 |
-| 2:35 | 点击 `追踪` | $0.848、350 bps、OPEN |
-| 2:48 | 点击模拟冲突 | $0.792、1,100 bps、PAUSED |
-| 3:10 | 切回 PPT | To B 客户与价值漏斗 |
-| 3:50 | 下一页 | 产业资源与落地路径 |
+| 0:35 | Already on the Mint page | 500 MT, eBL, invoice, insurance |
+| 0:55 | Point to the AI verification | $6.531M collateral value |
+| 1:08 | Point to BALANCED | $3.300M cash, $0.848 |
+| 1:25 | Click `Investment Marketplace` | Mystery Voyage on the first screen |
+| 1:30 | Select Balanced Risk Passport | Candidate count, risk/stress-loss range, 0.001 USDC |
+| 1:42 | Create fair round | Candidate set frozen, commitment |
+| 1:49 | Click Open Mystery Voyage | HTTP 402 → Settlement |
+| 1:58 | Complete the Reveal | 500 MT copper, Singapore → Shanghai |
+| 2:08 | Expand the AI Risk Passport | Fit, stress loss, collateral coverage, evidence |
+| 2:17 | Click Verify | Browser shows VERIFIED |
+| 2:25 | Click Subscribe and confirm a second time | $260,000, not principal-protected, target redemption |
+| 2:35 | Click `Track` | $0.848, 350 bps, OPEN |
+| 2:48 | Click the simulated conflict | $0.792, 1,100 bps, PAUSED |
+| 3:10 | Switch back to the slides | To-B customers and value funnel |
+| 3:50 | Next slide | Industry resources and rollout path |
 
-### 4.3 Demo 中只强调六个数字
+### 4.3 Emphasise only six numbers during the demo
 
 ```text
-500 MT      同一批铜货物
-$6.531M     AI 核验抵押货值
-$3.300M     出口商希望现在拿到的现金
-$0.848      初始 AI 发行价
-0.001 USDC  Mystery Voyage AI 报告费
-1,100 bps   冲突后风险分数，交易暂停
+500 MT      The same copper shipment
+$6.531M     AI-verified collateral value
+$3.300M     Cash the exporter wants now
+$0.848      Initial AI issue price
+0.001 USDC  Mystery Voyage AI report fee
+1,100 bps   Risk score after the conflict; deal paused
 ```
 
-`$0.792` 作为画面变化点，不展开收益公式。
+`$0.792` is a visual change point; do not expand on the yield formula.
 
-### 4.4 盲盒 Demo 的四条硬规则
+### 4.4 Four hard rules for the blind-box demo
 
-1. **先披露、后付款**：候选数量、概率、风险范围、压力损失和报告费必须先显示。
-2. **先冻结、后揭晓**：候选集变化时 fail closed，不能静默更换项目。
-3. **买报告、不买资产**：0.001 USDC 不得进入 RWA 投资本金。
-4. **再确认、才认购**：没有独立风险确认和第二次授权，不调用 subscription。
+1. **Disclose first, pay later**: the candidate count, odds, risk range, stress loss and report fee must be shown first.
+2. **Freeze first, reveal later**: if the candidate set changes, fail closed; never silently swap the deal.
+3. **Buy the report, not the asset**: the 0.001 USDC must never become RWA investment principal.
+4. **Confirm again before subscribing**: without an independent risk confirmation and a second authorisation, never call subscription.
 
-### 4.5 现场失败应对
+### 4.5 Handling failures on stage
 
-| 问题 | 应对方式 |
+| Problem | Response |
 |---|---|
-| x402 网络或钱包失败 | 立即切同一流程录屏，展示准备好的测试网付款证据 |
-| Reveal 动画卡住 | 跳到已完成的 reveal proof 页面，从 AI Risk Passport 继续 |
-| Verify 失败 | 明确说明 verifier 已 fail closed，切已验证样例；不要把失败说成无关紧要 |
-| 揭晓不是铜 | 使用与实际结果匹配的通用口播，或使用明确标记的 Demo fixture |
-| 风险事件未刷新 | 使用前后状态截图或录屏，不连续重复点击 |
+| x402 network or wallet failure | Immediately switch to the recording of the same flow and show the prepared testnet payment evidence |
+| Reveal animation freezes | Jump to the completed reveal-proof page and continue from the AI Risk Passport |
+| Verify fails | State clearly that the verifier has failed closed and switch to a verified sample; do not brush the failure off as unimportant |
+| The reveal is not the copper | Use a generic script that matches the actual result, or use a clearly labelled Demo fixture |
+| The risk event does not refresh | Use before/after screenshots or the recording; do not keep clicking repeatedly |
 
 ---
 
-## 5. Mystery Voyage 的 To B 定位
+## 5. Mystery Voyage's To-B positioning
 
-### 5.1 一句话定位
+### 5.1 One-line positioning
 
-> **Mystery Voyage 是一个由风险边界约束、由 x402 付费、由 commit-reveal 验证的贸易资产发现与 AI 尽调入口。**
+> **Mystery Voyage is a trade-asset discovery and AI due-diligence entry point that is constrained by risk boundaries, paid via x402 and verified by commit-reveal.**
 
-### 5.2 它为企业创造的五个价值
+### 5.2 Five kinds of value it creates for businesses
 
-| 价值 | 具体作用 |
+| Value | What it does |
 |---|---|
-| 客户激活 | 把复杂、低频的贸易融资项目变成更容易开始的体验 |
-| 风险教育 | 用户先选择风险边界，避免只按最高收益筛选 |
-| 情报变现 | 企业可按次销售 AI 尽调、估值和反欺诈报告 |
-| 合格线索 | 报告阅读、风险确认和认购意向形成高质量漏斗 |
-| 白标分发 | 物流、eBL、银行和 RWA 平台可嵌入自己的品牌与资产池 |
+| Customer activation | Turns complex, infrequent trade finance deals into an experience that is easier to start |
+| Risk education | Users choose a risk boundary first, rather than filtering only by the highest yield |
+| Intelligence monetisation | Businesses can sell AI due-diligence, valuation and anti-fraud reports per call |
+| Qualified leads | Report reading, risk confirmation and subscription intent form a high-quality funnel |
+| White-label distribution | Logistics, eBL, banking and RWA platforms can embed it with their own brand and asset pool |
 
-### 5.3 它不是什么
+### 5.3 What it is not
 
-- 不是随机购买 RWA。
-- 不是收益抽奖、博彩或中奖机制。
-- 不是开盒后自动扣除投资预算。
-- 不是货权、收益权或保本承诺。
-- Voyage Passport 只是产品体验凭证，不是投资凭证。
+- It is not a random RWA purchase.
+- It is not a yield lottery, gambling or prize mechanism.
+- It does not automatically deduct an investment budget after opening.
+- It is not cargo title, a revenue right or a principal guarantee.
+- The Voyage Passport is only a product-experience credential, not an investment certificate.
 
-### 5.4 最强 To B 表达
+### 5.4 The strongest To-B framing
 
-> **盲盒负责让客户愿意打开第一份风险报告；AgentBL 的 To B 基础设施负责把这次发现变成可审计、可融资、可持续监控的企业工作流。**
+> **The blind box makes customers willing to open their first risk report; AgentBL's To-B infrastructure turns that discovery into an auditable, financeable, continuously monitored enterprise workflow.**
 
 ---
 
-## 6. Microsoft Azure 与 Injective 怎么讲
+## 6. How to talk about Microsoft Azure and Injective
 
 ### Microsoft Azure
 
-主舞台只说：
+On the main stage, say only:
 
-> Microsoft Azure 为 AgentBL 提供企业级 AI 推理、评估与调用链追踪，让每一次风险判断都能被测量、回放和治理。
+> Microsoft Azure gives AgentBL enterprise-grade AI inference, evaluation and call-chain tracing, so every risk judgement can be measured, replayed and governed.
 
-如果现场实际没有 Azure provider，不说“本场由 Azure 驱动”，只说“已支持 Azure provider 与评估接口”。
+If the Azure provider is not actually running on the day, do not say "this session is powered by Azure"; only say "supports an Azure provider and evaluation interfaces".
 
 ### Injective
 
-主舞台只说：
+On the main stage, say only:
 
-> Injective 让风险报告的购买者、贸易融资资金方和其他 AI Agent 在全球基础设施上完成 x402 机器支付、证据验证和可编程结算。
+> Injective lets buyers of risk reports, trade finance capital providers and other AI agents complete x402 machine payments, evidence verification and programmable settlement on global infrastructure.
 
-必须补充：
+Must add:
 
-> 全球支付与分发不等于绕过监管；企业准入层仍保留 KYC/AML、合格投资者和司法辖区要求。
+> Global payment and distribution does not mean bypassing regulation; the enterprise access layer still keeps KYC/AML, qualified-investor and jurisdictional requirements.
 
 ---
 
-## 7. 最终彩排验收清单
+## 7. Final rehearsal acceptance checklist
 
-### 故事
+### Story
 
-- [ ] 开场仍然是一批铜的现金流困境，不以盲盒开场。
-- [ ] 全程只讲同一批铜，不为盲盒新增第二条故事线。
-- [ ] Mystery Voyage 由“资产如何被合适资金发现”自然引出。
-- [ ] 盲盒之后仍回到认购和在途风险监控，主线闭合。
-- [ ] 前 3 分 10 秒完成报价、盲盒、认购、风险暂停。
+- [ ] The opening is still one copper shipment's cash-flow squeeze, not the blind box.
+- [ ] The whole pitch talks only about the same copper shipment, with no second storyline added for the blind box.
+- [ ] Mystery Voyage is introduced naturally by "how does the right capital discover the asset".
+- [ ] After the blind box, the pitch returns to subscription and in-transit risk monitoring, closing the storyline.
+- [ ] The quote, blind box, subscription and risk pause are all done within the first 3 minutes 10 seconds.
 
 ### Mystery Voyage
 
-- [ ] 付款前显示候选数、概率、风险/压力损失区间和报告费。
-- [ ] `Commit → 402 → Settlement → Reveal → Verify` 连续成功。
-- [ ] 揭晓的是同一批铜，或口播与实际 Demo 结果严格一致。
-- [ ] AI Risk Passport 显示适配理由、压力损失、抵押覆盖和证据新鲜度。
-- [ ] 浏览器 verifier 成功，篡改时 fail closed。
-- [ ] 明确说出“盲的是航线，不盲风险”。
-- [ ] 明确说出“开盒买报告，不是购买 RWA”。
-- [ ] 未完成第二次确认时不会发起认购。
+- [ ] Before payment, the candidate count, odds, risk/stress-loss range and report fee are shown.
+- [ ] `Commit → 402 → Settlement → Reveal → Verify` succeeds in one continuous run.
+- [ ] The reveal is the same copper shipment, or the script strictly matches the actual demo result.
+- [ ] The AI Risk Passport shows the fit reasons, stress loss, collateral coverage and evidence freshness.
+- [ ] The browser verifier succeeds, and fails closed when tampered with.
+- [ ] Say explicitly: "it hides the route, not the risk".
+- [ ] Say explicitly: "opening the box buys a report, not an RWA".
+- [ ] No subscription is initiated until the second confirmation is completed.
 
-### To B 与产业资源
+### To B and industry resources
 
-- [ ] 盲盒被解释为获客、教育、报告变现、线索筛选和白标能力。
-- [ ] 清楚说出 Risk API、白标模块、许可型基础设施三层产品。
-- [ ] 清楚说出授权费、按量费、融资服务费三类收入。
-- [ ] 产业资源页说明谁带来文件、客户、系统集成和资金。
-- [ ] 没有 LOI/API/sandbox 证据的资源不表述为正式伙伴或生产接入。
-- [ ] Azure 与 Injective 各自承担必要角色，不抢主故事。
+- [ ] The blind box is explained as customer acquisition, education, report monetisation, lead filtering and white-label capability.
+- [ ] Clearly name the three product layers: Risk API, white-label module, permissioned infrastructure.
+- [ ] Clearly name the three revenue streams: licence fees, usage fees, financing service fees.
+- [ ] The industry-resources slide states who brings the documents, customers, system integration and capital.
+- [ ] Resources without LOI/API/sandbox evidence are not described as formal partners or production integrations.
+- [ ] Azure and Injective each play a necessary role without stealing the main story.
 
-### 事实与合规
+### Facts and compliance
 
-- [ ] `22 个项目 / $98.03M` 等 Demo 数据不说成真实 traction。
-- [ ] 模拟冲突、虚拟航运时间、offline fixture 均有明确标签。
-- [ ] 不使用“稳赚、中奖、大奖、保底、无风险”等词。
-- [ ] 不说“绕过监管”。
-- [ ] 目标兑付不是保证兑付。
-- [ ] Voyage Passport 不被描述为货权或投资证明。
+- [ ] Demo data such as `22 deals / $98.03M` is not presented as real traction.
+- [ ] The simulated conflict, virtual voyage time and offline fixtures are all clearly labelled.
+- [ ] Words like "guaranteed profit", "winning", "jackpot", "guaranteed minimum" or "risk-free" are not used.
+- [ ] Never say "bypassing regulation".
+- [ ] Target redemption is not guaranteed redemption.
+- [ ] The Voyage Passport is not described as cargo title or proof of investment.
 
-### 时间与流畅度
+### Timing and flow
 
-- [ ] 完整口播控制在 `4:45–4:55`。
-- [ ] Mystery Voyage Demo 控制在 `60–70 秒`。
-- [ ] Slide 3–5 一镜到底，不切回 PPT、不搜索项目。
-- [ ] To B 与产业资源合计不少于 `80 秒`。
-- [ ] 完整彩排至少 5 次，其中连续 3 次无需口头补丁。
-- [ ] 录屏、截图、proof 和测试网付款证据均已准备。
+- [ ] The full script stays within `4:45–4:55`.
+- [ ] The Mystery Voyage demo stays within `60–70 seconds`.
+- [ ] Slides 3–5 are done in one take, without switching back to the slides or searching for deals.
+- [ ] To B and industry resources together get no less than `80 seconds`.
+- [ ] At least 5 full rehearsals, including 3 in a row with no verbal patching needed.
+- [ ] The screen recording, screenshots, proof and testnet payment evidence are all prepared.
 
 ---
 
-## 8. 最终一句话
+## 8. The final line
 
-### 中文
-
-> **AgentBL 让 AI 为一批真实在途货物定价，让 Mystery Voyage 帮助合适的资金发现并理解它，再在世界变化时持续保护企业和资本。**
-
-### English
+### Pitch line
 
 > **AgentBL uses AI to price a real shipment, Mystery Voyage to make it discoverable and verifiable, and continuous monitoring to protect capital as the world changes.**
 
-### 收尾金句
+### Closing line
 
-> **一批货、一份实时风险价格、一条连接全球贸易与资本的新航线。**
+> **One shipment, one real-time risk price, one new route connecting global trade and capital.**

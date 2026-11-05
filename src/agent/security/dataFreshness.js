@@ -1,15 +1,15 @@
 // TRUST-5: Data Freshness and Source Health
-// 风险情报标记 observed_at/expires_at/source_status，过期自动降置信度或拒绝定价
+// Risk intel carries observed_at/expires_at/source_status; stale data automatically lowers confidence or blocks pricing
 
 export class DataFreshnessValidator {
-  constructor(maxAgeMs = 86400000) { // 默认 24 小时
+  constructor(maxAgeMs = 86400000) { // default 24 hours
     this.maxAgeMs = maxAgeMs;
   }
 
   /**
-   * 验证数据新鲜度
-   * @param {Object} data - 包含 observed_at 的数据
-   * @param {number} currentTime - 当前时间戳
+   * Validate data freshness
+   * @param {Object} data - data containing observed_at
+   * @param {number} currentTime - current timestamp
    * @returns {Object} - { fresh: boolean, age_ms: number, status: string }
    */
   validateFreshness(data, currentTime = Date.now()) {
@@ -32,24 +32,24 @@ export class DataFreshnessValidator {
   }
 
   /**
-   * 根据数据新鲜度调整置信度
-   * @param {number} baseConfidence - 基础置信度 (0-1)
-   * @param {number} ageMs - 数据年龄（毫秒）
-   * @returns {number} - 调整后的置信度
+   * Adjust confidence according to data freshness
+   * @param {number} baseConfidence - base confidence (0-1)
+   * @param {number} ageMs - data age (milliseconds)
+   * @returns {number} - adjusted confidence
    */
   adjustConfidence(baseConfidence, ageMs) {
     if (ageMs > this.maxAgeMs) {
-      return 0; // 过期数据置信度为 0
+      return 0; // expired data has zero confidence
     }
 
-    // 线性衰减：新鲜数据置信度 100%，接近过期时衰减到 50%
+    // Linear decay: fresh data has 100% confidence, decaying to 50% as it nears expiry
     const decayFactor = 1 - (ageMs / this.maxAgeMs) * 0.5;
     return baseConfidence * decayFactor;
   }
 
   /**
-   * 检查数据源健康状态
-   * @param {Object} source - 数据源信息
+   * Check data source health
+   * @param {Object} source - data source info
    * @returns {Object} - { healthy: boolean, status: string }
    */
   checkSourceHealth(source) {
@@ -65,7 +65,7 @@ export class DataFreshnessValidator {
       const lastUpdate = new Date(source.last_update).getTime();
       const timeSinceUpdate = Date.now() - lastUpdate;
 
-      // 如果数据源超过 1 小时未更新，标记为不健康
+      // Mark the source unhealthy if it has not updated for more than 1 hour
       if (timeSinceUpdate > 3600000) {
         return { healthy: false, status: 'STALE_SOURCE' };
       }
@@ -76,7 +76,7 @@ export class DataFreshnessValidator {
 }
 
 /**
- * 带新鲜度验证的风险情报数据结构
+ * Risk intel data structure with freshness validation
  */
 export class RiskIntelligence {
   constructor(data) {
@@ -91,14 +91,14 @@ export class RiskIntelligence {
   }
 
   /**
-   * 检查情报是否可用于定价
-   * @param {number} currentTime - 当前时间戳
+   * Check whether the intel can be used for pricing
+   * @param {number} currentTime - current timestamp
    * @returns {Object} - { usable: boolean, reason: string, adjusted_confidence: number }
    */
   isUsableForPricing(currentTime = Date.now()) {
     const validator = new DataFreshnessValidator();
 
-    // 检查数据新鲜度
+    // Check data freshness
     const freshness = validator.validateFreshness(this, currentTime);
     if (!freshness.fresh) {
       return {
@@ -108,7 +108,7 @@ export class RiskIntelligence {
       };
     }
 
-    // 检查是否过期
+    // Check whether it has expired
     if (this.expires_at) {
       const expiresAt = new Date(this.expires_at).getTime();
       if (currentTime > expiresAt) {
@@ -120,7 +120,7 @@ export class RiskIntelligence {
       }
     }
 
-    // 检查数据源健康
+    // Check data source health
     if (this.source) {
       const sourceHealth = validator.checkSourceHealth(this.source);
       if (!sourceHealth.healthy) {
@@ -132,7 +132,7 @@ export class RiskIntelligence {
       }
     }
 
-    // 调整置信度
+    // Adjust confidence
     const adjustedConfidence = validator.adjustConfidence(
       this.confidence,
       freshness.age_ms
@@ -147,10 +147,10 @@ export class RiskIntelligence {
 }
 
 /**
- * 测试数据新鲜度验证（clock-controlled tests）
+ * Test data freshness validation (clock-controlled tests)
  */
 export function testDataFreshnessValidation() {
-  const validator = new DataFreshnessValidator(86400000); // 24 小时
+  const validator = new DataFreshnessValidator(86400000); // 24 hours
   const baseTime = Date.now();
 
   const tests = [
@@ -201,7 +201,7 @@ export function testDataFreshnessValidation() {
 }
 
 /**
- * 测试网络断开时不使用旧数据
+ * Test that stale data is not used when the network is down
  */
 export function testOfflineFallback() {
   const intelligence = new RiskIntelligence({
@@ -209,7 +209,7 @@ export function testOfflineFallback() {
     event_type: 'war_risk',
     severity: 'HIGH',
     description: 'Conflict in region',
-    observed_at: new Date(Date.now() - 100000000).toISOString(), // 太旧
+    observed_at: new Date(Date.now() - 100000000).toISOString(), // too old
     source: { name: 'xAPI', status: 'offline' }
   });
 

@@ -1,76 +1,76 @@
-# AgentBL Agent · 基础说明（团队协作与上手）
+# AgentBL Agent · Basic Guide (Team Collaboration and Onboarding)
 
-> 这是项目的**基础说明 / 团队协作手册**（原 `README.md`）。它照顾第一次参加黑客松、第一次用 Node.js、第一次提 PR 的同学，覆盖 Harness 背景、命令、目录、改数据、领任务、开分支、提 PR 的完整流程。
+> This is the project's **basic guide / team collaboration handbook** (formerly `README.md`). It looks after teammates who are taking part in a hackathon for the first time, using Node.js for the first time, or opening a PR for the first time, and covers the full flow: Harness background, commands, directories, changing data, claiming tasks, creating branches and opening PRs.
 >
-> 想快速了解项目「是什么 + 怎么用」，请看根目录新的 [`README.md`](../README.md)。本文件作为更细的背景与协作规范保留。
+> For a quick overview of "what the project is + how to use it", see the new [`README.md`](../README.md) in the root directory. This file is kept as the more detailed background and collaboration guidelines.
 
 ---
 
-> AI Agent x Blockchain 黑客松仓库：**AI 动态定价的 eBL-backed RWA 折价发行协议**的文档、Mock Harness、测试框架和团队协作规范。
+> AI Agent x Blockchain hackathon repository: docs, Mock Harness, test framework and team collaboration guidelines for an **AI-dynamically-priced, eBL-backed RWA discounted issuance protocol**.
 
-这份文档是给所有项目成员看的，尤其照顾第一次参加黑客松、第一次用 Node.js、第一次提 PR 的同学。你不需要一开始就懂完 Web3、国际贸易或后端测试，只要按下面步骤做，就能把项目跑起来、领任务、开发、验证、提交 PR。
+This document is for every project member, and especially looks after teammates who are taking part in a hackathon for the first time, using Node.js for the first time, or opening a PR for the first time. You don't need to fully understand Web3, international trade or backend testing at the start; just follow the steps below and you will be able to run the project, claim tasks, develop, verify and open a PR.
 
 ---
 
-## 0. 先读这一段：这个项目到底是什么
+## 0. Read this first: what is this project, really
 
-AgentBL Agent 是一个面向黑客松的 **AI Dynamic Pricing x eBL-backed RWA Trade Finance** 仓库。
+AgentBL Agent is a hackathon-oriented **AI Dynamic Pricing x eBL-backed RWA Trade Finance** repository.
 
-项目一句话：
+The project in one sentence:
 
-> 出口商把电子提单质押到智能合约，系统以货值为支撑发行 RWA；AI Pricing & Risk Agent 根据到账速度和贸易风险，动态给出 RWA 的折价发行价、可融资额度和风控动作，投资者在认购前就看到价格、目标兑付价和风险来源。
+> The exporter pledges an electronic bill of lading to a smart contract, and the system issues an RWA backed by the cargo value; the AI Pricing & Risk Agent, based on payout speed and trade risk, dynamically produces the RWA's discounted issue price, financeable amount and risk-control actions, so investors see the price, target redemption price and risk sources before subscribing.
 
-更白话一点：
+In plainer terms:
 
 ```text
-国际贸易里，货已经装船，但钱还没回来。
-出口商想提前、快速拿到现金。
-电子提单代表货物权利，可以质押。
-我们用 AI 给这批货估值，再把"想多快拿钱 + 有多少风险"折算成一个发行折价（比如 1 RWA 卖 0.85）。
-投资者按折价认购，AI 在运输途中根据风险改价、暂停或清算。
+In international trade, the goods are already loaded on the ship, but the money hasn't come back yet.
+The exporter wants to get cash early and quickly.
+The electronic bill of lading represents rights to the goods and can be pledged.
+We use AI to value this cargo, then convert "how fast you want the money + how much risk there is" into an issuance discount (e.g. 1 RWA sells for 0.85).
+Investors subscribe at the discount, and the AI reprices, pauses or liquidates during transit according to risk.
 ```
 
-> ⚠️ 模型升级提示：早期版本是"RiskReport 风控 + 资金池放贷"；当前主线是 **AI 动态定价的 RWA 折价发行**（见 `docs/PRD.md` v0.2 + `docs/tasks.md`）。定价引擎 `src/core/pricingEngine.js` 已实现并输出 `PricingQuote`（pricing_action）；旧 `riskEngine.js` 的 `RiskReport`（contract_action）仍保留用于 legacy 流程与回归。本文件已标注哪些是"现状（Current）"、哪些是"目标（Target）"。
+> ⚠️ Model upgrade notice: early versions were "RiskReport risk control + pooled lending"; the current main line is **AI-dynamically-priced RWA discounted issuance** (see `docs/PRD.md` v0.2 + `docs/tasks.md`). The pricing engine `src/core/pricingEngine.js` is implemented and outputs a `PricingQuote` (pricing_action); the old `riskEngine.js` `RiskReport` (contract_action) is still kept for the legacy flow and regression. This file marks which parts are "Current" and which are "Target".
 
-本仓库现在不是最终 Demo，而是一个 **准备仓库 + 可运行 Harness**。它的目标是让大家在正式开发前有统一背景、统一 PRD、统一数据、统一命令、统一验证方式。
+This repository is not the final Demo right now, but a **preparation repository + runnable Harness**. Its goal is to give everyone a shared background, shared PRD, shared data, shared commands and shared verification method before formal development begins.
 
 ---
 
-## 1. Harness 是什么
+## 1. What a Harness is
 
-### 1.1 一句话解释
+### 1.1 In one sentence
 
-**Harness 是一个小型、固定、可重复运行的测试环境。**
+**A Harness is a small, fixed, repeatable test environment.**
 
-你可以把它理解成：
+You can think of it as:
 
 ```text
-一套固定的假数据
-+ 一套固定的风险计算规则
-+ 一套固定的流程模拟
-+ 一套固定的 API
-+ 一套固定的测试命令
+A fixed set of fake data
++ a fixed set of risk calculation rules
++ a fixed process simulation
++ a fixed set of APIs
++ a fixed set of test commands
 ```
 
-它的作用是让我们在没有真实银行、真实电子提单平台、真实智能合约、真实船舶数据的情况下，仍然能把项目主流程跑通。
+Its purpose is to let us run the project's main flow end to end even without a real bank, a real electronic bill of lading platform, real smart contracts or real vessel data.
 
-### 1.2 为什么黑客松需要 Harness
+### 1.2 Why a hackathon needs a Harness
 
-黑客松时间很短。如果每个人都随便改、随便接数据、随便写接口，最后很容易出现：
+Hackathons are short. If everyone changes things, connects data and writes interfaces however they like, it is very easy to end up with:
 
-- PM 的故事和工程实现对不上；
-- Agent 同学输出的 JSON 前端读不了；
-- 前端页面期待字段 A，后端实际返回字段 B；
-- 合约同学设计的状态机和 demo 剧情不一致；
-- 最后 1 小时才发现主流程跑不起来。
+- The PM's story not matching the engineering implementation;
+- JSON output by the Agent teammates that the frontend cannot read;
+- The frontend page expecting field A while the backend actually returns field B;
+- The state machine designed by the contract teammates not matching the demo storyline;
+- Discovering in the last hour that the main flow does not run.
 
-Harness 的价值就是：
+The value of the Harness is:
 
-> 不管你做什么功能，都必须能回到同一条主流程，并且能被命令验证。
+> Whatever feature you build, it must feed back into the same main flow and be verifiable by a command.
 
-### 1.3 本项目 Harness 的主链路
+### 1.3 The main path of this project's Harness
 
-请先记住这条线：
+Remember this line first:
 
 ```text
 data/demo-case.json
@@ -80,86 +80,86 @@ data/demo-case.json
 → scripts / tests / public UI
 ```
 
-每个文件在做什么：
+What each file does:
 
-| 文件 | 它是什么 | 小白理解 |
+| File | What it is | Plain-language explanation |
 |---|---|---|
-| `data/demo-case.json` | Demo 输入数据（legacy） | 一笔铜阴极板国际贸易案例，喂给旧风险引擎 |
-| `data/uploads/` | 拟真上传单据 | 模拟用户上传的 eBL + 商业发票（新加坡铜 / 原油），见其 README |
-| `data/cases/` | 结构化 case（新模型） | 对齐 PricingQuote 字段的案例 JSON |
-| `src/core/riskEngine.js` | 定价/风险引擎 | 现状：算 RiskReport（旧）。目标：升级为输出 RWA 折价的 PricingQuote |
-| `src/core/workflow.js` | 流程模拟器 | 模拟链上状态机（现状 Created→Funding→…，目标 Created→Priced→Open→…） |
-| `src/agent/` | AI 估值 tool calling | LLM 调用「实时铜价 / 历史同类成交价 / 估值」工具，见 `docs/ai-valuation-tooling.md` |
-| `src/app/server.js` | 最小 Web/API 服务 | 提供网页和 API，让前端或测试能访问数据 |
-| `scripts/check.mjs` | 自检脚本 | 检查文件、脚本、seed 数据、引擎是否还正常 |
-| `scripts/demo.mjs` | CLI Demo | 在终端打印完整演示流程 |
-| `scripts/smoke.mjs` | 冒烟测试 | 启动一个临时 API server，检查关键 API 是否可用 |
-| `scripts/agent-valuation.mjs` | 估值 CLI | 跑 AI 估值工具，离线有 deterministic fallback |
-| `tests/*.test.js` | 自动测试 | 验证引擎和主流程没有被改坏 |
-| `public/*` | 前端页面 | 浏览器看到的页面 |
+| `data/demo-case.json` | Demo input data (legacy) | A copper cathode international trade case, fed to the old risk engine |
+| `data/uploads/` | Realistic uploaded documents | Simulates eBL + commercial invoices uploaded by users (Singapore copper / crude oil), see its README |
+| `data/cases/` | Structured cases (new model) | Case JSON aligned with PricingQuote fields |
+| `src/core/riskEngine.js` | Pricing/risk engine | Current: computes a RiskReport (old). Target: upgrade to output a PricingQuote with the RWA discount |
+| `src/core/workflow.js` | Process simulator | Simulates the on-chain state machine (current Created→Funding→…, target Created→Priced→Open→…) |
+| `src/agent/` | AI valuation tool calling | The LLM calls the "real-time copper price / historical comparable trade prices / valuation" tools, see `docs/ai-valuation-tooling.md` |
+| `src/app/server.js` | Minimal Web/API service | Serves the web page and APIs so the frontend or tests can access the data |
+| `scripts/check.mjs` | Self-check script | Checks whether files, scripts, seed data and the engine still work |
+| `scripts/demo.mjs` | CLI Demo | Prints the full demo flow in the terminal |
+| `scripts/smoke.mjs` | Smoke test | Starts a temporary API server and checks that the key APIs are available |
+| `scripts/agent-valuation.mjs` | Valuation CLI | Runs the AI valuation tools, with a deterministic fallback offline |
+| `tests/*.test.js` | Automated tests | Verify that the engine and main flow have not been broken |
+| `public/*` | Frontend pages | The pages seen in the browser |
 
-### 1.4 Harness 不是什么
+### 1.4 What the Harness is not
 
-Harness 不是最终产品。当前阶段它不会做这些事：
+The Harness is not the final product. At the current stage it does not do the following:
 
-- 不连接真实银行；
-- 不连接真实电子提单平台；
-- 不进行真实募资；
-- 不部署真实主网合约；
-- 不进行真实 KYC；
-- 不处理真实跨境支付；
-- 不承诺任何收益；
-- 不面对公众融资。
+- Does not connect to a real bank;
+- Does not connect to a real electronic bill of lading platform;
+- Does not raise real funds;
+- Does not deploy real mainnet contracts;
+- Does not perform real KYC;
+- Does not process real cross-border payments;
+- Does not promise any returns;
+- Does not raise funds from the public.
 
-它只是一个 **可运行、可解释、可验证的黑客松骨架**。
+It is just a **runnable, explainable, verifiable hackathon skeleton**.
 
 ---
 
-## 2. 第一次上手前需要准备什么
+## 2. What to prepare before getting started for the first time
 
-### 2.1 你需要安装的软件
+### 2.1 Software you need to install
 
-至少需要：
+At minimum:
 
 1. **Git**
-   用来拉代码、开分支、提交修改、推送 PR。
+   Used to pull code, create branches, commit changes and push PRs.
 
 2. **Node.js >= 18.18.0**
-   用来运行项目脚本、测试和本地 Web 服务。
+   Used to run project scripts, tests and the local web service.
 
-3. **代码编辑器**
-   推荐 VS Code，也可以用 Cursor、WebStorm 或其他编辑器。
+3. **Code editor**
+   VS Code is recommended; Cursor, WebStorm or other editors also work.
 
-4. **浏览器**
-   Chrome、Edge、Firefox 都可以。
+4. **Browser**
+   Chrome, Edge or Firefox are all fine.
 
-### 2.2 检查 Git 是否安装
+### 2.2 Check whether Git is installed
 
-打开终端，运行：
+Open a terminal and run:
 
 ```bash
 git --version
 ```
 
-如果看到类似：
+If you see something like:
 
 ```text
 git version 2.x.x
 ```
 
-说明 Git 已安装。
+Git is installed.
 
-如果提示找不到 `git`，说明你还没装 Git，先安装 Git 再继续。
+If it says `git` cannot be found, you haven't installed Git yet; install Git first and then continue.
 
-### 2.3 检查 Node 是否安装
+### 2.3 Check whether Node is installed
 
-运行：
+Run:
 
 ```bash
 node -v
 ```
 
-如果看到类似：
+If you see something like:
 
 ```text
 v18.18.0
@@ -167,25 +167,25 @@ v20.x.x
 v22.x.x
 ```
 
-说明 Node 已安装。版本必须大于等于 18.18.0。
+Node is installed. The version must be greater than or equal to 18.18.0.
 
-再检查 npm：
+Then check npm:
 
 ```bash
 npm -v
 ```
 
-如果能输出版本号，就可以继续。
+If it prints a version number, you can continue.
 
-### 2.4 Windows PowerShell 小提醒
+### 2.4 A quick note for Windows PowerShell
 
-如果你在 Windows PowerShell 里运行 `npm run check`，遇到类似：
+If you run `npm run check` in Windows PowerShell and get something like:
 
 ```text
-无法加载文件 npm.ps1，因为在此系统上禁止运行脚本
+File npm.ps1 cannot be loaded because running scripts is disabled on this system
 ```
 
-不是项目坏了，是 PowerShell 执行策略限制。可以改用：
+The project is not broken; it is a PowerShell execution policy restriction. You can use instead:
 
 ```powershell
 npm.cmd run check
@@ -194,44 +194,44 @@ npm.cmd run demo
 npm.cmd run dev
 ```
 
-下面文档里写 `npm run xxx` 的地方，Windows 同学都可以替换成 `npm.cmd run xxx`。
+Wherever this document says `npm run xxx`, Windows users can replace it with `npm.cmd run xxx`.
 
 ---
 
-## 3. 第一次把项目跑起来
+## 3. Running the project for the first time
 
-### 3.1 进入项目目录
+### 3.1 Enter the project directory
 
-如果你已经拿到项目文件，终端进入：
+If you already have the project files, in the terminal go to:
 
 ```bash
 cd AgentBL-Agent-Starter
 ```
 
-如果你是从 GitHub clone：
+If you are cloning from GitHub:
 
 ```bash
 git clone <repo-url>
 cd AgentBL-Agent-Starter
 ```
 
-`<repo-url>` 换成真实仓库地址。
+Replace `<repo-url>` with the real repository address.
 
-### 3.2 确认自己在正确目录
+### 3.2 Confirm you are in the right directory
 
-运行：
+Run:
 
 ```bash
 ls
 ```
 
-Windows PowerShell 也可以运行：
+In Windows PowerShell you can also run:
 
 ```powershell
 dir
 ```
 
-你应该能看到这些文件或目录：
+You should see these files or directories:
 
 ```text
 README.md
@@ -244,80 +244,80 @@ src
 tests
 ```
 
-如果看不到 `package.json`，说明你不在项目根目录，需要先 `cd` 到正确位置。
+If you cannot see `package.json`, you are not in the project root directory and need to `cd` to the right location first.
 
-### 3.3 安装项目
+### 3.3 Install the project
 
-运行：
+Run:
 
 ```bash
 npm install
 ```
 
-当前项目没有外部依赖，所以它只会打印提示：
+The project currently has no external dependencies, so it only prints a message:
 
 ```text
 No external dependencies are required for this preparation harness.
 Next: npm run check && npm run test && npm run demo
 ```
 
-这一步的意义：
+Why this step matters:
 
-- 让所有成员形成统一启动习惯；
-- 后续如果项目加入依赖，大家不需要改流程；
-- 确认 npm 能正常运行。
+- Gives all members a consistent startup habit;
+- If the project adds dependencies later, nobody needs to change their workflow;
+- Confirms that npm runs correctly.
 
-### 3.4 跑第一条自检命令
+### 3.4 Run the first self-check command
 
-运行：
+Run:
 
 ```bash
 npm run check
 ```
 
-这条命令会检查：
+This command checks:
 
-- 必需文件是否存在；
-- `package.json` 里脚本是否完整；
-- `data/demo-case.json` 是否能读取；
-- 风险引擎是否能生成 `evidence_hash`；
-- 风险动作是否是合法值。
+- Whether the required files exist;
+- Whether the scripts in `package.json` are complete;
+- Whether `data/demo-case.json` can be read;
+- Whether the risk engine can generate `evidence_hash`;
+- Whether the risk action is a valid value.
 
-成功时应该看到：
+On success you should see:
 
 ```text
 check passed: files, scripts, seed data and risk engine are valid.
 ```
 
-如果失败，不要慌。先看错误提示，一般是文件缺失、JSON 格式写坏、或者 Node 没有正确运行。
+If it fails, don't panic. Read the error message first; it is usually a missing file, broken JSON format, or Node not running correctly.
 
-### 3.5 跑测试
+### 3.5 Run the tests
 
-运行：
+Run:
 
 ```bash
 npm run test
 ```
 
-这条命令会运行 `tests/*.test.js`。
+This command runs `tests/*.test.js`.
 
-它主要验证：
+It mainly verifies:
 
-- 风险引擎规则有没有被改坏；
-- workflow 主流程是否还能跑；
-- 关键输出字段是否还存在。
+- Whether the risk engine rules have been broken;
+- Whether the workflow main flow still runs;
+- Whether the key output fields still exist.
 
-成功时你会看到 Node test 的通过结果。
+On success you will see the Node test pass results.
 
-### 3.6 跑命令行 Demo
+### 3.6 Run the command-line Demo
 
-运行：
+Run:
 
 ```bash
 npm run demo
 ```
 
-这条命令会读取 `data/demo-case.json`，然后打印：
+This command reads `data/demo-case.json` and then prints:
 
 ```text
 AgentBL Agent mock demo flow
@@ -332,48 +332,48 @@ Risk report
 }
 ```
 
-这一步的意义：
+Why this step matters:
 
-- PM 可以用它理解 demo 剧情；
-- Agent 同学可以看风险输出；
-- Web3 同学可以看状态机；
-- 前端同学可以知道页面应该展示哪些字段。
+- The PM can use it to understand the demo storyline;
+- Agent teammates can see the risk output;
+- Web3 teammates can see the state machine;
+- Frontend teammates can know which fields the page should display.
 
-### 3.7 启动网页和 API
+### 3.7 Start the web page and API
 
-运行：
+Run:
 
 ```bash
 npm run dev
 ```
 
-成功时会看到：
+On success you will see:
 
 ```text
 AgentBL Agent harness running at http://localhost:3000
 ```
 
-打开浏览器访问：
+Open a browser and visit:
 
 ```text
 http://localhost:3000
 ```
 
-注意：`npm run dev` 会一直占着终端运行。如果你想停止它，在终端按：
+Note: `npm run dev` keeps occupying the terminal while it runs. If you want to stop it, press in the terminal:
 
 ```text
 Ctrl + C
 ```
 
-### 3.8 检查 API
+### 3.8 Check the API
 
-启动 `npm run dev` 后，可以在浏览器打开：
+After starting `npm run dev`, you can open in the browser:
 
 ```text
 http://localhost:3000/api/health
 ```
 
-如果看到：
+If you see:
 
 ```json
 {
@@ -382,144 +382,144 @@ http://localhost:3000/api/health
 }
 ```
 
-说明 server 正常。
+the server is working.
 
-再打开：
+Then open:
 
 ```text
 http://localhost:3000/api/demo-data
 ```
 
-你会看到 `data/demo-case.json` 的内容。
+You will see the contents of `data/demo-case.json`.
 
 ---
 
-## 4. 每个命令到底在干什么
+## 4. What each command actually does
 
 ### 4.1 `npm run check`
 
-适合什么时候跑：
+When to run it:
 
-- 第一次拉项目后；
-- 每次提交前；
-- 改了 `package.json`、`data/demo-case.json`、`scripts/check.mjs` 后；
-- 不确定项目有没有被改坏时。
+- After pulling the project for the first time;
+- Before every commit;
+- After changing `package.json`, `data/demo-case.json` or `scripts/check.mjs`;
+- When you are not sure whether the project has been broken.
 
-它会做什么：
+What it does:
 
 ```text
-检查 README、docs、data、src、tests 等关键文件是否存在
-检查 package.json 里 install/dev/test/check/demo/smoke 脚本是否存在
-读取 demo-case.json
-调用 calculateRisk(data)
-确认 risk report 有 evidence_hash
-确认 contract_action 是合法动作
+Check that key files such as README, docs, data, src and tests exist
+Check that the install/dev/test/check/demo/smoke scripts exist in package.json
+Read demo-case.json
+Call calculateRisk(data)
+Confirm the risk report has an evidence_hash
+Confirm contract_action is a valid action
 ```
 
-你要记住：
+Remember:
 
-> `check` 是最低成本的健康检查。先跑它。
+> `check` is the lowest-cost health check. Run it first.
 
 ### 4.2 `npm run test`
 
-适合什么时候跑：
+When to run it:
 
-- 改了 `src/core/riskEngine.js`；
-- 改了 `src/core/workflow.js`；
-- 改了测试文件；
-- 改了 RiskReport 字段。
+- After changing `src/core/riskEngine.js`;
+- After changing `src/core/workflow.js`;
+- After changing test files;
+- After changing RiskReport fields.
 
-它会做什么：
+What it does:
 
 ```text
-运行 tests/riskEngine.test.js
-运行 tests/smoke.test.js
-检查核心逻辑是否符合预期
+Run tests/riskEngine.test.js
+Run tests/smoke.test.js
+Check that the core logic behaves as expected
 ```
 
-你要记住：
+Remember:
 
-> 改核心逻辑必须跑 `test`。
+> If you change core logic, you must run `test`.
 
 ### 4.3 `npm run smoke`
 
-适合什么时候跑：
+When to run it:
 
-- 改了 `src/app/server.js`；
-- 改了 API；
-- 改了 workflow；
-- 改了前端调用 API 的方式；
-- 准备提交主流程相关 PR 前。
+- After changing `src/app/server.js`;
+- After changing the API;
+- After changing the workflow;
+- After changing how the frontend calls the API;
+- Before submitting a PR related to the main flow.
 
-它会做什么：
+What it does:
 
 ```text
-临时启动一个 server
-请求 /api/health
-请求 /api/demo-data
-请求 /api/workflow/simulate
-确认返回结果可用
-关闭 server
+Temporarily start a server
+Request /api/health
+Request /api/demo-data
+Request /api/workflow/simulate
+Confirm the returned results are usable
+Shut down the server
 ```
 
-你要记住：
+Remember:
 
-> `smoke` 检查 API 主流程有没有冒烟起火。
+> `smoke` checks whether the API main flow is going up in smoke.
 
 ### 4.4 `npm run demo`
 
-适合什么时候跑：
+When to run it:
 
-- PM 写路演脚本；
-- Agent 同学调风险解释；
-- Web3 同学看状态机；
-- 准备最终演示；
-- 改了 demo case 后。
+- When the PM writes the pitch script;
+- When Agent teammates tune the risk explanation;
+- When Web3 teammates look at the state machine;
+- When preparing the final demo;
+- After changing the demo case.
 
-它会做什么：
+What it does:
 
 ```text
-读取 demo-case.json
-调用 simulateWorkflow(data)
-打印每一步状态变化
-打印 RiskReport JSON
+Read demo-case.json
+Call simulateWorkflow(data)
+Print each state change
+Print the RiskReport JSON
 ```
 
-你要记住：
+Remember:
 
-> `demo` 是我们的兜底演示方案。网页坏了也可以用它讲完整流程。
+> `demo` is our fallback demo option. Even if the web page breaks, we can use it to walk through the full flow.
 
 ### 4.5 `npm run dev`
 
-适合什么时候跑：
+When to run it:
 
-- 做前端页面；
-- 手动看 API；
-- 给队友演示当前页面；
-- 检查浏览器里的效果。
+- When building frontend pages;
+- When manually inspecting the API;
+- When showing the current page to teammates;
+- When checking how it looks in the browser.
 
-它会做什么：
+What it does:
 
 ```text
-启动本地 Web server
-提供 public/index.html
-提供 /api/health
-提供 /api/demo-data
-提供 /api/risk/analyze
-提供 /api/workflow/simulate
+Start the local web server
+Serve public/index.html
+Serve /api/health
+Serve /api/demo-data
+Serve /api/risk/analyze
+Serve /api/workflow/simulate
 ```
 
-你要记住：
+Remember:
 
-> `dev` 是人工调试用的，跑起来后要打开浏览器看。
+> `dev` is for manual debugging; once it is running, open a browser to look.
 
 ---
 
-## 5. 项目目录怎么读
+## 5. How to read the project directories
 
-第一次看仓库时，不要从所有文件一起看。按这个顺序看：
+When looking at the repository for the first time, don't look at all the files at once. Read in this order:
 
-### 5.1 先看文档
+### 5.1 Docs first
 
 ```text
 docs/background.md
@@ -528,45 +528,45 @@ docs/tasks.md
 docs/acceptance.md
 ```
 
-它们分别回答：
+What each one answers:
 
-| 文件 | 回答什么问题 |
+| File | Question it answers |
 |---|---|
-| `docs/background.md` | 这个领域是什么，提单/eBL/RWA/贸易融资是什么 |
-| `docs/PRD.md` | 我们具体要做什么产品、什么 MVP、什么页面和 API |
-| `docs/tasks.md` | 每个人可以领什么任务，怎么验证 |
-| `docs/acceptance.md` | 什么叫做完成，什么命令必须通过 |
+| `docs/background.md` | What this domain is; what bills of lading/eBL/RWA/trade finance are |
+| `docs/PRD.md` | What product exactly we are building, what MVP, what pages and APIs |
+| `docs/tasks.md` | What tasks each person can claim and how to verify them |
+| `docs/acceptance.md` | What counts as done and which commands must pass |
 
-### 5.2 再看数据
+### 5.2 Then the data
 
 ```text
 data/demo-case.json
 ```
 
-这是整个 Harness 的输入。它是一笔模拟贸易融资案例。
+This is the input to the whole Harness. It is a simulated trade finance case.
 
-你可以把它理解成：
+You can think of it as:
 
 ```text
-一张电子提单
-+ 一份保险
-+ 一笔融资请求
-+ 一个市场价格
-+ 一些运输风险事件
+An electronic bill of lading
++ an insurance policy
++ a financing request
++ a market price
++ some transit risk events
 ```
 
-### 5.3 再看核心逻辑
+### 5.3 Then the core logic
 
 ```text
 src/core/riskEngine.js
 src/core/workflow.js
 ```
 
-`riskEngine.js` 做风险计算。
+`riskEngine.js` does the risk calculation.
 
-`workflow.js` 把风险动作变成流程状态。
+`workflow.js` turns risk actions into process states.
 
-### 5.4 最后看 Web 和测试
+### 5.4 Finally, the web layer and tests
 
 ```text
 src/app/server.js
@@ -575,42 +575,42 @@ tests/*
 scripts/*
 ```
 
-这些文件负责把核心逻辑暴露给网页、API、测试和命令行。
+These files expose the core logic to the web page, APIs, tests and the command line.
 
 ---
 
-## 6. 如何修改 Demo 数据
+## 6. How to modify the Demo data
 
-### 6.1 为什么先改 Demo 数据
+### 6.1 Why modify the Demo data first
 
-对小白最友好的练习方式是先改 `data/demo-case.json`，因为不用理解很多代码，也能看到风险结果的变化。
+The most beginner-friendly exercise is to modify `data/demo-case.json` first, because you can see the risk results change without having to understand much code.
 
-> 这一节改的是 **legacy** seed（旧 RiskReport 引擎）。新模型的拟真数据在 `data/uploads/`（eBL + 商业发票）和 `data/cases/`（结构化 case），字段对齐 PricingQuote，见 `data/uploads/README.md`。
+> This section modifies the **legacy** seed (the old RiskReport engine). Realistic data for the new model is in `data/uploads/` (eBL + commercial invoices) and `data/cases/` (structured cases), with fields aligned to PricingQuote; see `data/uploads/README.md`.
 
-### 6.2 可以改哪些字段
+### 6.2 Which fields you can change
 
-打开：
+Open:
 
 ```text
 data/demo-case.json
 ```
 
-可以尝试改：
+You can try changing:
 
-- `bill_of_lading.shipper`：出口商；
-- `bill_of_lading.consignee`：进口商；
-- `bill_of_lading.vessel`：船名；
-- `bill_of_lading.cargo`：货物名称；
-- `bill_of_lading.quantity_mt`：货物数量；
-- `bill_of_lading.declared_value_usd`：申报货值；
-- `insurance.insured_value_usd`：保险金额；
-- `financing.requested_amount_usd`：融资金额；
-- `market.current_price_usd_per_mt`：当前市场价格；
-- `shipment_events`：运输事件，比如坏天气、延误、保险风险。
+- `bill_of_lading.shipper`: exporter;
+- `bill_of_lading.consignee`: importer;
+- `bill_of_lading.vessel`: vessel name;
+- `bill_of_lading.cargo`: cargo name;
+- `bill_of_lading.quantity_mt`: cargo quantity;
+- `bill_of_lading.declared_value_usd`: declared cargo value;
+- `insurance.insured_value_usd`: insured amount;
+- `financing.requested_amount_usd`: financing amount;
+- `market.current_price_usd_per_mt`: current market price;
+- `shipment_events`: shipment events, such as bad weather, delays, insurance risk.
 
-### 6.3 改完要跑什么
+### 6.3 What to run after changing it
 
-改完后运行：
+After changing it, run:
 
 ```bash
 npm run check
@@ -618,7 +618,7 @@ npm run test
 npm run demo
 ```
 
-看 `npm run demo` 输出里的这些字段有没有变化：
+Check whether these fields in the `npm run demo` output have changed:
 
 - `risk_level`
 - `cargo_health_score`
@@ -628,16 +628,16 @@ npm run demo
 - `detected_risks`
 - `explanation`
 
-### 6.4 常见错误
+### 6.4 Common mistakes
 
-JSON 文件最容易写坏。注意：
+JSON files are the easiest thing to break. Note:
 
-- 字符串必须用双引号；
-- 每个字段之间要有逗号；
-- 最后一项后面不要多逗号；
-- 数字不要加引号，除非原本就是字符串。
+- Strings must use double quotes;
+- There must be a comma between fields;
+- Do not put an extra comma after the last item;
+- Do not quote numbers, unless they were originally strings.
 
-错误示例：
+Bad example:
 
 ```json
 {
@@ -646,9 +646,9 @@ JSON 文件最容易写坏。注意：
 }
 ```
 
-最后一行多了逗号，会导致 JSON 解析失败。
+The last line has an extra comma, which makes JSON parsing fail.
 
-正确示例：
+Good example:
 
 ```json
 {
@@ -659,150 +659,150 @@ JSON 文件最容易写坏。注意：
 
 ---
 
-## 7. 如何手动测试 API
+## 7. How to test the API manually
 
-### 7.1 启动 server
+### 7.1 Start the server
 
-运行：
+Run:
 
 ```bash
 npm run dev
 ```
 
-保持这个终端不要关。
+Keep this terminal open.
 
-### 7.2 浏览器测试 GET API
+### 7.2 Test GET APIs in the browser
 
-打开：
+Open:
 
 ```text
 http://localhost:3000/api/health
 ```
 
-这表示服务是否活着。
+This shows whether the service is alive.
 
-打开：
+Open:
 
 ```text
 http://localhost:3000/api/demo-data
 ```
 
-这表示 seed 数据是否能读出来。
+This shows whether the seed data can be read.
 
-### 7.3 终端测试 POST API
+### 7.3 Test POST APIs in the terminal
 
-新开一个终端，运行：
+Open a new terminal and run:
 
 ```bash
 curl -X POST http://localhost:3000/api/risk/analyze
 ```
 
-它会返回风险报告。
+It returns the risk report.
 
-再运行：
+Then run:
 
 ```bash
 curl -X POST http://localhost:3000/api/workflow/simulate
 ```
 
-它会返回状态机模拟结果。
+It returns the state machine simulation result.
 
-如果你的 Windows 没有 `curl`，可以先只用浏览器看 GET API，或者直接跑：
+If your Windows machine does not have `curl`, you can just use the browser for the GET APIs for now, or run directly:
 
 ```bash
 npm run smoke
 ```
 
-`smoke` 会自动帮你测关键 API。
+`smoke` automatically tests the key APIs for you.
 
 ---
 
-## 8. 如何领取任务
+## 8. How to claim a task
 
-任务文件在：
+The task file is at:
 
 ```text
 docs/tasks.md
 ```
 
-### 8.1 任务表怎么看
+### 8.1 How to read the task table
 
-任务按角色分组：
+Tasks are grouped by role:
 
-- PM / Business；
-- Agent / AI；
-- Frontend；
-- Web3 / Contract；
-- Backend / Integration；
-- QA / Integrator。
+- PM / Business;
+- Agent / AI;
+- Frontend;
+- Web3 / Contract;
+- Backend / Integration;
+- QA / Integrator.
 
-每行任务长这样：
+Each task row looks like this:
 
 ```text
-| AI-2 | 优化 riskEngine 规则和权重 | Unassigned | Todo | `npm run test` | - |
+| AI-2 | Optimize riskEngine rules and weights | Unassigned | Todo | `npm run test` | - |
 ```
 
-每一列的意思：
+What each column means:
 
-| 列 | 含义 |
+| Column | Meaning |
 |---|---|
-| ID | 任务编号，PR 里要写 |
-| Task | 具体要做的事 |
-| Owner | 谁负责 |
-| Status | 当前状态 |
-| Verification | 怎么验证 |
-| Done Evidence | 完成证据，比如 PR 链接或 commit |
+| ID | Task number, to be included in the PR |
+| Task | What exactly needs to be done |
+| Owner | Who is responsible |
+| Status | Current status |
+| Verification | How to verify it |
+| Done Evidence | Evidence of completion, such as a PR link or commit |
 
-### 8.2 状态是什么意思
+### 8.2 What the statuses mean
 
-| 状态 | 含义 |
+| Status | Meaning |
 |---|---|
-| `Todo` | 还没人做 |
-| `In Progress` | 有人在做 |
-| `Review` | 已提交 PR，等待 review |
-| `Done` | 已完成并合并 |
-| `Blocked` | 被卡住，需要队友帮助 |
+| `Todo` | Nobody is working on it yet |
+| `In Progress` | Someone is working on it |
+| `Review` | PR submitted, waiting for review |
+| `Done` | Completed and merged |
+| `Blocked` | Stuck, needs help from teammates |
 
-### 8.3 领取任务前先做什么
+### 8.3 What to do before claiming a task
 
-先确保自己在最新主分支：
+First make sure you are on the latest main branch:
 
 ```bash
 git checkout main
 git pull
 ```
 
-如果主分支不叫 `main`，按仓库实际主分支名字来。
+If the main branch is not called `main`, use the repository's actual main branch name.
 
-然后打开 `docs/tasks.md`，找 `Owner` 是 `Unassigned` 且 `Status` 是 `Todo` 的任务。
+Then open `docs/tasks.md` and find a task whose `Owner` is `Unassigned` and whose `Status` is `Todo`.
 
-### 8.4 如何认领任务
+### 8.4 How to claim a task
 
-假设你要领：
-
-```text
-AI-2 | 优化 riskEngine 规则和权重
-```
-
-把这一行从：
+Suppose you want to claim:
 
 ```text
-| AI-2 | 优化 riskEngine 规则和权重 | Unassigned | Todo | `npm run test` | - |
+AI-2 | Optimize riskEngine rules and weights
 ```
 
-改成：
+Change this row from:
 
 ```text
-| AI-2 | 优化 riskEngine 规则和权重 | your-name | In Progress | `npm run test` | - |
+| AI-2 | Optimize riskEngine rules and weights | Unassigned | Todo | `npm run test` | - |
 ```
 
-`your-name` 可以写你的名字、GitHub ID 或队内昵称。
+to:
 
-### 8.5 认领任务后要不要先提交
+```text
+| AI-2 | Optimize riskEngine rules and weights | your-name | In Progress | `npm run test` | - |
+```
 
-建议要。
+`your-name` can be your name, GitHub ID or team nickname.
 
-因为这样别人能看到你已经在做，避免撞车。
+### 8.5 Should you commit right after claiming a task
+
+Yes, that is recommended.
+
+That way others can see you are already working on it, avoiding collisions.
 
 ```bash
 git checkout -b feature/ai-risk-weight
@@ -811,24 +811,24 @@ git commit -m "chore(tasks): claim AI-2"
 git push -u origin feature/ai-risk-weight
 ```
 
-如果你们团队不想为认领任务单独提交，也可以把认领和功能改动放在同一个 PR。但一定要在群里说清楚，避免两个人做同一个任务。
+If your team doesn't want a separate commit just for claiming tasks, you can also put the claim and the feature changes in the same PR. But be sure to say so clearly in the group chat, so that two people don't work on the same task.
 
 ---
 
-## 9. 如何开分支开发
+## 9. How to create a branch and develop
 
-### 9.1 为什么要开分支
+### 9.1 Why create a branch
 
-不要直接在 `main` 上改。原因：
+Do not make changes directly on `main`. Reasons:
 
-- main 应该保持稳定；
-- 每个任务应该有独立 PR；
-- 出错时好回滚；
-- 队友容易 review。
+- main should stay stable;
+- Each task should have its own PR;
+- It is easy to roll back when something goes wrong;
+- It is easy for teammates to review.
 
-### 9.2 分支命名规则
+### 9.2 Branch naming rules
 
-推荐：
+Recommended:
 
 ```text
 feature/ai-risk-schema
@@ -839,38 +839,38 @@ docs/update-readme
 chore/update-tasks
 ```
 
-命名建议：
+Naming suggestion:
 
 ```text
-类型/简短说明
+type/short-description
 ```
 
-常见类型：
+Common types:
 
-| 类型 | 用途 |
+| Type | Purpose |
 |---|---|
-| `feature` | 新功能 |
-| `fix` | 修 bug |
-| `docs` | 文档 |
-| `test` | 测试 |
-| `chore` | 任务表、脚本、配置等杂项 |
+| `feature` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation |
+| `test` | Tests |
+| `chore` | Miscellaneous such as task table, scripts, config |
 
-### 9.3 开分支命令
+### 9.3 Branch creation commands
 
-先确保主分支最新：
+First make sure the main branch is up to date:
 
 ```bash
 git checkout main
 git pull
 ```
 
-再开新分支：
+Then create a new branch:
 
 ```bash
 git checkout -b feature/your-task-name
 ```
 
-示例：
+Example:
 
 ```bash
 git checkout -b feature/ai-risk-weight
@@ -878,25 +878,25 @@ git checkout -b feature/ai-risk-weight
 
 ---
 
-## 10. 如何开发一个任务
+## 10. How to develop a task
 
-### 10.1 先看 Verification
+### 10.1 Look at Verification first
 
-每个任务都有 `Verification` 列。那一列告诉你完成后必须跑什么。
+Every task has a `Verification` column. That column tells you what you must run when you are done.
 
-例如：
+For example:
 
 ```text
-AI-2 | 优化 riskEngine 规则和权重 | Verification: `npm run test`
+AI-2 | Optimize riskEngine rules and weights | Verification: `npm run test`
 ```
 
-意思是你做完后至少要跑：
+This means that when you are done you must at least run:
 
 ```bash
 npm run test
 ```
 
-如果你改了主流程，建议多跑：
+If you changed the main flow, it is recommended to also run:
 
 ```bash
 npm run check
@@ -905,161 +905,161 @@ npm run smoke
 npm run demo
 ```
 
-### 10.2 按任务类型找文件
+### 10.2 Find files by task type
 
-| 任务类型 | 常改文件 |
+| Task type | Commonly changed files |
 |---|---|
-| PM / Business | `docs/*`、`README.md` |
-| Agent / AI | `src/core/riskEngine.js`、`data/demo-case.json`、`tests/riskEngine.test.js` |
-| Frontend | `public/index.html`、`public/app.js`、`public/styles.css` |
-| Web3 / Contract | `src/core/workflow.js`、`docs/PRD.md`、`hardhat/contracts/*` |
-| Backend / Integration | `src/app/server.js`、`scripts/smoke.mjs`、`tests/*` |
-| QA | `scripts/*`、`tests/*`、`docs/acceptance.md` |
+| PM / Business | `docs/*`, `README.md` |
+| Agent / AI | `src/core/riskEngine.js`, `data/demo-case.json`, `tests/riskEngine.test.js` |
+| Frontend | `public/index.html`, `public/app.js`, `public/styles.css` |
+| Web3 / Contract | `src/core/workflow.js`, `docs/PRD.md`, `hardhat/contracts/*` |
+| Backend / Integration | `src/app/server.js`, `scripts/smoke.mjs`, `tests/*` |
+| QA | `scripts/*`, `tests/*`, `docs/acceptance.md` |
 
-### 10.3 小白最推荐的开发方式
+### 10.3 The most recommended way for beginners to develop
 
-不要一次改很多。
+Don't change a lot at once.
 
-推荐节奏：
+Recommended rhythm:
 
 ```text
-改一点
-→ 跑一次相关命令
-→ 看输出
-→ 再改一点
-→ 再跑
+Change a little
+→ run the relevant command once
+→ look at the output
+→ change a little more
+→ run again
 ```
 
-比如改风险规则：
+For example, when changing risk rules:
 
 ```bash
 npm run test
 npm run demo
 ```
 
-比如改 API：
+For example, when changing an API:
 
 ```bash
 npm run smoke
 ```
 
-比如改页面：
+For example, when changing a page:
 
 ```bash
 npm run dev
 ```
 
-然后打开浏览器看。
+Then open the browser to look.
 
-### 10.4 不知道自己改坏了什么怎么办
+### 10.4 What to do if you don't know what you broke
 
-先看当前改了哪些文件：
+First see which files you have changed:
 
 ```bash
 git status
 ```
 
-看具体差异：
+See the specific differences:
 
 ```bash
 git diff
 ```
 
-跑最低成本检查：
+Run the lowest-cost check:
 
 ```bash
 npm run check
 ```
 
-如果 `check` 过了，再跑任务对应命令。
+If `check` passes, then run the commands for the task.
 
 ---
 
-## 11. 如何更新任务状态
+## 11. How to update task status
 
-### 11.1 开始做时
+### 11.1 When you start
 
-在 `docs/tasks.md` 中：
+In `docs/tasks.md`:
 
 ```text
 Owner: Unassigned → your-name
 Status: Todo → In Progress
 ```
 
-### 11.2 提 PR 前
+### 11.2 Before opening a PR
 
-如果你的团队希望任务表体现 review 状态，可以改成：
+If your team wants the task table to reflect review status, you can change it to:
 
 ```text
 Status: In Progress → Review
-Done Evidence: PR 链接或先写 Pending PR
+Done Evidence: PR link, or write Pending PR for now
 ```
 
-如果你还没有 PR 链接，可以先不填 Done Evidence，在 PR 创建后再补一次提交。
+If you don't have a PR link yet, you can leave Done Evidence empty for now and add it in another commit after the PR is created.
 
-### 11.3 合并后
+### 11.3 After merging
 
-PR 合并后，把任务改成：
+After the PR is merged, change the task to:
 
 ```text
 Status: Done
-Done Evidence: PR 链接 / commit hash / 测试命令输出
+Done Evidence: PR link / commit hash / test command output
 ```
 
-如果团队节奏很快，也可以由 integrator 统一在合并后更新任务表。
+If the team moves fast, the integrator can also update the task table centrally after merging.
 
 ---
 
-## 12. 提交代码前要检查什么
+## 12. What to check before committing code
 
-### 12.1 看工作区状态
+### 12.1 Look at the working tree status
 
-运行：
+Run:
 
 ```bash
 git status
 ```
 
-你会看到哪些文件被改了。
+You will see which files have been changed.
 
-确认：
+Confirm:
 
-- 只包含你这次任务相关的文件；
-- 没有误改奇怪文件；
-- 没有把本地临时文件提交进去；
-- 没有包含 API Key、私钥、密码。
+- It only includes files related to this task;
+- You haven't accidentally changed unrelated files;
+- You aren't committing local temporary files;
+- It doesn't include API keys, private keys or passwords.
 
-### 12.2 跑验证命令
+### 12.2 Run the verification commands
 
-最低要求：
+Minimum requirement:
 
 ```bash
 npm run check
 npm run test
 ```
 
-如果改了 API、server、workflow、前端、demo 数据：
+If you changed the API, server, workflow, frontend or demo data:
 
 ```bash
 npm run smoke
 npm run demo
 ```
 
-如果改了页面：
+If you changed a page:
 
 ```bash
 npm run dev
 ```
 
-然后手动打开：
+Then open manually:
 
 ```text
 http://localhost:3000
 ```
 
-### 12.3 记录验证结果
+### 12.3 Record the verification results
 
-PR 里要写类似：
+The PR should include something like:
 
 ```text
 Verification:
@@ -1069,7 +1069,7 @@ Verification:
 - npm run demo: passed
 ```
 
-如果某个命令没跑，也要诚实写：
+If you didn't run a command, say so honestly:
 
 ```text
 Not run:
@@ -1078,17 +1078,17 @@ Not run:
 
 ---
 
-## 13. 如何提交 commit
+## 13. How to make a commit
 
-### 13.1 添加文件
+### 13.1 Add files
 
-查看状态：
+Check the status:
 
 ```bash
 git status
 ```
 
-添加你要提交的文件：
+Add the files you want to commit:
 
 ```bash
 git add README.md
@@ -1096,23 +1096,23 @@ git add docs/tasks.md
 git add src/core/riskEngine.js
 ```
 
-如果你确定所有改动都属于本任务，也可以：
+If you are sure all changes belong to this task, you can also:
 
 ```bash
 git add .
 ```
 
-小白建议优先一个个 `git add 文件名`，更不容易误提交。
+Beginners are advised to prefer `git add <filename>` one by one, which makes accidental commits less likely.
 
-### 13.2 写 commit message
+### 13.2 Write the commit message
 
-推荐格式：
+Recommended format:
 
 ```text
 type(scope): short description
 ```
 
-示例：
+Examples:
 
 ```bash
 git commit -m "docs(readme): explain harness workflow"
@@ -1122,29 +1122,29 @@ git commit -m "test(risk): cover insurance expiry risk"
 git commit -m "chore(tasks): claim FE-1"
 ```
 
-常见 type：
+Common types:
 
-| type | 用途 |
+| type | Purpose |
 |---|---|
-| `feat` | 新功能 |
-| `fix` | 修复 bug |
-| `docs` | 文档 |
-| `test` | 测试 |
-| `chore` | 杂项、任务表、配置 |
-| `refactor` | 重构但不改行为 |
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation |
+| `test` | Tests |
+| `chore` | Miscellaneous, task table, config |
+| `refactor` | Refactoring without changing behavior |
 
-### 13.3 提交前发现错了怎么办
+### 13.3 What to do if you find a mistake before submitting
 
-如果还没 commit，直接改文件，然后重新跑验证。
+If you haven't committed yet, just edit the files and re-run the verification.
 
-如果已经 commit 但还没 push，可以追加修改：
+If you have committed but not pushed yet, you can amend:
 
 ```bash
 git add <file>
 git commit --amend
 ```
 
-小白如果不熟 `amend`，也可以再提交一个修复 commit：
+If you are a beginner and not familiar with `amend`, you can also make another fix commit:
 
 ```bash
 git add <file>
@@ -1153,69 +1153,69 @@ git commit -m "fix: address review notes"
 
 ---
 
-## 14. 如何推送分支
+## 14. How to push a branch
 
-第一次推送当前分支：
+Push the current branch for the first time:
 
 ```bash
 git push -u origin feature/your-task-name
 ```
 
-示例：
+Example:
 
 ```bash
 git push -u origin feature/ai-risk-weight
 ```
 
-以后同一个分支继续推送：
+Later pushes on the same branch:
 
 ```bash
 git push
 ```
 
-如果 push 失败，常见原因：
+If the push fails, common reasons are:
 
-- 没有权限；
-- 分支名写错；
-- 网络问题；
-- 本地落后远端；
-- 还没有配置 GitHub SSH / token。
+- No permission;
+- Wrong branch name;
+- Network problems;
+- Local branch is behind the remote;
+- GitHub SSH / token not configured yet.
 
-遇到权限问题，找团队 repo 管理员。
+For permission problems, contact the team's repo admin.
 
 ---
 
-## 15. 如何提交 PR
+## 15. How to open a PR
 
-### 15.1 在 GitHub 页面创建 PR
+### 15.1 Create a PR on the GitHub page
 
-推送分支后，打开 GitHub 仓库页面。
+After pushing the branch, open the GitHub repository page.
 
-通常 GitHub 会提示：
+Usually GitHub will prompt:
 
 ```text
 Compare & pull request
 ```
 
-点击它。
+Click it.
 
-如果没有提示：
+If there is no prompt:
 
-1. 打开仓库的 Pull requests 页面；
-2. 点击 New pull request；
-3. base 选择 `main`；
-4. compare 选择你的分支；
-5. 创建 PR。
+1. Open the repository's Pull requests page;
+2. Click New pull request;
+3. Choose `main` as base;
+4. Choose your branch as compare;
+5. Create the PR.
 
-### 15.2 PR 标题怎么写
+### 15.2 How to write the PR title
 
-推荐格式：
+Recommended format:
 
 ```text
 [Task ID] type(scope): short description
 ```
 
-示例：
+Examples:
 
 ```text
 [AI-2] feat(agent): tune risk scoring weights
@@ -1224,9 +1224,9 @@ Compare & pull request
 [BE-5] fix(api): validate invalid case input
 ```
 
-### 15.3 PR 描述模板
+### 15.3 PR description template
 
-复制下面模板到 PR 描述里：
+Copy the template below into the PR description:
 
 ````markdown
 ## Task
@@ -1265,32 +1265,32 @@ Paste command output or summarize results here.
 -
 ````
 
-如果是纯文档 PR，可以写：
+For a docs-only PR, you can write:
 
 ```text
 Not run: npm run smoke / npm run demo, docs-only change.
 ```
 
-但如果改了代码，尽量跑对应命令。
+But if you changed code, try to run the corresponding commands.
 
-### 15.4 PR 创建后要做什么
+### 15.4 What to do after creating the PR
 
-1. 把 PR 链接发到团队群；
-2. 在 `docs/tasks.md` 里把任务状态改成 `Review`；
-3. 如果有 PR 链接，把 Done Evidence 暂时填 PR 链接；
-4. 等队友 review；
-5. 按 review 意见修改；
-6. 再 push；
-7. 等 CI / 人工验证通过；
-8. 合并。
+1. Post the PR link in the team group chat;
+2. Change the task status to `Review` in `docs/tasks.md`;
+3. If you have the PR link, temporarily fill Done Evidence with the PR link;
+4. Wait for teammates to review;
+5. Make changes according to the review comments;
+6. Push again;
+7. Wait for CI / manual verification to pass;
+8. Merge.
 
 ---
 
-## 16. Review 和合并后要做什么
+## 16. What to do after review and merge
 
-### 16.1 收到 review 意见
+### 16.1 When you receive review comments
 
-不要重新开分支。直接在原分支继续改：
+Don't create a new branch. Keep making changes on the original branch:
 
 ```bash
 git status
@@ -1299,27 +1299,27 @@ git commit -m "fix: address review feedback"
 git push
 ```
 
-GitHub PR 会自动更新。
+The GitHub PR updates automatically.
 
-### 16.2 合并后更新本地 main
+### 16.2 Update your local main after merging
 
-PR 合并后，本地回到 main：
+After the PR is merged, go back to main locally:
 
 ```bash
 git checkout main
 git pull
 ```
 
-### 16.3 更新任务状态
+### 16.3 Update the task status
 
-如果还没更新 `docs/tasks.md`，把任务改成：
+If you haven't updated `docs/tasks.md` yet, change the task to:
 
 ```text
 Status: Done
-Done Evidence: PR 链接或 commit hash
+Done Evidence: PR link or commit hash
 ```
 
-如果这个更新需要单独 PR，可以开一个小 PR：
+If this update needs its own PR, you can open a small PR:
 
 ```bash
 git checkout -b chore/mark-task-done
@@ -1328,17 +1328,17 @@ git commit -m "chore(tasks): mark AI-2 done"
 git push -u origin chore/mark-task-done
 ```
 
-团队也可以约定由 PM / Integrator 统一维护任务状态。
+The team can also agree that the PM / Integrator maintains task status centrally.
 
 ---
 
-## 17. 不同角色的详细上手路径
+## 17. Detailed onboarding paths for different roles
 
 ### 17.1 PM / Business
 
-你主要负责让评委听懂。
+Your main job is to make the judges understand.
 
-先读：
+Read first:
 
 ```text
 docs/background.md
@@ -1346,31 +1346,31 @@ docs/PRD.md
 docs/acceptance.md
 ```
 
-常见任务：
+Common tasks:
 
-- 写 3 分钟 demo 脚本；
-- 准备一句话 pitch；
-- 准备合规边界 Q&A；
-- 准备最终演示故事线。
+- Write the 3-minute demo script;
+- Prepare the one-sentence pitch;
+- Prepare the compliance boundary Q&A;
+- Prepare the final demo storyline.
 
-常跑命令：
+Commands you will run often:
 
 ```bash
 npm run demo
 ```
 
-你应该关注输出里的：
+You should pay attention to these in the output:
 
-- 状态机每一步；
-- 风险报告解释；
-- `contract_action`；
-- `detected_risks`。
+- Each step of the state machine;
+- The risk report explanation;
+- `contract_action`;
+- `detected_risks`.
 
 ### 17.2 Agent / AI
 
-你主要负责让风险判断可信、稳定、结构化。
+Your main job is to make the risk judgement credible, stable and structured.
 
-先看：
+Look at first:
 
 ```text
 data/demo-case.json
@@ -1378,32 +1378,32 @@ src/core/riskEngine.js
 tests/riskEngine.test.js
 ```
 
-常见任务：
+Common tasks:
 
-- 调整风险规则；
-- 固定 RiskReport schema；
-- 增加单据一致性检查；
-- 生成自然语言风险解释；
-- 接入 Qwen / DeepSeek mock fallback。
+- Tune risk rules;
+- Freeze the RiskReport schema;
+- Add document consistency checks;
+- Generate natural-language risk explanations;
+- Integrate the Qwen / DeepSeek mock fallback.
 
-常跑命令：
+Commands you will run often:
 
 ```bash
 npm run test
 npm run demo
 ```
 
-注意：
+Notes:
 
-- 输出必须是 JSON；
-- 不要只返回自然语言；
-- 字段改动要同步前端和测试。
+- Output must be JSON;
+- Don't return only natural language;
+- Field changes must be synced with the frontend and tests.
 
 ### 17.3 Frontend
 
-你主要负责让 Demo 可视化。
+Your main job is to visualize the Demo.
 
-先看：
+Look at first:
 
 ```text
 public/index.html
@@ -1412,38 +1412,38 @@ public/styles.css
 src/app/server.js
 ```
 
-常见任务：
+Common tasks:
 
-- Exporter Dashboard；
-- Risk Agent Report；
-- Investor Pool；
-- Settlement Timeline；
-- Run Demo 按钮。
+- Exporter Dashboard;
+- Risk Agent Report;
+- Investor Pool;
+- Settlement Timeline;
+- Run Demo button.
 
-常跑命令：
+Commands you will run often:
 
 ```bash
 npm run dev
 npm run smoke
 ```
 
-浏览器打开：
+Open in the browser:
 
 ```text
 http://localhost:3000
 ```
 
-注意：
+Notes:
 
-- 页面展示的数据应该来自 API；
-- 不要在前端写死太多字段；
-- API 字段变了要和 Agent / Backend 同学同步。
+- The data shown on the page should come from the API;
+- Don't hard-code too many fields in the frontend;
+- When API fields change, sync with the Agent / Backend teammates.
 
 ### 17.4 Web3 / Contract
 
-你主要负责把 workflow 映射成合约思维。
+Your main job is to map the workflow into contract thinking.
 
-先看：
+Look at first:
 
 ```text
 src/core/workflow.js
@@ -1451,15 +1451,15 @@ docs/PRD.md
 docs/background.md
 ```
 
-常见任务：
+Common tasks:
 
-- 设计 EBLRegistry 接口；
-- 设计 RWAOfferingPool 接口（createOffering / subscribe / reprice / pause / settle）；
-- 设计 RiskPricingOracle 接口（updatePricing + PricingUpdated 事件）；
-- 做 JS contract mock；
-- 可选实现最小 Solidity 合约。
+- Design the EBLRegistry interface;
+- Design the RWAOfferingPool interface (createOffering / subscribe / reprice / pause / settle);
+- Design the RiskPricingOracle interface (updatePricing + PricingUpdated event);
+- Build the JS contract mock;
+- Optionally implement minimal Solidity contracts.
 
-常跑命令：
+Commands you will run often:
 
 ```bash
 npm run test
@@ -1467,17 +1467,17 @@ npm run smoke
 npm run demo
 ```
 
-注意：
+Notes:
 
-- 黑客松 MVP 可以先用 JS mock；
-- 合约状态必须和 demo 状态机对齐；
-- 风险动作来自 Agent 输出，不是凭空切状态。
+- The hackathon MVP can use a JS mock first;
+- Contract states must align with the demo state machine;
+- Risk actions come from the Agent output; states are not switched out of thin air.
 
 ### 17.5 Backend / Integration
 
-你主要负责 API 和主流程稳定。
+Your main job is the stability of the API and the main flow.
 
-先看：
+Look at first:
 
 ```text
 src/app/server.js
@@ -1485,15 +1485,15 @@ scripts/smoke.mjs
 tests/smoke.test.js
 ```
 
-常见任务：
+Common tasks:
 
-- 维护 `/api/health`；
-- 维护 `/api/demo-data`；
-- 维护 `/api/risk/analyze`；
-- 维护 `/api/workflow/simulate`；
-- 增加错误输入校验。
+- Maintain `/api/health`;
+- Maintain `/api/demo-data`;
+- Maintain `/api/risk/analyze`;
+- Maintain `/api/workflow/simulate`;
+- Add invalid-input validation.
 
-常跑命令：
+Commands you will run often:
 
 ```bash
 npm run smoke
@@ -1502,9 +1502,9 @@ npm run test
 
 ### 17.6 QA / Integrator
 
-你主要负责防止大家把主流程改坏。
+Your main job is to stop people from breaking the main flow.
 
-先看：
+Look at first:
 
 ```text
 scripts/check.mjs
@@ -1513,14 +1513,14 @@ tests/*
 docs/acceptance.md
 ```
 
-常见任务：
+Common tasks:
 
-- 维护 check/test/smoke；
-- 补测试；
-- 做最终演示兜底清单；
-- 最后 6 小时功能冻结。
+- Maintain check/test/smoke;
+- Add tests;
+- Prepare the final demo fallback checklist;
+- Feature freeze for the final 6 hours.
 
-常跑命令：
+Commands you will run often:
 
 ```bash
 npm run check
@@ -1531,17 +1531,17 @@ npm run demo
 
 ---
 
-## 18. Demo 流程
+## 18. Demo flow
 
-### 18.1 当前（legacy）CLI demo
+### 18.1 Current (legacy) CLI demo
 
-命令：
+Command:
 
 ```bash
 npm run demo
 ```
 
-当前 `npm run demo` 跑的还是旧 RiskReport 引擎，展示：
+The current `npm run demo` still runs the old RiskReport engine, showing:
 
 ```text
 Created → Funding → Funded → InTransit
@@ -1549,7 +1549,7 @@ Created → Funding → Funded → InTransit
 → Warning / Frozen / Liquidation
 ```
 
-当前 seed case（`data/demo-case.json`）：
+Current seed case (`data/demo-case.json`):
 
 ```text
 Shanghai Metals Export Co. → Hamburg Industrial GmbH
@@ -1558,55 +1558,55 @@ Financing: 5,600,000 USDC
 Risk events: bad weather, delay, insurance expiry risk, copper price drop
 ```
 
-### 18.2 目标（Target）定价 demo
+### 18.2 Target pricing demo
 
-新模型的 demo 用 `data/uploads/` 的拟真数据（新加坡 → 上海铜阴极板 500 吨）：
+The new model's demo uses the realistic data in `data/uploads/` (Singapore → Shanghai copper cathodes, 500 tonnes):
 
 ```text
-出口商上传 eBL + 商业发票
-→ AI 调用工具：实时 LME 铜价 + 历史同类成交价 + 估值（npm run agent:value）
-→ AI 输出 PricingQuote：发行价 ≈ 0.80（FAST 到账，让出约 60% 盈利）
-→ Created → Priced → Open（投资者按 ≈ 0.80 认购）
-→ 霍尔木兹战争升级 + 铜价剧烈波动 → AI 把价压到 ≈ 0.76
-→ Repriced / Paused，RiskPricingOracle 记录新价 + 证据哈希
+Exporter uploads eBL + commercial invoice
+→ AI calls tools: real-time LME copper price + historical comparable trade prices + valuation (npm run agent:value)
+→ AI outputs PricingQuote: issue price ≈ 0.80 (FAST payout, giving up about 60% of the profit)
+→ Created → Priced → Open (investors subscribe at ≈ 0.80)
+→ Hormuz war escalation + sharp copper price volatility → AI pushes the price down to ≈ 0.76
+→ Repriced / Paused, RiskPricingOracle records the new price + evidence hash
 ```
 
-评委应该看到：
+Judges should see:
 
 ```text
-AI 调用工具拉了真实价格和历史成交价
-→ 把"速度 + 风险"折算成发行价（≈ 0.80 → ≈ 0.76）
-→ pricing_action / offering 状态变化
-→ 前端或 CLI 展示价格、目标兑付价、风险来源、证据哈希
+AI calls tools to pull real prices and historical trade prices
+→ converts "speed + risk" into an issue price (≈ 0.80 → ≈ 0.76)
+→ pricing_action / offering state changes
+→ the frontend or CLI shows the price, target redemption price, risk sources and evidence hash
 ```
 
 ---
 
-## 19. API 预览
+## 19. API preview
 
-当前 API 是 Mock 版本，后续可以替换为真实 AI Agent、合约、Oracle 或 RAG 服务。
+The current API is a Mock version and can later be replaced with real AI Agent, contract, Oracle or RAG services.
 
-当前已实现（Current）：
+Currently implemented (Current):
 
-| Method | Path | 用途 |
+| Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/health` | Harness 健康检查 |
-| GET | `/api/demo-data` | 返回 seed 电子提单案例 |
-| GET | `/api/cases` | 返回结构化 case 目录（前端场景选择器用） |
-| POST | `/api/risk/analyze` | 返回结构化 AI 风险报告（旧 RiskReport） |
-| POST | `/api/workflow/simulate` | 模拟主流程状态机 |
-| POST | `/api/pricing/quote` | 生成 AI PricingQuote（折价 + 额度 + 动作；空 body 用 demo case，`?compare=true` 返回三种到账速度 + 推荐） |
-| POST | `/api/offering/simulate` | 模拟 RWA 发行、认购、改价、暂停、结算（`events` 可在途中升级风险） |
-| POST | `/api/workflow/pricing-simulate` | 合并 PricingQuote + RiskReport + offering 生命周期为一次模拟 |
-| POST | `/api/oracle/pricing-update` | 返回链上 oracle 更新载荷（issue price/risk/action + quote_hash/evidence_hash） |
-| GET | `/api/scenarios` | 返回多场景回归摘要 |
-| POST | `/api/scenarios/run` | 跑单个场景 |
-| GET | `/api/mcp/tools` | MCP 工具清单 |
-| POST | `/api/mcp/call` | 调用 MCP 工具 |
-| POST | `/api/rag/search` | 检索风险情报知识库 |
-| GET | `/api/rag/judge-qa` | 评委 Q&A 问答对 |
+| GET | `/api/health` | Harness health check |
+| GET | `/api/demo-data` | Returns the seed electronic bill of lading case |
+| GET | `/api/cases` | Returns the structured case catalog (used by the frontend scenario selector) |
+| POST | `/api/risk/analyze` | Returns a structured AI risk report (old RiskReport) |
+| POST | `/api/workflow/simulate` | Simulates the main-flow state machine |
+| POST | `/api/pricing/quote` | Generates an AI PricingQuote (discount + amount + action; empty body uses the demo case, `?compare=true` returns three payout speeds + recommendation) |
+| POST | `/api/offering/simulate` | Simulates RWA issuance, subscription, repricing, pause and settlement (`events` can escalate risk mid-way) |
+| POST | `/api/workflow/pricing-simulate` | Merges PricingQuote + RiskReport + offering lifecycle into one simulation |
+| POST | `/api/oracle/pricing-update` | Returns the on-chain oracle update payload (issue price/risk/action + quote_hash/evidence_hash) |
+| GET | `/api/scenarios` | Returns the multi-scenario regression summary |
+| POST | `/api/scenarios/run` | Runs a single scenario |
+| GET | `/api/mcp/tools` | MCP tool list |
+| POST | `/api/mcp/call` | Calls an MCP tool |
+| POST | `/api/rag/search` | Searches the risk intelligence knowledge base |
+| GET | `/api/rag/judge-qa` | Judge Q&A pairs |
 
-POST API 的 body 可以为空。为空时会自动读取：
+The body of POST APIs can be empty. When empty, it automatically reads:
 
 ```text
 data/demo-case.json
@@ -1614,22 +1614,22 @@ data/demo-case.json
 
 ---
 
-## 20. 目录结构
+## 20. Directory structure
 
 ```text
 .
-├── README.md                   # 项目介绍 + 使用指南（新）
-├── 基础说明.md                 # 本文件：团队协作与上手基础
+├── README.md                   # Project introduction + usage guide (new)
+├── docs/Instruction.md         # This file: team collaboration and onboarding basics
 ├── Makefile
 ├── package.json
 ├── .env.example
 ├── data/
-│   ├── demo-case.json          # legacy seed (RiskReport 引擎)
-│   ├── scenarios/              # 多场景回归 fixtures
-│   ├── pricing-scenarios/      # AI 定价场景 fixtures
-│   ├── uploads/                # 拟真上传单据：eBL + 商业发票（新加坡铜 / 原油）
-│   ├── cases/                  # 结构化 case（对齐新模型 PricingQuote 字段）
-│   └── risk-intel/             # RAG 风险情报 feed
+│   ├── demo-case.json          # legacy seed (RiskReport engine)
+│   ├── scenarios/              # Multi-scenario regression fixtures
+│   ├── pricing-scenarios/      # AI pricing scenario fixtures
+│   ├── uploads/                # Realistic uploaded documents: eBL + commercial invoices (Singapore copper / crude oil)
+│   ├── cases/                  # Structured cases (aligned with the new model's PricingQuote fields)
+│   └── risk-intel/             # RAG risk intelligence feed
 ├── docs/
 │   ├── background.md
 │   ├── PRD.md
@@ -1638,7 +1638,7 @@ data/demo-case.json
 │   ├── contracts.md
 │   ├── award-roadmap.md
 │   └── ai-valuation-tooling.md
-├── public/                     # 前端（零依赖 ES module SPA）
+├── public/                     # Frontend (zero-dependency ES module SPA)
 │   ├── index.html
 │   ├── app.js
 │   ├── api.js
@@ -1651,59 +1651,59 @@ data/demo-case.json
 ├── src/
 │   ├── app/server.js
 │   ├── core/                   # pricingEngine / pricingSchema / offeringSimulator / oracle / ...
-│   ├── agent/                  # AI 估值 tool calling + LLM client + 文档一致性 + 风险情报
+│   ├── agent/                  # AI valuation tool calling + LLM client + document consistency + risk intelligence
 │   ├── mcp/                    # MCP server + tools
-│   ├── rag/                    # 知识库 + 检索 + judge QA
+│   ├── rag/                    # Knowledge base + retrieval + judge QA
 │   └── skill/                  # pricingAnalyst / demoOperator
-├── hardhat/                    # Solidity 合约（RiskPricingOracle / RWAOfferingPool / ...）
+├── hardhat/                    # Solidity contracts (RiskPricingOracle / RWAOfferingPool / ...)
 └── tests/                      # node --test
 ```
 
 ---
 
-## 21. 当前不做什么
+## 21. What we are not doing for now
 
-本仓库刻意不做：
+This repository deliberately does not do:
 
-- 开放式二级市场；
-- AMM；
-- 真实 KYC；
-- 真实跨境支付；
-- 真实 AIS 船舶数据接入；
-- 真实 OCR 高精度审单；
-- 真实智能合约主网部署；
-- 面向公众募资；
-- 保本保收益承诺。
+- An open secondary market;
+- AMM;
+- Real KYC;
+- Real cross-border payments;
+- Real AIS vessel data integration;
+- Real high-accuracy OCR document review;
+- Real smart contract mainnet deployment;
+- Fundraising from the public;
+- Promises of guaranteed capital or returns.
 
-这些不是忘了做，而是为了让 48 小时黑客松主流程稳定。
+These are not forgotten; they are left out to keep the 48-hour hackathon main flow stable.
 
 ---
 
-## 22. 提交 PR 前最终检查清单
+## 22. Final checklist before opening a PR
 
-提交 PR 前，请逐项确认：
+Before opening a PR, please confirm each item:
 
 ```text
-[ ] 我已经从最新 main 开了自己的分支
-[ ] 我已经在 docs/tasks.md 认领任务
-[ ] 我的改动只包含本任务相关文件
-[ ] 我没有提交 API Key、私钥、密码、本地临时文件
-[ ] 我已经跑过任务要求的验证命令
-[ ] 我已经把验证结果写进 PR 描述
-[ ] 如果改了页面，我手动打开 http://localhost:3000 看过
-[ ] 如果改了主流程，我跑过 npm run smoke 和 npm run demo
-[ ] PR 标题包含任务 ID
-[ ] PR 描述说明了做了什么、如何验证、有什么风险
+[ ] I created my own branch from the latest main
+[ ] I claimed the task in docs/tasks.md
+[ ] My changes only include files related to this task
+[ ] I did not commit API keys, private keys, passwords or local temporary files
+[ ] I ran the verification commands required by the task
+[ ] I wrote the verification results into the PR description
+[ ] If I changed a page, I manually opened http://localhost:3000 to look
+[ ] If I changed the main flow, I ran npm run smoke and npm run demo
+[ ] The PR title includes the task ID
+[ ] The PR description explains what was done, how to verify it and what the risks are
 ```
 
-最低验证：
+Minimum verification:
 
 ```bash
 npm run check
 npm run test
 ```
 
-主流程相关验证：
+Main-flow-related verification:
 
 ```bash
 npm run check
@@ -1714,70 +1714,70 @@ npm run demo
 
 ---
 
-## 23. 最后 6 小时规则
+## 23. Rules for the final 6 hours
 
-进入黑客松最后 6 小时：
+Entering the final 6 hours of the hackathon:
 
-- 不再新增大功能；
-- 只修影响演示的 bug；
-- 保持 CLI demo 可用；
-- 保持 Web 页面可用；
-- `npm run check`、`npm run test`、`npm run smoke` 必须通过；
-- 如果 AI provider 挂了，用 mock fallback；
-- 如果网页挂了，用 `npm run demo` 兜底演示。
+- No more new major features;
+- Only fix bugs that affect the demo;
+- Keep the CLI demo working;
+- Keep the web page working;
+- `npm run check`, `npm run test`, `npm run smoke` must pass;
+- If the AI provider goes down, use the mock fallback;
+- If the web page goes down, use `npm run demo` as the fallback demo.
 
-这时最重要的不是"再多做一个功能"，而是：
+At this point the most important thing is not "build one more feature", but:
 
-> 主流程稳定，演示讲得清楚，评委看得懂。
+> The main flow is stable, the demo is explained clearly, and the judges understand it.
 
 ---
 
-## 24. 一句话记住协作规则
+## 24. The collaboration rules in one line
 
 ```text
-先读文档
-→ 跑通 Harness
-→ 领取任务
-→ 开分支
-→ 小步修改
-→ 跑验证
-→ 提交 commit
-→ push 分支
-→ 创建 PR
-→ review 后合并
+Read the docs first
+→ get the Harness running
+→ claim a task
+→ create a branch
+→ change in small steps
+→ run verification
+→ make a commit
+→ push the branch
+→ create a PR
+→ merge after review
 ```
 
-如果你是小白，不知道下一步做什么，先跑：
+If you are a beginner and don't know what to do next, run first:
 
 ```bash
 npm run check
 npm run demo
 ```
 
-然后去 `docs/tasks.md` 选一个 `Unassigned` 的小任务。稳稳地来，项目就会一点点长起来。
+Then go to `docs/tasks.md` and pick a small `Unassigned` task. Take it steady, and the project will grow bit by bit.
 
 ---
 
 ## 25. Scenario Harness
 
-为了让项目更接近真实参赛作品，Harness 支持多场景回归：
+To bring the project closer to a real competition entry, the Harness supports multi-scenario regression:
 
 ```bash
 npm run scenarios
 ```
 
-它会跑两套引擎的回归：
+It runs regressions for both engines:
 
 ```text
-1. legacy RiskReport 谐波：data/demo-case.json + data/scenarios/*.json
-   （低风险批准、预警保证金、严重风险清算）
-2. AI 动态定价场景：data/pricing-scenarios/*.json
-   （fast / balanced 正常开盘、high-risk 途中降价 reprice、high-risk 暂停 pause）
+1. legacy RiskReport harness: data/demo-case.json + data/scenarios/*.json
+   (low-risk approval, warning margin call, severe-risk liquidation)
+2. AI dynamic pricing scenarios: data/pricing-scenarios/*.json
+   (fast / balanced normal opening, high-risk in-transit price cut reprice, high-risk pause)
 ```
 
-第 2 套直接驱动 AI 定价引擎（risk discount = AI-4，high-risk pause/reprice = AI-10），
-所以 `npm run scenarios` 是这两个 AI 任务的验证命令。以后新增 AI、MCP、RAG、合约或前端功能时，
-至少要说明它影响哪个 scenario，并跑：
+The second set directly drives the AI pricing engine (risk discount = AI-4, high-risk pause/reprice = AI-10),
+so `npm run scenarios` is the verification command for these two AI tasks. When adding AI, MCP, RAG, contract or frontend features in the future,
+at least state which scenario it affects, and run:
 
 ```bash
 npm run check
@@ -1786,16 +1786,16 @@ npm run smoke
 npm run scenarios
 ```
 
-## 26. Judge Q&A assistant（AI-12）
+## 26. Judge Q&A assistant (AI-12)
 
-彩排时用来回答评委追问的接地气问答助手（默认离线、确定性，可选 LLM 润色并自动兜底）：
+A down-to-earth Q&A assistant for answering judges' follow-up questions during rehearsal (offline and deterministic by default, with optional LLM polish and automatic fallback):
 
 ```bash
-npm run qa                          # 跑完整评委彩排问答（6 个标准问题）
-npm run qa -- "why discount to 0.80?"   # 回答单个自由问题
-npm run qa -- --llm "is it guaranteed?"  # 让已配置的 LLM 润色（出错自动回退到确定性答案）
+npm run qa                          # Run the full judge rehearsal Q&A (6 standard questions)
+npm run qa -- "why discount to 0.80?"   # Answer a single free-form question
+npm run qa -- --llm "is it guaranteed?"  # Let the configured LLM polish it (automatically falls back to the deterministic answer on error)
 ```
 
-每个回答都用**真实定价引擎数字**（`compareSpeeds` / `quoteFromCase`）和**检索到的风险情报引用**
-（`src/agent/riskIntel.js`）拼出，所以助手永远不会和定价引擎自相矛盾，也始终保留
-"target redemption 不是保本" 的合规口径。实现见 `src/agent/judgeAssistant.js`。
+Every answer is assembled from **real pricing engine numbers** (`compareSpeeds` / `quoteFromCase`) and **retrieved risk intelligence citations**
+(`src/agent/riskIntel.js`), so the assistant never contradicts the pricing engine and always keeps
+the compliance line "target redemption is not a capital guarantee". Implementation in `src/agent/judgeAssistant.js`.

@@ -1,7 +1,7 @@
 {
   "case_id": "CASE-EBL-2026-SOY-SH-SG",
   "model": "ai-dynamic-pricing-rwa-v0.2",
-  "note": "拟真样例数据：北京农业贸易 × 新加坡食品加工 非转基因大豆 CIF 新加坡。完整单据链：合同→发票→箱单→订舱→eBL(TradeGo)→保险→融资(HSBC)。所有公司、人名、船名、单号均为虚构。",
+  "note": "Simulated sample data: Beijing Agricultural Trading × Singapore Food Processing, non-GMO soybeans CIF Singapore. Full document chain: contract → invoice → packing list → booking → eBL (TradeGo) → insurance → financing (HSBC). All companies, people, vessels and document numbers are fictional.",
   "uploaded_documents": {
     "sales_contract_file": "data/uploads/soybean-sh-sg/sales-contract.md",
     "commercial_invoice_file": "data/uploads/soybean-sh-sg/commercial-invoice.md",
@@ -28,7 +28,7 @@
     "place_of_receipt": "Shanghai",
     "place_of_delivery": "Singapore",
     "incoterms": "CIF Singapore",
-    "cargo": "Non-GMO Soybeans (非转基因大豆), Bulk",
+    "cargo": "Non-GMO Soybeans, Bulk",
     "quantity_mt": 5000,
     "containers": "N/A (Bulk Vessel, 4 Holds)",
     "gross_weight_mt": 5050,
@@ -63,7 +63,7 @@
     "country_of_origin": "China"
   },
   "cargo": {
-    "commodity": "Soybean（大豆）",
+    "commodity": "Soybean",
     "grade": "Non-GMO Soybeans, Grade No.1, Protein ≥ 38%, Moisture ≤ 13.5%",
     "hs_code": "120190",
     "quantity": 5000,
@@ -112,7 +112,7 @@
     "note": "HSBC Hong Kong provides 80% advance against eBL + Insurance + L/C proceeds. SOFR + 3% for 45 days. Non-GMO premium-grade soybeans with strong buyer (Singapore Food Processing) and bank-intermediated L/C payment — high-quality collateral."
   },
   "market": {
-    "commodity": "Soybean（大豆）",
+    "commodity": "Soybean",
     "benchmark": "CBOT Soybean Futures (July 2026 Contract)",
     "price_unit": "USD/MT",
     "cbot_futures_usd_per_mt": 480,

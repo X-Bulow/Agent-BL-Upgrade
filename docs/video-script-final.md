@@ -1,188 +1,188 @@
-# 🎬 AgentBL · 3 分钟视频脚本（网页 Demo 演示版）
+# 🎬 AgentBL · 3-Minute Video Script (Web Demo Version)
 
-> **目标**：Injective × Microsoft × Web3Labs 新星计划提交视频
+> **Goal**: Submission video for the Injective × Microsoft × Web3Labs Nova Program
 >
-> **时长**：3 分钟（180 秒）
+> **Length**: 3 minutes (180 seconds)
 >
-> **形式**：纯网页 Demo 演示 + 口播解说
+> **Format**: Pure web demo + voice-over narration
 >
-> **核心信息**：Web3 原生贸易融资 + AI 自主定价 + 微软 Azure AI + Injective 链上执行
+> **Core message**: Web3-native trade finance + autonomous AI pricing + Microsoft Azure AI + Injective on-chain execution
 
 ---
 
-## 🎯 片头（5 秒）
+## 🎯 Opening Title (5 seconds)
 
-**【全屏字幕】**
-```
-AgentBL
-Web3 原生贸易融资协议
-
-出口商上链提单 · AI 定价风险 · 投资者直接融资
-
-Powered by: Injective × Microsoft Azure AI × ENI × 丽讯科技
-```
-
----
-
-## 📺 视频脚本 + 操作指南
-
-### [0:00–0:25] 开场：痛点 + 解决方案
-
-**【画面】** 
-- 浏览器打开 Dashboard 首页
-- 鼠标停在页面标题
-
-**【口播】**
-> 大家好，这是 AgentBL。
->
-> 国际贸易中，货物装船后，出口商的钱要 **30 到 45 天**才能回来。全球贸易融资缺口高达 **2.5 万亿美元**。
->
-> AgentBL 要做的是：**让出口商把电子提单上链，AI 秒级定价风险，全球投资者直接认购。无需银行审批。**
->
-> 我们用 **Microsoft Azure OpenAI** 驱动 AI 定价引擎，所有决策在 **Injective** 链上执行。接下来 3 分钟演示完整流程。
-
-**【操作】**
-1. 打开浏览器，访问 `http://localhost:3000`
-2. 确保页面顶部显示"● 已连接 Injective Testnet"
-3. 鼠标停留在页面，不要点击，让观众看清界面
-
----
-
-### [0:25–1:10] 演示 ①：AI 定价引擎 + 数据来源
-
-**【画面】** 
-- 顶部下拉选择案例：**"Clean copper · Singapore → Shanghai"**
-- AI Pricing Console 自动展开
-- 展示瀑布图和数据来源标签
-
-**【口播】**
-> 首先看 AI 如何定价。我选择一个案例：新加坡出口商，500 吨铜阴极板，发往上海港。
->
-> **AI 自动启动工作流**：
-> - 调用实时 **LME 铜价 API** 估值货物 → 450 万美元
-> - 交叉核验电子提单、商业发票、保险单——检测数量是否一致、保险是否足额、保单会不会过期
-> - 通过 **xAPI 协议**抓取地缘风险、天气、航线风险
-> - 接入**丽讯科技物流系统**，获取这条航线的历史准时率
->
-> **AI 引擎使用 Microsoft Azure OpenAI 的 GPT-4 模型**，从大量实时数据中提取风险因素，然后给出三档融资方案：
-> - **FAST 到账**：折价 20%，发行价 $0.80
-> - **BALANCED**：折价 15%，发行价 $0.85  
-> - **SAFE**：折价 10%，发行价 $0.90
->
-> 你看这里，每一项数据都标注了来源——LME 铜价、UN Comtrade、xAPI 风险情报——**完全可追溯、可审计**。
-
-**【操作】**
-1. 在页面顶部案例下拉框，选择 **"Clean copper · Singapore → Shanghai"**
-2. 等待 AI Pricing Console 展开（约 2-3 秒）
-3. **慢速滚动**瀑布图，让观众看清每一层
-4. **鼠标指向**"Data Sources"部分的标签（LME、xAPI、丽讯数据）
-5. **鼠标指向**三档发行价对比（$0.80 / $0.85 / $0.90）
-
----
-
-### [1:10–1:50] 演示 ②：ENI 防欺诈 + 一键上链
-
-**【画面】** 
-- 切换案例到：**"Copper · Shanghai → Hamburg (insurance gap)"**
-- 显示风险维度卡片（保险项飘红）
-- 点击"⛓️ 铸造 RWA 上链"按钮
-- MetaMask 弹窗签名
-
-**【口播】**
-> 第二个演示：**防欺诈和上链**。
->
-> 我切换到另一个案例——这批货的保险有问题。你看 AI 立刻检测出：**保险金额低于货值、保单几乎卡在到港当天过期**。
->
-> 这些都是传统银行贸易融资部门要人工审核的风险点。AgentBL 的 AI 自动完成，每个疑点都折算成**风险基点**，直接压低发行价。
->
-> 而且，电子提单上链时，我们使用 **ENI 可信文件层**。ENI 为每批货生成一个 **cargoHash**——船名、航次、货物的 SHA-256 哈希，在链上注册。**同一批货只能注册一次，防止一货多单骗贷**。
->
-> 现在点击"铸造 RWA 上链"——你看，MetaMask 弹窗，这是一笔真实的 **Injective Testnet** 交易。签名后，这笔 RWA 就在链上创建了，全球投资者可以认购。
-
-**【操作】**
-1. 顶部切换案例到 **"Copper · Shanghai → Hamburg (insurance gap)"**
-2. 等待页面刷新
-3. **慢速滚动**到"AI 货值估算 & 航线风险"卡片
-4. **鼠标指向**飘红的保险项（Insurance、Document Consistency）
-5. **滚动到底部**，点击 **"⛓️ 铸造 RWA 上链"** 按钮
-6. **等待 MetaMask 弹窗**（如果已连接钱包）
-7. **展示弹窗**（不要立刻签名，让观众看清）
-8. **点击确认**签名
-9. **等待交易确认**（约 5-10 秒）
-10. **展示成功状态**（显示交易哈希）
-
----
-
-### [1:50–2:35] 演示 ③：在途自主决策（高潮）
-
-**【画面】** 
-- 切换到"航运追踪"页面
-- 点击"⚔️ 模拟霍尔木兹冲突升级"按钮
-- 风险维度飙红，AI 重新定价，状态变为 PAUSED
-
-**【口播】**
-> 第三个演示，也是最硬核的一手：**AI 在途自主决策**。
->
-> 我们模拟一个极端场景：这批铜正在海上航行，突然**霍尔木兹海峡冲突升级**。
->
-> 此时铜价其实在涨——如果只看价格，会认为"抵押物更值钱、更安全"。**完全看反。**
->
-> 我点击这个"冲突升级"按钮，你看 AI 的反应：
-> - 风险维度全部飙红
-> - **Microsoft Azure OpenAI** 重新分析局势：进口商违约概率上升、保险因"战争除外"条款失效、货物回收率下降
-> - AI **自主决策**：把货值 haircut 21%、风险分打到 **1410 个基点**
-> - 最关键的——AI 直接在 **Injective 链上执行 PAUSE**，暂停新投资者进场，把他们拦在爆雷之外
->
-> 这个决策**从检测风险到链上执行，全程自动，无需人工干预**。这就是 AI Agent 和普通 AI 聊天机器人的本质区别。
-
-**【操作】**
-1. 导航栏点击"航运追踪"（或 Voyage Tracking）
-2. 确认当前案例显示为 "In Transit" 状态
-3. **定格 2 秒**，让观众看清界面
-4. **点击 "⚔️ 模拟霍尔木兹冲突升级"** 按钮
-5. **等待 AI 重新定价**（约 3-5 秒）
-6. **慢速滚动**展示：
-   - 风险维度卡片变红
-   - 新报价：货值 -21%、风险 1410bps
-   - 状态变为 **"PAUSED"**
-7. **滚动到底部**，展示链上交易哈希
-8. **（可选）点击交易哈希**，跳转到 Injective 区块浏览器
-
----
-
-### [2:35–3:00] 收束：技术栈 + 核心价值
-
-**【画面】** 
-- 回到 Dashboard 首页
-- 显示页面底部的"Powered by"标识
-- 最后 5 秒：全屏 tagline
-
-**【口播】**
-> 总结一下，AgentBL 是一个 **Web3 原生的贸易融资协议**。
->
-> 技术栈方面：
-> - **Microsoft Azure OpenAI**：驱动 AI 定价引擎，支持 GPT-4 工具调用和结构化输出
-> - **Injective**：所有智能合约部署在 Injective inEVM 测试网，每个 AI 决策都在链上强制执行
-> - **ENI 可信文件层**：电子提单的唯一性控制和不可篡改性
-> - **丽讯科技**：真实的物流数据和行业客户场景
->
-> **核心价值：取代银行**。出口商不需要银行授信，投资者不需要银行账户，AI 和智能合约取代了银行的风控部、放款部、清算部。
->
-> **代码决定一切。** 谢谢。
-
-**【操作】**
-1. 回到首页（点击左上角 Logo）
-2. 滚动到页面底部，展示 "Powered by" 标识
-3. **最后 5 秒**：切换到全屏字幕
-
-**【全屏字幕】**
+**[Full-screen caption]**
 ```
 AgentBL
 Web3-Native Trade Finance Protocol
 
-Microsoft Azure OpenAI 驱动 AI 定价
-Injective 链上执行决策
-ENI 防欺诈，丽讯物流场景
+Exporters put eBLs on-chain · AI prices the risk · Investors finance directly
+
+Powered by: Injective × Microsoft Azure AI × ENI × Lixun Technology
+```
+
+---
+
+## 📺 Video Script + Operating Guide
+
+### [0:00–0:25] Opening: Pain Point + Solution
+
+**[Visual]** 
+- Browser opens the Dashboard home page
+- Mouse rests on the page title
+
+**[Voice-over]**
+> Hi everyone, this is AgentBL.
+>
+> In international trade, after the goods are loaded onto the ship, it takes **30 to 45 days** for the exporter's money to come back. The global trade finance gap is as high as **2.5 trillion US dollars**.
+>
+> What AgentBL does is: **let exporters put electronic bills of lading on-chain, have AI price the risk in seconds, and let global investors subscribe directly. No bank approval needed.**
+>
+> We use **Microsoft Azure OpenAI** to power the AI pricing engine, and every decision is executed on the **Injective** chain. Over the next 3 minutes we'll demo the complete flow.
+
+**[Actions]**
+1. Open the browser and go to `http://localhost:3000`
+2. Make sure the top of the page shows "● Connected to Injective Testnet"
+3. Keep the mouse on the page without clicking so viewers can see the interface clearly
+
+---
+
+### [0:25–1:10] Demo ①: AI Pricing Engine + Data Sources
+
+**[Visual]** 
+- Select the case from the top dropdown: **"Clean copper · Singapore → Shanghai"**
+- The AI Pricing Console expands automatically
+- Show the waterfall chart and data source tags
+
+**[Voice-over]**
+> First, let's see how the AI prices. I'll pick a case: a Singapore exporter shipping 500 tonnes of copper cathodes to the port of Shanghai.
+>
+> **The AI automatically starts the workflow**:
+> - Calls the real-time **LME copper price API** to value the cargo → 4.5 million US dollars
+> - Cross-checks the electronic bill of lading, commercial invoice and insurance policy — checking whether quantities match, whether the insurance is sufficient, and whether the policy will expire
+> - Pulls geopolitical, weather and route risk through the **xAPI protocol**
+> - Connects to the **Lixun Technology logistics system** to get this route's historical on-time rate
+>
+> **The AI engine uses Microsoft Azure OpenAI's GPT-4 model** to extract risk factors from large volumes of real-time data, and then offers three financing options:
+> - **FAST payout**: 20% discount, issue price $0.80
+> - **BALANCED**: 15% discount, issue price $0.85  
+> - **SAFE**: 10% discount, issue price $0.90
+>
+> Look here: every data point is labelled with its source — LME copper price, UN Comtrade, xAPI risk intelligence — **fully traceable and auditable**.
+
+**[Actions]**
+1. In the case dropdown at the top of the page, select **"Clean copper · Singapore → Shanghai"**
+2. Wait for the AI Pricing Console to expand (about 2-3 seconds)
+3. **Scroll slowly** through the waterfall chart so viewers can see each layer
+4. **Point the mouse** at the tags in the "Data Sources" section (LME, xAPI, Lixun data)
+5. **Point the mouse** at the three-tier issue price comparison ($0.80 / $0.85 / $0.90)
+
+---
+
+### [1:10–1:50] Demo ②: ENI Anti-Fraud + One-Click On-Chain
+
+**[Visual]** 
+- Switch the case to: **"Copper · Shanghai → Hamburg (insurance gap)"**
+- Show the risk dimension cards (insurance item highlighted in red)
+- Click the "⛓️ Mint RWA On-Chain" button
+- MetaMask pop-up for signing
+
+**[Voice-over]**
+> Second demo: **anti-fraud and going on-chain**.
+>
+> I'll switch to another case — this cargo has an insurance problem. Look, the AI immediately detects: **the insured amount is below the cargo value, and the policy expires almost exactly on the day of arrival at port**.
+>
+> These are all risk points that a traditional bank's trade finance department has to review manually. AgentBL's AI does it automatically, converting each red flag into **risk basis points** that directly push down the issue price.
+>
+> And when the electronic bill of lading goes on-chain, we use the **ENI trusted document layer**. ENI generates a **cargoHash** for each shipment — a SHA-256 hash of the vessel name, voyage and cargo — registered on-chain. **The same cargo can only be registered once, preventing loan fraud with multiple bills for one cargo**.
+>
+> Now I click "Mint RWA On-Chain" — look, MetaMask pops up; this is a real **Injective Testnet** transaction. Once signed, this RWA is created on-chain and global investors can subscribe.
+
+**[Actions]**
+1. Switch the case at the top to **"Copper · Shanghai → Hamburg (insurance gap)"**
+2. Wait for the page to refresh
+3. **Scroll slowly** to the "AI Cargo Valuation & Route Risk" card
+4. **Point the mouse** at the red-flagged insurance items (Insurance, Document Consistency)
+5. **Scroll to the bottom** and click the **"⛓️ Mint RWA On-Chain"** button
+6. **Wait for the MetaMask pop-up** (if the wallet is already connected)
+7. **Show the pop-up** (don't sign immediately; let viewers see it clearly)
+8. **Click confirm** to sign
+9. **Wait for the transaction to confirm** (about 5-10 seconds)
+10. **Show the success state** (displaying the transaction hash)
+
+---
+
+### [1:50–2:35] Demo ③: Autonomous In-Transit Decisions (Climax)
+
+**[Visual]** 
+- Switch to the "Voyage Tracking" page
+- Click the "⚔️ Simulate Hormuz Conflict Escalation" button
+- Risk dimensions turn red, the AI reprices, and the status changes to PAUSED
+
+**[Voice-over]**
+> The third demo, and the most hard-core move: **autonomous AI decisions while in transit**.
+>
+> We simulate an extreme scenario: this copper is sailing at sea when suddenly **conflict in the Strait of Hormuz escalates**.
+>
+> At this point copper prices are actually rising — if you only looked at price, you'd think "the collateral is worth more, so it's safer". **That's completely backwards.**
+>
+> I click this "conflict escalation" button, and look at how the AI reacts:
+> - All risk dimensions turn red
+> - **Microsoft Azure OpenAI** re-analyses the situation: importer default probability rises, insurance fails because of the "war exclusion" clause, and the cargo recovery rate drops
+> - The AI **decides autonomously**: it applies a 21% haircut to the cargo value and pushes the risk score to **1410 basis points**
+> - Most importantly — the AI directly **executes a PAUSE on the Injective chain**, stopping new investors from entering and keeping them out of the blow-up
+>
+> This decision, **from detecting the risk to executing on-chain, is fully automatic with no human intervention**. That is the fundamental difference between an AI Agent and an ordinary AI chatbot.
+
+**[Actions]**
+1. Click "Voyage Tracking" in the navigation bar
+2. Confirm the current case shows the "In Transit" status
+3. **Hold for 2 seconds** so viewers can see the interface clearly
+4. **Click the "⚔️ Simulate Hormuz Conflict Escalation"** button
+5. **Wait for the AI to reprice** (about 3-5 seconds)
+6. **Scroll slowly** to show:
+   - Risk dimension cards turning red
+   - New quote: cargo value -21%, risk 1410bps
+   - Status changes to **"PAUSED"**
+7. **Scroll to the bottom** to show the on-chain transaction hash
+8. **(Optional) Click the transaction hash** to jump to the Injective block explorer
+
+---
+
+### [2:35–3:00] Wrap-Up: Tech Stack + Core Value
+
+**[Visual]** 
+- Return to the Dashboard home page
+- Show the "Powered by" badge at the bottom of the page
+- Last 5 seconds: full-screen tagline
+
+**[Voice-over]**
+> To sum up, AgentBL is a **Web3-native trade finance protocol**.
+>
+> On the tech stack:
+> - **Microsoft Azure OpenAI**: powers the AI pricing engine, supporting GPT-4 tool calling and structured output
+> - **Injective**: all smart contracts are deployed on the Injective inEVM testnet, and every AI decision is enforced on-chain
+> - **ENI trusted document layer**: uniqueness control and tamper-resistance for electronic bills of lading
+> - **Lixun Technology**: real logistics data and industry customer scenarios
+>
+> **Core value: replacing the bank**. Exporters don't need bank credit lines, investors don't need bank accounts, and AI plus smart contracts replace the bank's risk control, lending and clearing departments.
+>
+> **Code decides everything.** Thank you.
+
+**[Actions]**
+1. Return to the home page (click the logo in the top-left corner)
+2. Scroll to the bottom of the page and show the "Powered by" badge
+3. **Last 5 seconds**: switch to the full-screen caption
+
+**[Full-screen caption]**
+```
+AgentBL
+Web3-Native Trade Finance Protocol
+
+AI pricing powered by Microsoft Azure OpenAI
+Decisions executed on Injective
+ENI anti-fraud, Lixun logistics scenarios
 
 No bank. No intermediary.
 The AI prices. The chain enforces.
@@ -190,120 +190,116 @@ The AI prices. The chain enforces.
 
 ---
 
-## 🎯 关键强调点（对应评分维度）
+## 🎯 Key Points to Emphasise (Mapped to Judging Criteria)
 
-### ① Microsoft Azure AI 使用（至少 3 次提及）
+### ① Use of Microsoft Azure AI (mention at least 3 times)
 
-| 时间段 | 提及内容 |
+| Timestamp | What is mentioned |
 |--------|---------|
-| [0:20] | "我们用 **Microsoft Azure OpenAI** 驱动 AI 定价引擎" |
-| [1:00] | "AI 引擎使用 **Microsoft Azure OpenAI 的 GPT-4 模型**" |
-| [2:15] | "**Microsoft Azure OpenAI** 重新分析局势" |
-| [2:45] | "**Microsoft Azure OpenAI**：驱动 AI 定价引擎，支持工具调用" |
+| [0:20] | "We use **Microsoft Azure OpenAI** to power the AI pricing engine" |
+| [1:00] | "The AI engine uses **Microsoft Azure OpenAI's GPT-4 model**" |
+| [2:15] | "**Microsoft Azure OpenAI** re-analyses the situation" |
+| [2:45] | "**Microsoft Azure OpenAI**: powers the AI pricing engine, supporting tool calling" |
 
-**演示证据**：
-- 代码中的 `openaiCompatClient.js` 支持 Azure provider
-- AI 定价输出的解释文本（由 GPT-4 生成）
-- 文档中明确标注 Azure OpenAI 集成
+**Demo evidence**:
+- `openaiCompatClient.js` in the code supports the Azure provider
+- The explanation text in the AI pricing output (generated by GPT-4)
+- The documentation explicitly notes the Azure OpenAI integration
 
-### ② Injective 使用（至少 3 次）
+### ② Use of Injective (at least 3 times)
 
-| 时间段 | 提及内容 |
+| Timestamp | What is mentioned |
 |--------|---------|
-| [0:20] | "所有决策在 **Injective** 链上执行" |
-| [1:35] | "这是一笔真实的 **Injective Testnet** 交易" |
-| [2:25] | "AI 直接在 **Injective 链上执行 PAUSE**" |
-| [2:45] | "所有智能合约部署在 **Injective inEVM 测试网**" |
+| [0:20] | "Every decision is executed on the **Injective** chain" |
+| [1:35] | "This is a real **Injective Testnet** transaction" |
+| [2:25] | "The AI directly **executes a PAUSE on the Injective chain**" |
+| [2:45] | "All smart contracts are deployed on the **Injective inEVM testnet**" |
 
-**演示证据**：
-- MetaMask 显示 Injective Testnet (Chain ID 1439)
-- 交易哈希指向 Injective 区块浏览器
-- 页面顶部显示 "● 已连接 Injective Testnet"
+**Demo evidence**:
+- MetaMask shows Injective Testnet (Chain ID 1439)
+- The transaction hash links to the Injective block explorer
+- The top of the page shows "● Connected to Injective Testnet"
 
-### ③ ENI 可信文件层（至少 2 次）
+### ③ ENI Trusted Document Layer (at least 2 times)
 
-| 时间段 | 提及内容 |
+| Timestamp | What is mentioned |
 |--------|---------|
-| [1:25] | "我们使用 **ENI 可信文件层**" |
-| [1:30] | "ENI 为每批货生成 **cargoHash**，防止一货多单" |
-| [2:45] | "**ENI 可信文件层**：唯一性控制" |
+| [1:25] | "We use the **ENI trusted document layer**" |
+| [1:30] | "ENI generates a **cargoHash** for each shipment, preventing multiple bills for one cargo" |
+| [2:45] | "**ENI trusted document layer**: uniqueness control" |
 
-### ④ 丽讯科技物流场景（至少 2 次）
+### ④ Lixun Technology Logistics Scenarios (at least 2 times)
 
-| 时间段 | 提及内容 |
+| Timestamp | What is mentioned |
 |--------|---------|
-| [0:50] | "接入**丽讯科技物流系统**，获取航线历史数据" |
-| [2:50] | "**丽讯科技**：真实的物流数据和行业客户场景" |
+| [0:50] | "Connects to the **Lixun Technology logistics system** to get the route's historical data" |
+| [2:50] | "**Lixun Technology**: real logistics data and industry customer scenarios" |
 
 ---
 
-## 🎬 录制技术要点
+## 🎬 Recording Technical Notes
 
-### 浏览器设置
-- **分辨率**：1920×1080 或 1280×720
-- **缩放**：100%（不要缩放，保证清晰）
-- **全屏模式**：F11 全屏，隐藏浏览器标签栏
-- **禁用通知**：避免录制时弹窗干扰
+### Browser Settings
+- **Resolution**: 1920×1080 or 1280×720
+- **Zoom**: 100% (don't zoom, to keep it sharp)
+- **Full-screen mode**: F11 full screen, hide the browser tab bar
+- **Disable notifications**: avoid pop-ups interfering with the recording
 
-### 鼠标操作
-- **慢速移动**：让观众跟上节奏
-- **明确指向**：指向重要信息时停留 1-2 秒
-- **平滑滚动**：不要跳跃式滚动
+### Mouse Handling
+- **Move slowly**: let viewers keep up
+- **Point clearly**: pause for 1-2 seconds when pointing at important information
+- **Scroll smoothly**: no jumpy scrolling
 
-### 备用方案（如果网页不稳定）
+### Backup Plans (if the web page is unstable)
 
-**Plan B：终端演示**
+**Plan B: Terminal demo**
 ```bash
-# 完整闭环演示
+# Complete end-to-end demo
 npm run demo:once
 
-# 三种结算结果
+# Three settlement outcomes
 npm run demo:default
 
-# AI 工具调用轨迹
+# AI tool-call trace
 npm run agent:value
 ```
 
-**Plan C：截图 + PPT**
-- 提前截取关键界面
-- 用 PPT 展示，口播解说
-- 数字和证据来自测试输出
+**Plan C: Screenshots + PPT**
+- Capture the key screens in advance
+- Present them in a PPT with voice-over narration
+- Numbers and evidence come from the test output
 
 ---
 
-## ⏱️ 时间分配总结
+## ⏱️ Time Allocation Summary
 
-| 时间段 | 内容 | 时长 |
+| Timestamp | Content | Duration |
 |-------|------|------|
-| 0:00-0:25 | 开场 + 痛点 + 技术栈 | 25 秒 |
-| 0:25-1:10 | AI 定价引擎演示 | 45 秒 |
-| 1:10-1:50 | ENI 防欺诈 + 上链 | 40 秒 |
-| 1:50-2:35 | 在途自主决策（高潮） | 45 秒 |
-| 2:35-3:00 | 收束 + 技术栈总结 | 25 秒 |
-| **总计** | | **180 秒** |
+| 0:00-0:25 | Opening + pain point + tech stack | 25 seconds |
+| 0:25-1:10 | AI pricing engine demo | 45 seconds |
+| 1:10-1:50 | ENI anti-fraud + on-chain | 40 seconds |
+| 1:50-2:35 | Autonomous in-transit decisions (climax) | 45 seconds |
+| 2:35-3:00 | Wrap-up + tech stack summary | 25 seconds |
+| **Total** | | **180 seconds** |
 
 ---
 
-## 📋 提交前检查清单
+## 📋 Pre-Submission Checklist
 
-- [ ] 提到 "Microsoft Azure OpenAI" 至少 3 次
-- [ ] 提到 "Injective" 至少 3 次
-- [ ] 提到 "ENI" 至少 2 次
-- [ ] 提到 "丽讯科技" 至少 2 次
-- [ ] 演示了 MetaMask 连接 Injective Testnet
-- [ ] 演示了 AI 定价完整流程
-- [ ] 演示了 cargoHash 防欺诈机制
-- [ ] 演示了在途自主决策（战争场景）
-- [ ] 展示了链上交易哈希
-- [ ] 时长控制在 3 分钟 ± 10 秒
-- [ ] 片头和片尾显示完整 tagline
+- [ ] Mention "Microsoft Azure OpenAI" at least 3 times
+- [ ] Mention "Injective" at least 3 times
+- [ ] Mention "ENI" at least 2 times
+- [ ] Mention "Lixun Technology" at least 2 times
+- [ ] Demo MetaMask connecting to Injective Testnet
+- [ ] Demo the complete AI pricing flow
+- [ ] Demo the cargoHash anti-fraud mechanism
+- [ ] Demo autonomous in-transit decisions (war scenario)
+- [ ] Show the on-chain transaction hash
+- [ ] Keep the length to 3 minutes ± 10 seconds
+- [ ] Show the full tagline in the opening and closing titles
 
 ---
 
-## 💡 一句话总结（社交媒体用）
+## 💡 One-Line Summary (for Social Media)
 
-**中文**：
-> AgentBL：出口商上链提单，Microsoft Azure AI 定价风险，Injective 链上执行，全球投资者直接融资。无需银行。
-
-**English**:
 > AgentBL: Exporters tokenize eBLs. Microsoft Azure AI prices risk. Injective enforces decisions. Global investors fund directly. No bank required.

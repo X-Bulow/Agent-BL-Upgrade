@@ -104,6 +104,7 @@ function deterministicFallback(pref) {
   const p = pref.toLowerCase();
   const criteria = { sort_by: 'score_desc' };
 
+  // The Chinese alternatives below recognise Chinese user input (stable / low risk / medium risk / high yield / copper / soybean).
   if (p.includes('low risk') || p.includes('safe') || p.includes('稳健') || p.includes('低风险')) {
     criteria.risk_max = 'LOW';
     criteria.sort_by = 'risk_asc';

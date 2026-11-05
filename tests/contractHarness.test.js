@@ -76,3 +76,24 @@ test('contract harness covers scenario contract actions with oracle events', asy
     assert.equal(pricingEvent.args.evidenceHash, result.risk_report.evidence_hash, file);
   }
 });
+
+test('contract harness disburses escrow to the eBL holder when the offering is fully subscribed', async () => {
+  const data = await readCase('data/demo-case.json');
+  const result = simulateContractHarness(data);
+  const disbursed = result.events.find((event) => event.event === 'FundsDisbursed');
+  assert.equal(result.offering.disbursed, true);
+  assert.equal(result.offering.escrowed_paid_amount, 0);
+  assert.equal(disbursed.args.issuer, data.bill_of_lading.shipper);
+  assert.equal(disbursed.args.amount, result.offering.subscribed_paid_amount);
+});
+
+test('contract harness keeps a partial subscription in escrow and out of transit', async () => {
+  const data = await readCase('data/demo-case.json');
+  const result = simulateContractHarness(data, { subscribed_amount: 10 });
+  assert.equal(result.offering.disbursed, false);
+  assert.equal(result.offering.escrowed_paid_amount, result.offering.subscribed_paid_amount);
+  assert.ok(!result.events.some((event) => event.event === 'FundsDisbursed'));
+  assert.notEqual(result.offering.state, 'InTransit');
+  const stateChanged = result.events.find((event) => event.event === 'OfferingStateChanged');
+  if (stateChanged) assert.equal(stateChanged.args.oldState, 'Subscribed');
+});

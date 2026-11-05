@@ -124,8 +124,9 @@ contract AgentBLRWA {
     }
 
     /// @notice Reprice an offering when an in-transit risk event arrives.
-    /// @dev Ungated for the demo: the dashboard's "simulate in-transit risk"
-    ///      buttons can anchor the AI's new price/risk on-chain.
+    /// @dev Only the offering's creator may reprice it, so the dashboard's
+    ///      "simulate in-transit risk" buttons can anchor the AI's new price/risk
+    ///      on-chain without letting other wallets rewrite someone else's pool.
     function reprice(
         uint256 poolId,
         uint256 newIssuePriceE6,
@@ -137,6 +138,7 @@ contract AgentBLRWA {
     ) external {
         Offering storage o = offerings[poolId];
         require(o.exists, "pool missing");
+        require(msg.sender == o.creator, "not creator");
 
         uint256 old = o.issuePriceE6;
         if (newIssuePriceE6 > 0) o.issuePriceE6 = newIssuePriceE6;

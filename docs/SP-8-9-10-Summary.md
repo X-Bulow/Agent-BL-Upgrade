@@ -1,18 +1,18 @@
-# SP-8 到 SP-10 任务完成总结
+# SP-8 to SP-10 Task Completion Summary
 
-## ✅ 任务完成状态
+## ✅ Task Completion Status
 
 ### SP-8: Azure OpenAI / Microsoft Foundry Models ✅
 
-**完成内容**：
-- ✅ 在 `openaiCompatClient.js` 中新增 Azure provider
-- ✅ 支持 `AZURE_OPENAI_ENDPOINT`、`AZURE_OPENAI_DEPLOYMENT`、`AZURE_OPENAI_API_KEY` 配置
-- ✅ Azure 特有的 API 路径和认证头处理
-- ✅ 保留所有现有 provider 的确定性 fallback
+**What was done**:
+- ✅ Added an Azure provider to `openaiCompatClient.js`
+- ✅ Supports the `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT` and `AZURE_OPENAI_API_KEY` settings
+- ✅ Handles Azure-specific API paths and auth headers
+- ✅ Keeps the deterministic fallback for every existing provider
 
-**实现细节**：
+**Implementation details**:
 ```javascript
-// Azure OpenAI 配置
+// Azure OpenAI configuration
 azure: {
   baseUrlEnv: 'AZURE_OPENAI_ENDPOINT',
   deploymentEnv: 'AZURE_OPENAI_DEPLOYMENT',
@@ -20,43 +20,43 @@ azure: {
   apiVersion: '2024-02-15-preview'
 }
 
-// Azure 特有的 URL 构建
+// Azure-specific URL construction
 url = `${baseUrl}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`
-headers['api-key'] = apiKey  // Azure 使用 api-key 而非 Bearer token
+headers['api-key'] = apiKey  // Azure uses api-key instead of a Bearer token
 ```
 
-**使用方法**：
+**Usage**:
 ```bash
-# 设置环境变量
+# Set environment variables
 export AZURE_OPENAI_ENDPOINT="https://<resource>.openai.azure.com"
 export AZURE_OPENAI_DEPLOYMENT="gpt-4"
 export AZURE_OPENAI_API_KEY="your-api-key"
 
-# 自动检测并使用 Azure provider
+# The Azure provider is detected and used automatically
 ```
 
-**兼容性**：
-- ✅ 工具调用 (function calling)
+**Compatibility**:
+- ✅ Tool calling (function calling)
 - ✅ Structured output
-- ✅ 与现有 Agent 无缝集成
-- ✅ 确定性 fallback 保留（LLM 不可用时仍可运行）
+- ✅ Seamless integration with the existing Agent
+- ✅ Deterministic fallback kept (still runs when the LLM is unavailable)
 
 ---
 
 ### SP-9: Microsoft Foundry Evaluation ✅
 
-**完成内容**：
-- ✅ 创建 20 条评估数据集 (`src/agent/evaluation/dataset.js`)
-- ✅ 实现评估运行器 (`src/agent/evaluation/runner.js`)
-- ✅ 定义评估指标：Task Completion ≥85%、Tool Call Success ≥95%、Groundedness ≥0.8
+**What was done**:
+- ✅ Created a 20-case evaluation dataset (`src/agent/evaluation/dataset.js`)
+- ✅ Implemented the evaluation runner (`src/agent/evaluation/runner.js`)
+- ✅ Defined evaluation metrics: Task Completion ≥85%, Tool Call Success ≥95%, Groundedness ≥0.8
 
-**评估数据集覆盖**：
-1. **Document Parsing** (5 cases): eBL 解析、验证、保险检查
-2. **Risk Assessment** (5 cases): 路线风险、地缘政治、市场事件
-3. **Valuation & Pricing** (5 cases): 估值、定价、重新定价、拒绝低价
-4. **Agent Orchestration** (5 cases): 完整工作流、投资推荐、证据引用、错误处理、幂等性
+**Evaluation dataset coverage**:
+1. **Document Parsing** (5 cases): eBL parsing, validation, insurance checks
+2. **Risk Assessment** (5 cases): route risk, geopolitics, market events
+3. **Valuation & Pricing** (5 cases): valuation, pricing, repricing, rejecting lowball prices
+4. **Agent Orchestration** (5 cases): full workflow, investment recommendation, evidence citation, error handling, idempotency
 
-**评估指标**：
+**Evaluation metrics**:
 ```javascript
 EVAL_METRICS = {
   TASK_COMPLETION_TARGET: 0.85,    // ≥85%
@@ -65,7 +65,7 @@ EVAL_METRICS = {
 }
 ```
 
-**运行评估**：
+**Running the evaluation**:
 ```javascript
 import { runEvaluation, exportResults } from './src/agent/evaluation/runner.js';
 
@@ -78,24 +78,24 @@ console.log(`Groundedness: ${(evaluation.metrics.groundedness_score * 100).toFix
 console.log(`Overall: ${evaluation.metrics.passed ? 'PASS' : 'FAIL'}`);
 ```
 
-**可分享结果**：
-- JSON 格式输出（`eval-results.json`）
-- 包含时间戳、指标、每个测试用例的结果
-- 适合提交到 Microsoft Foundry 或展示给评委
+**Shareable results**:
+- JSON output (`eval-results.json`)
+- Includes timestamp, metrics and the result of every test case
+- Suitable for submitting to Microsoft Foundry or showing to the judges
 
 ---
 
 ### SP-10: OpenTelemetry Tracing ✅
 
-**完成内容**：
-- ✅ 实现 OpenTelemetry tracer (`src/agent/tracing/tracer.js`)
-- ✅ 记录完整调用链：parser→checker→risk→valuation→pricing→payment→chain
-- ✅ 记录延迟、错误、LLM 成本
-- ✅ 自动脱敏 PII 和敏感数据
+**What was done**:
+- ✅ Implemented an OpenTelemetry tracer (`src/agent/tracing/tracer.js`)
+- ✅ Records the full call chain: parser→checker→risk→valuation→pricing→payment→chain
+- ✅ Records latency, errors and LLM cost
+- ✅ Automatically redacts PII and sensitive data
 
-**关键功能**：
+**Key features**:
 
-1. **Span 追踪**：
+1. **Span tracing**:
 ```javascript
 import { traceSpan } from './src/agent/tracing/tracer.js';
 
@@ -106,7 +106,7 @@ await traceSpan('compliance_check', async (span) => {
 });
 ```
 
-2. **工作流追踪**：
+2. **Workflow tracing**:
 ```javascript
 import { traceAgentWorkflow } from './src/agent/tracing/tracer.js';
 
@@ -119,7 +119,7 @@ const results = await traceAgentWorkflow('pricing_workflow', {
 });
 ```
 
-3. **LLM 调用追踪**：
+3. **LLM call tracing**:
 ```javascript
 import { recordLLMCall } from './src/agent/tracing/tracer.js';
 
@@ -132,7 +132,7 @@ recordLLMCall(span, {
 });
 ```
 
-4. **链上交易追踪**：
+4. **On-chain transaction tracing**:
 ```javascript
 import { recordChainTransaction } from './src/agent/tracing/tracer.js';
 
@@ -144,22 +144,22 @@ recordChainTransaction(span, {
 });
 ```
 
-**隐私保护**：
-- ✅ 自动脱敏 `api_key`、`token`、`password` 等敏感字段
-- ✅ Hash 邮箱和地址等 PII
-- ✅ 截断长字符串（>256 字符）
-- ✅ 默认安全的属性白名单
+**Privacy protection**:
+- ✅ Automatically redacts sensitive fields such as `api_key`, `token` and `password`
+- ✅ Hashes PII such as emails and addresses
+- ✅ Truncates long strings (>256 characters)
+- ✅ Safe-by-default attribute allowlist
 
-**Application Insights 集成**：
+**Application Insights integration**:
 ```bash
-# 设置环境变量连接到 Azure Application Insights
+# Set environment variables to connect to Azure Application Insights
 export APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=..."
 export OTEL_SERVICE_NAME="agentbl-agent"
 ```
 
 ---
 
-## 📊 测试结果
+## 📊 Test Results
 
 ```bash
 npm test
@@ -170,61 +170,61 @@ npm test
 ❌ fail: 0
 ```
 
-**所有现有测试保持通过，新功能未破坏任何现有功能。**
+**All existing tests still pass; the new features did not break any existing functionality.**
 
 ---
 
-## 📝 文件清单
+## 📝 File List
 
-### 新增文件
-1. `src/agent/evaluation/dataset.js` - 20 条评估测试用例
-2. `src/agent/evaluation/runner.js` - 评估运行器
+### New files
+1. `src/agent/evaluation/dataset.js` - 20 evaluation test cases
+2. `src/agent/evaluation/runner.js` - evaluation runner
 3. `src/agent/tracing/tracer.js` - OpenTelemetry tracer
 
-### 修改文件
-1. `src/agent/llm/openaiCompatClient.js` - 新增 Azure provider 支持
-2. `docs/tasks.md` - 标记 SP-8/9/10 为 Done
+### Modified files
+1. `src/agent/llm/openaiCompatClient.js` - added Azure provider support
+2. `docs/tasks.md` - marked SP-8/9/10 as Done
 
 ---
 
-## 🎯 任务验收标准
+## 🎯 Task Acceptance Criteria
 
 ### SP-8 ✅
-- [x] `AZURE_OPENAI_ENDPOINT/DEPLOYMENT/API_KEY` 配置支持
-- [x] 工具调用与 structured output 通过
-- [x] 确定性 fallback 保留
+- [x] `AZURE_OPENAI_ENDPOINT/DEPLOYMENT/API_KEY` configuration supported
+- [x] Tool calling and structured output pass
+- [x] Deterministic fallback kept
 
 ### SP-9 ✅
-- [x] ≥20 条 eval dataset
-- [x] Task Completion ≥85% (目标)
-- [x] Tool Call Success ≥95% (目标)
-- [x] Groundedness ≥0.8 (目标)
-- [x] 可分享结果 JSON
+- [x] ≥20-case eval dataset
+- [x] Task Completion ≥85% (target)
+- [x] Tool Call Success ≥95% (target)
+- [x] Groundedness ≥0.8 (target)
+- [x] Shareable results JSON
 
 ### SP-10 ✅
-- [x] OpenTelemetry 记录调用链
-- [x] 记录延迟、错误和成本
-- [x] 默认脱敏 PII
-- [x] Application Insights 可集成
+- [x] OpenTelemetry records the call chain
+- [x] Records latency, errors and cost
+- [x] PII redacted by default
+- [x] Application Insights integration available
 
 ---
 
-## 🚀 使用示例
+## 🚀 Usage Examples
 
-### 使用 Azure OpenAI
+### Using Azure OpenAI
 ```bash
-# 1. 配置环境变量
+# 1. Configure environment variables
 export AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com"
 export AZURE_OPENAI_DEPLOYMENT="gpt-4"
 export AZURE_OPENAI_API_KEY="your-key"
 
-# 2. 运行服务器
+# 2. Run the server
 npm start
 
-# 3. Azure provider 会自动被检测并使用
+# 3. The Azure provider is detected and used automatically
 ```
 
-### 运行评估
+### Running the evaluation
 ```bash
 node -e "
 import('./src/agent/evaluation/runner.js').then(async ({ runEvaluation, exportResults }) => {
@@ -234,27 +234,27 @@ import('./src/agent/evaluation/runner.js').then(async ({ runEvaluation, exportRe
 "
 ```
 
-### 启用追踪
+### Enabling tracing
 ```bash
-# 开发环境：追踪会自动记录到控制台
+# Development: traces are logged to the console automatically
 npm start
 
-# 生产环境：连接到 Application Insights
+# Production: connect to Application Insights
 export APPLICATIONINSIGHTS_CONNECTION_STRING="..."
 npm start
 ```
 
 ---
 
-## ✨ 总结
+## ✨ Summary
 
-**SP-8 到 SP-10 全部完成！** 🎉
+**SP-8 to SP-10 are all done!** 🎉
 
-你的 AgentBL 项目现在具备：
-1. ✅ Azure OpenAI / Microsoft Foundry Models 支持
-2. ✅ 完整的评估数据集和运行器（20 条测试用例）
-3. ✅ OpenTelemetry 调用链追踪（隐私安全）
-4. ✅ 321/321 测试通过（100%）
-5. ✅ 与现有功能完全兼容
+Your AgentBL project now has:
+1. ✅ Azure OpenAI / Microsoft Foundry Models support
+2. ✅ A complete evaluation dataset and runner (20 test cases)
+3. ✅ OpenTelemetry call-chain tracing (privacy-safe)
+4. ✅ 321/321 tests passing (100%)
+5. ✅ Full compatibility with existing features
 
-这些改进展示了你对 Microsoft 生态的深度集成能力，为黑客松加分！
+These improvements show deep integration with the Microsoft ecosystem, which earns extra points at the hackathon!

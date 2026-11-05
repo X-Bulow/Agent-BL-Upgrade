@@ -28,6 +28,7 @@ export const state = {
   marketSort: 'recommended',
   marketSubscriptionUsd: null,
   marketSubscriptionResult: null,
+  protocolViews: {},          // case_id -> { loading } | { none } | { view } | { error } for on-chain offerings
 
   // View ① mint module
   financingUsd: null,        // merchant's requested cash (USD)

@@ -1,148 +1,147 @@
-# AgentBL 5 分钟故事型 To B 路演大纲
+# AgentBL 5-Minute Story-Driven To-B Pitch Outline
 
-> 版本：2026-07-23
+> Version: 2026-07-23
 >
-> 定位：Top10 Demo Day / 投资人 / 产业合作方。
+> Audience: Top 10 Demo Day / investors / industry partners.
 >
-> 目标：用一批真实世界货物讲清完整故事，用 Demo 证明完成度，再用产业资源和 To B 路径证明这不是一次性的黑客松作品。
+> Goal: use one batch of real-world cargo to tell a complete story, use the demo to prove how finished the product is, then use industry resources and a To-B path to prove this is not a one-off hackathon project.
 
 ---
 
-## 1. 这一版要讲什么
+## 1. What this version is about
 
-### 1.1 唯一主线
+### 1.1 The single storyline
 
-> **一批货已经离港，但出口商的钱还没有回来。AgentBL 让 AI 在货物航行期间持续理解风险，把它变成企业和资金方都能使用的融资价格与行动建议。**
+> **A shipment has already left port, but the exporter's money has not come back yet. AgentBL lets AI keep understanding the risk while the cargo is at sea, and turns it into a financing price and action recommendation that both businesses and capital providers can use.**
 
-这不是一场关于合约数量、模型参数或 Web3 名词的演讲。观众只需要看到：
+This is not a talk about the number of contracts, model parameters or Web3 jargon. The audience only needs to see:
 
 ```text
-一批真实货物
-→ 一组真实贸易单据
-→ AI 给出可解释的融资报价
-→ 投资者理解并认购
-→ 航运风险发生变化
-→ AI 立即重定价并暂停风险交易
-→ 企业可以把这套能力嵌入自己的业务
+One batch of real cargo
+→ One set of real trade documents
+→ AI gives an explainable financing quote
+→ Investors understand it and subscribe
+→ Shipping risk changes
+→ AI immediately reprices and pauses the risky deal
+→ Businesses can embed this capability in their own operations
 ```
 
-### 1.2 评审记忆点
+### 1.2 What the judges should remember
 
-1. **AI × 真实世界**：AI 理解货物、单据、保险、物流路线和世界事件，不是只处理链上 Token。
-2. **完成度**：现场展示从出口商融资到投资者认购，再到在途风险干预的完整闭环。
-3. **To B 可落地**：物流平台、eBL 服务商、贸易融资机构、保险和产业资金方都能直接采购或集成。
-4. **产业资源**：项目不是从零寻找场景，而是在可信文件、物流客户、系统集成和金融资源之间搭桥。
-5. **全球化基础设施**：Microsoft Azure 提供企业级 AI，Injective 提供全球可访问的支付与结算；合规由机构准入层承接，不使用“绕过监管”的表述。
+1. **AI × the real world**: the AI understands cargo, documents, insurance, logistics routes and world events; it does not just process on-chain tokens.
+2. **Completeness**: a live demo of the full loop, from exporter financing to investor subscription to in-transit risk intervention.
+3. **To-B ready**: logistics platforms, eBL providers, trade finance institutions, insurers and industrial capital can buy or integrate it directly.
+4. **Industry resources**: the project is not searching for a use case from scratch; it bridges trusted documents, logistics customers, system integration and financial resources.
+5. **Global infrastructure**: Microsoft Azure provides enterprise-grade AI and Injective provides globally accessible payment and settlement; compliance is handled by an institutional access layer, and we never use the phrase "bypassing regulation".
 
-### 1.3 最终口号
+### 1.3 Closing slogan
 
 ```text
 AgentBL turns every shipment into an AI-priced financial opportunity.
-让每一批在途货物，都拥有一个实时、可信、可融资的风险价格。
 ```
 
 ---
 
-## 2. 5 分钟结构
+## 2. 5-minute structure
 
-| 页 | 时间 | 内容 | 形式 |
+| Slide | Time | Content | Format |
 |---|---:|---|---|
-| 1 | 0:00–0:15 | 一批货的现金流困境 | 故事开场 |
-| 2 | 0:15–0:40 | 为什么现在的体系无法解决 | 痛点 + 方案 |
-| 3 | 0:40–1:35 | Demo 第一幕：出口商获得 AI 报价 | 实机演示 |
-| 4 | 1:35–2:20 | Demo 第二幕：投资者理解并认购 | 实机演示 |
-| 5 | 2:20–3:05 | Demo 第三幕：风险突变，AI 暂停交易 | 实机演示 |
-| 6 | 3:05–3:50 | To B：企业为什么愿意付费 | 业务价值 + x402 Demo |
-| 7 | 3:50–4:35 | 产业资源与落地路径 | 资源飞轮 + GTM |
-| 8 | 4:35–5:00 | 扩张目标、合作诉求与收束 | 未来 + Ask |
+| 1 | 0:00–0:15 | One shipment's cash-flow squeeze | Story opening |
+| 2 | 0:15–0:40 | Why today's system cannot solve it | Pain point + solution |
+| 3 | 0:40–1:35 | Demo act 1: the exporter gets an AI quote | Live demo |
+| 4 | 1:35–2:20 | Demo act 2: the investor understands and subscribes | Live demo |
+| 5 | 2:20–3:05 | Demo act 3: risk shifts, the AI pauses the deal | Live demo |
+| 6 | 3:05–3:50 | To B: why businesses will pay | Business value + x402 demo |
+| 7 | 3:50–4:35 | Industry resources and go-to-market path | Resource flywheel + GTM |
+| 8 | 4:35–5:00 | Expansion goals, partnership ask and close | Future + Ask |
 
-总计：`300 秒`。
+Total: `300 seconds`.
 
-> Slide 3–5 连续展示同一笔交易，不返回 PPT。PPT 只作为章节标题，产品界面才是主角。
+> Slides 3–5 show the same deal continuously without returning to the slides. The deck only serves as chapter titles; the product interface is the star.
 
 ---
 
-## 3. 逐页内容与口播
+## 3. Slide-by-slide content and script
 
-### Slide 1｜一艘船已经离港，下一笔生意却被卡住了
+### Slide 1 | A ship has already left port, but the next deal is stuck
 
-**时间：0:00–0:15｜15 秒**
+**Time: 0:00–0:15 | 15 seconds**
 
-#### 屏幕只放
+#### Screen shows only
 
 ```text
 500 MT Copper Cathode
 Singapore → Shanghai
 
-货已经离港，现金还要等 30–45 天。
+The cargo has left port; the cash is still 30–45 days away.
 ```
 
-背景使用真实货船/港口照片，叠加一条从新加坡到上海的航线。不要在封面放架构图。
+Use a real cargo ship / port photo as the background, overlaid with a route from Singapore to Shanghai. Do not put an architecture diagram on the cover.
 
-#### 口播
+#### Script
 
-> 这是一批从新加坡运往上海的 500 吨铜。货已经离港，但出口商还要等 30 到 45 天才能回款，而下一批采购和工资今天就要支付。问题不是他没有资产——价值数百万美元的货就在海上；问题是没有人能足够快地理解这批货的风险，并给出可信的融资价格。
+> This is 500 tonnes of copper shipped from Singapore to Shanghai. The cargo has left port, but the exporter still has to wait 30 to 45 days to get paid, while the next purchase order and payroll are due today. The problem is not that he has no assets: millions of dollars of cargo are on the water right now. The problem is that nobody can understand this shipment's risk fast enough to give a credible financing price.
 
-#### 观众应该产生的问题
+#### The question the audience should ask
 
-“如果货物、提单和路线都可以被验证，为什么不能现在就获得资金？”
+"If the cargo, the bill of lading and the route can all be verified, why can't he get funded right now?"
 
 ---
 
-### Slide 2｜传统系统看企业信用，AgentBL 看这一批货
+### Slide 2 | Traditional systems look at corporate credit; AgentBL looks at this shipment
 
-**时间：0:15–0:40｜25 秒**
+**Time: 0:15–0:40 | 25 seconds**
 
-#### 屏幕内容
+#### Screen content
 
-左右对比，只保留三行：
+Side-by-side comparison, only three rows:
 
-| 传统流程 | AgentBL |
+| Traditional process | AgentBL |
 |---|---|
-| 人工核对多份单据 | AI 交叉核验 eBL、发票、保险 |
-| 用企业规模决定能不能融 | 用货物、路线和实时风险决定价格 |
-| 风险变化后人工追踪 | AI 在途监控并触发改价/暂停 |
+| Manual cross-checking of many documents | AI cross-verifies the eBL, invoice and insurance |
+| Company size decides whether you can be financed | Cargo, route and real-time risk decide the price |
+| Manual tracking after risk changes | AI monitors in transit and triggers repricing / pausing |
 
-底部一句：
+One line at the bottom:
 
 ```text
-AI 不是回答“这笔交易安全吗？”
-AI 必须回答“今天值多少钱、最多融多少、现在该不该继续？”
+The AI does not answer "Is this deal safe?"
+The AI must answer "What is it worth today, how much can be financed, and should we keep going right now?"
 ```
 
-#### 口播
+#### Script
 
-> 传统贸易融资先看企业有没有足够的历史信用和规模，真实货物反而要经过漫长人工审核。AgentBL 换了一个判断对象：我们不先给人贴标签，而是持续判断这一批货、这一条路线和这一组单据。AI 最终不能只写报告，它必须给出价格、额度和行动。
+> Traditional trade finance first asks whether a company has enough credit history and scale, and real cargo has to go through a long manual review. AgentBL changes what is being judged: instead of labelling the company first, we continuously assess this shipment, this route and this set of documents. In the end the AI cannot just write a report; it has to produce a price, a limit and an action.
 
-#### 转场
+#### Transition
 
-> 现在我们不用 PPT 解释，直接看这批铜如何完成一次融资。
+> Instead of explaining with slides, let's watch this copper get financed.
 
 ---
 
-### Slide 3｜Demo 第一幕：三份单据，变成一份融资报价
+### Slide 3 | Demo act 1: three documents become one financing quote
 
-**时间：0:40–1:35｜55 秒**
+**Time: 0:40–1:35 | 55 seconds**
 
-#### 画面
+#### Screen
 
-直接切到产品的 `提单上链 · 铸造 RWA` 页面，预先选中：
+Switch straight to the product's `Pricing & Mint` page, with the following preselected:
 
 ```text
-阴极铜 · 新加坡 → 中国，上海（洋山港）
+Copper Cathode · Singapore → Shanghai, China (Yangshan Port)
 EBL-2026-CU-04417
 MV Marina Star · 500 MT
 ```
 
-#### 操作顺序
+#### Click sequence
 
-1. 指向 eBL、商业发票、保险单三个输入，不在现场打开文件选择器。
-2. 指向 `AI 核验抵押货值 $6,531,250`。
-3. 快速扫过六类风险：单据、保险、货价、战争、天气、港口。
-4. 停在三档融资方案：FAST `$0.800`、BALANCED `$0.848`、LOW_COST `$0.889`。
-5. 选中 AI 推荐的 BALANCED：出口商现在获得 `$3.30M`，发行价 `$0.848`。
+1. Point to the three inputs: eBL, commercial invoice and insurance policy. Do not open the file picker live.
+2. Point to `AI-verified collateral value $6,531,250`.
+3. Quickly sweep through the six risk categories: documents, insurance, commodity price, war, weather, port.
+4. Stop at the three financing options: FAST `$0.800`, BALANCED `$0.848`, LOW_COST `$0.889`.
+5. Select the AI-recommended BALANCED option: the exporter gets `$3.30M` now, at an issue price of `$0.848`.
 
-#### 屏幕放大区域
+#### Zoomed-in screen area
 
 ```text
 Declared value          $6.875M
@@ -152,70 +151,70 @@ AI-recommended price    $0.848
 Action                  OPEN
 ```
 
-#### 口播
+#### Script
 
-> 出口商提交电子提单、发票和保险单。AgentBL 先检查数量、货值、航线和保险是否互相一致，再把商品价格、物流和世界风险合并。这里 AI 将申报货值 687.5 万美元保守核验为 653.1 万，并给出三种现金速度。出口商越需要快速拿钱，让出的贸易利润越多。AI 推荐均衡方案：现在获得 330 万美元，RWA 发行价 0.848。
+> The exporter submits the electronic bill of lading, the invoice and the insurance policy. AgentBL first checks that quantity, value, route and insurance are consistent with each other, then combines commodity prices, logistics and world risk. Here the AI conservatively verifies the declared value of $6.875 million as $6.531 million and offers three cash speeds. The faster the exporter needs the money, the more trade margin he gives up. The AI recommends the balanced option: $3.3 million now, with an RWA issue price of 0.848.
 
-> 我们不要求企业相信一句 AI 结论。每个数字都能追溯到单据、来源和风险证据。
+> We don't ask businesses to trust a one-line AI verdict. Every number can be traced back to documents, sources and risk evidence.
 
-#### 这一幕证明什么
+#### What this act proves
 
-- AI 理解真实业务对象，不是通用聊天。
-- 输出直接进入企业融资决策，不是“建议参考”。
-- 出口商能用“现金速度”理解产品，不需要先理解 Web3。
+- The AI understands real business objects; it is not a general-purpose chat.
+- The output feeds directly into a corporate financing decision, not a "for reference only" suggestion.
+- The exporter understands the product through "cash speed" without having to understand Web3 first.
 
-#### 不要演示
+#### Do not demo
 
-- 不讲定价公式和 basis points 的详细算法。
-- 不现场上传文件，避免文件弹窗和网络抖动破坏节奏。
-- 不展示 20 多个案例；只讲这一批铜。
+- Do not explain the pricing formula or the detailed basis-point algorithm.
+- Do not upload files live, to avoid file dialogs and network hiccups breaking the rhythm.
+- Do not show 20-plus cases; talk only about this copper shipment.
 
 ---
 
-### Slide 4｜Demo 第二幕：投资者看到的不是高收益，而是风险的价格
+### Slide 4 | Demo act 2: the investor sees not a high yield, but the price of risk
 
-**时间：1:35–2:20｜45 秒**
+**Time: 1:35–2:20 | 45 seconds**
 
-#### 操作顺序
+#### Click sequence
 
-1. 点击顶部 `投资市场`。
-2. 保持选中第一张铜项目卡，不浏览其他项目。
-3. 指向 `$0.848`、`17.9% 潜在毛收益`、`350 bps`、`$6.53M 抵押货值`。
-4. 在右侧输入预设金额 `$260,000`。
-5. 点击 `模拟认购`。
-6. 停在“预计获得 RWA / 目标兑付 / 目标兑付不保本”的结果卡。
+1. Click `Investment Marketplace` at the top.
+2. Keep the first copper deal card selected; do not browse other deals.
+3. Point to `$0.848`, `17.9% implied gross upside`, `350 bps`, `$6.53M collateral value`.
+4. Enter the preset amount `$260,000` on the right.
+5. Click `Simulate subscription`.
+6. Stop on the result card showing "expected RWA received / target redemption / target redemption is not guaranteed".
 
-#### 口播
+#### Script
 
-> 资金方看到的是同一笔交易的另一面：0.848 的发行价、653 万美元的抵押货值、350 个基点的风险，以及完整的风险来源。投资 26 万美元，系统算出对应份额和目标兑付。这里我们刻意把“不保本”放在最显眼的位置——投资者买到的不是承诺，而是已经被 AI 定价并持续监控的风险。
+> The capital provider sees the other side of the same deal: a 0.848 issue price, $6.53 million of collateral value, 350 basis points of risk, and the full set of risk sources. Invest $260,000 and the system calculates the matching share and target redemption. We deliberately put "not principal-protected" in the most visible spot: what the investor buys is not a promise, but a risk that has been priced by AI and is continuously monitored.
 
-> 这一步完成后，资金进入许可型融资池，出口商提前获得现金，投资者获得对应的贸易融资份额。
+> Once this step is done, the funds enter a permissioned financing pool, the exporter gets cash early, and the investor receives the corresponding trade finance share.
 
-#### 屏幕必须让人看见
+#### The screen must make this visible
 
 ```text
 Target redemption is not guaranteed.
-取决于进口商付款、货物结算与保险覆盖。
+It depends on importer payment, cargo settlement and insurance coverage.
 ```
 
-#### 这一幕证明什么
+#### What this act proves
 
-- 产品同时服务供给侧和资金侧。
-- 风险、收益和抵押物在同一个决策界面中呈现。
-- 不是“面向散户卖高收益 Token”，而是机构可理解的许可型资产工作流。
+- The product serves both the supply side and the capital side.
+- Risk, return and collateral are shown in one decision interface.
+- This is not "selling high-yield tokens to retail", but a permissioned asset workflow that institutions can understand.
 
 ---
 
-### Slide 5｜Demo 第三幕：货还在海上，世界已经变了
+### Slide 5 | Demo act 3: the cargo is still at sea, but the world has changed
 
-**时间：2:20–3:05｜45 秒**
+**Time: 2:20–3:05 | 45 seconds**
 
-#### 操作顺序
+#### Click sequence
 
-1. 在第一张铜项目卡点击 `追踪`，不要点击底部可能被遮挡的“打开航运页”。
-2. 用 5 秒展示虚拟航运进度和当前状态：`$0.848 / 350 bps / 开放`。
-3. 点击 `⚔ 霍尔木兹冲突升级`。
-4. 停在变化后的核心结果：
+1. On the first copper deal card, click `Track`; do not click `Open voyage view` at the bottom, which may be hidden.
+2. Spend 5 seconds showing the virtual voyage progress and current status: `$0.848 / 350 bps / OPEN`.
+3. Click `⚔ Strait of Hormuz escalation`.
+4. Stop on the key changed results:
 
 ```text
 Issue price   $0.848 → $0.792
@@ -224,45 +223,45 @@ Status        OPEN → PAUSED
 New evidence  0x9966a785…
 ```
 
-5. 指向状态时间线中的 `InTransit → Paused`。
+5. Point to `InTransit → Paused` in the status timeline.
 
-#### 口播
+#### Script
 
-> 货物离港以后，风险并不会停止。现在我们模拟冲突升级：商品价格可能上涨，但保险、航线、制裁和未来回收风险也同时恶化。普通价格系统只看到“铜更贵了”；AgentBL 看到的是多个保护层正在一起变弱。
+> Once the cargo leaves port, risk does not stop. Now we simulate an escalation of conflict: commodity prices may rise, but insurance, routing, sanctions and future recovery risk all deteriorate at the same time. An ordinary pricing system only sees "copper got more expensive"; AgentBL sees several layers of protection weakening together.
 
-> AI 立即把风险从 350 提升到 1,100 个基点，把价格从 0.848 调整到 0.792，并暂停新的认购。它没有替企业写一封预警邮件，而是阻止更多资本进入一笔风险已经改变的交易。
+> The AI immediately raises the risk from 350 to 1,100 basis points, adjusts the price from 0.848 to 0.792, and pauses new subscriptions. It does not write the company a warning email; it stops more capital from flowing into a deal whose risk has changed.
 
-#### 这一幕是全场高潮
+#### This act is the climax of the pitch
 
-评委应该在这里理解：
+The judges should understand here:
 
-> **AI 的价值不只是看懂世界，而是在正确时刻改变企业动作。**
+> **The value of AI is not just understanding the world, but changing what a business does at the right moment.**
 
-#### 真实性口径
+#### Truthfulness rules
 
-- 明确说“模拟冲突事件”和“虚拟航运时间”。
-- 页面显示 offline fixture 时，不要说成实时新闻接口。
-- 不继续点击第二个风险事件；一次明确变化比堆满告警更有力量。
+- Say explicitly "simulated conflict event" and "virtual voyage time".
+- When the page shows an offline fixture, do not call it a live news feed.
+- Do not go on to click a second risk event; one clear change is more powerful than a screen full of alerts.
 
 ---
 
-### Slide 6｜To B：我们卖的不是一个 Dashboard，而是企业的风险决策能力
+### Slide 6 | To B: we don't sell a dashboard, we sell a business's risk-decision capability
 
-**时间：3:05–3:50｜45 秒**
+**Time: 3:05–3:50 | 45 seconds**
 
-#### 屏幕内容
+#### Screen content
 
-用“客户—采购内容—业务结果”三列，不放泛泛的用户画像：
+Use three columns, "customer — what they buy — business outcome", instead of generic personas:
 
-| 谁会采购 | 采购什么 | 为什么愿意付费 |
+| Who buys | What they buy | Why they pay |
 |---|---|---|
-| 物流 / 货代 / 供应链平台 | eBL 验真 + AI 融资模块 | 给现有客户增加金融服务和收入 |
-| eBL / 贸易数字化平台 | 风险定价 API | 从“文件电子化”升级为“文件可融资” |
-| 银行 / 保理 / 产业资金方 | AI 预审与持续监控 | 缩短人工尽调，统一风险口径 |
-| 保险机构 | 航线、货物和保单风险 | 提前识别保障缺口和重大事件 |
-| 机构投资者 | 可解释的资产筛选与证据 | 在投入资金前看懂风险来自哪里 |
+| Logistics / freight forwarders / supply-chain platforms | eBL verification + AI financing module | Adds financial services and revenue for existing customers |
+| eBL / trade digitisation platforms | Risk pricing API | Upgrades from "digitised documents" to "financeable documents" |
+| Banks / factoring / industrial capital | AI pre-screening and continuous monitoring | Shortens manual due diligence and unifies the risk view |
+| Insurers | Route, cargo and policy risk | Spots coverage gaps and major events early |
+| Institutional investors | Explainable asset screening and evidence | Understand where the risk comes from before committing capital |
 
-右下角放三种企业产品：
+Bottom-right, three enterprise products:
 
 ```text
 Embedded Risk API
@@ -270,15 +269,15 @@ White-label eBL Financing Module
 Permissioned RWA Infrastructure
 ```
 
-#### 口播
+#### Script
 
-> AgentBL 的 To B 优势在于，我们不要求企业替换现有系统。物流平台可以嵌入我们的 eBL 验真和融资模块，银行或保理机构可以把 AI 当成预审和在途监控层，保险公司可以购买航线和保单风险，机构资金方可以获得统一的投资证据。
+> AgentBL's To-B advantage is that we don't ask businesses to replace their existing systems. Logistics platforms can embed our eBL verification and financing module, banks or factoring firms can use the AI as a pre-screening and in-transit monitoring layer, insurers can buy route and policy risk, and institutional capital gets a unified body of investment evidence.
 
-> 我们先卖风险判断，再承接融资交易。企业可以从一个 API、一个白标模块开始，不必第一天就部署完整的 RWA 协议。
+> We sell risk judgement first, then take on financing transactions. A business can start with one API or one white-label module; it doesn't have to deploy a full RWA protocol on day one.
 
-#### 配套的 10–15 秒业务 Demo
+#### Accompanying 10–15 second business demo
 
-在航运详情底部指向三种企业报告：
+At the bottom of the voyage detail, point to the three enterprise reports:
 
 ```text
 Premium Risk Intelligence
@@ -286,330 +285,330 @@ Premium Cargo Valuation
 Anti-Fraud Document Review
 ```
 
-若 Demo Mode 已连续验证稳定，可点击一次 `Run Demo: Premium Risk Intelligence`，让评委看到：
+If Demo Mode has been verified as stable across repeated runs, click `Run Demo: Premium Risk Intelligence` once so the judges see:
 
 ```text
 request → 402 payment required → USDC authorization → report unlocked
 ```
 
-若现场处于 Live Mode 或网络不稳定，只展示已准备好的报告和测试网付款证据，不临时支付。
+If the venue is in Live Mode or the network is unstable, only show the pre-prepared report and the testnet payment evidence; do not make an ad-hoc payment.
 
-#### 商业模式顺序
+#### Business model, in order
 
-1. **企业授权 / 白标模块**：年度合同或项目制，提供稳定预算和客户关系。
-2. **按量风险 API**：按单据、按报告、按监控事件计费，随着业务量增长。
-3. **融资协议费**：许可型资金池按成功融资规模收费。
+1. **Enterprise licence / white-label module**: annual contracts or project-based, providing stable budgets and customer relationships.
+2. **Usage-based risk API**: billed per document, per report, per monitoring event, growing with business volume.
+3. **Financing protocol fee**: the permissioned pool charges based on successfully financed volume.
 
-不要把测试网 `0.001 USDC` 当作企业正式定价；它只是证明机器支付闭环。
+Do not present the testnet `0.001 USDC` as formal enterprise pricing; it only proves the machine-payment loop.
 
-#### To B 的核心优势
+#### Core To-B advantages
 
-- 不改变客户前台和核心 ERP，只在 API / 模块层嵌入。
-- 决策可解释、可回放，方便风控、审计和合规团队采用。
-- AI 不可用时有确定性 fallback，适合企业 SLA，而不是一次性 Demo。
-- 同一份能力服务多个预算拥有者：运营、风控、融资、保险和投资。
-- 每笔业务沉淀“单据—风险—动作—结果”，形成数据飞轮。
+- No change to the customer's front end or core ERP; it embeds only at the API / module layer.
+- Decisions are explainable and replayable, which makes adoption easy for risk, audit and compliance teams.
+- A deterministic fallback when the AI is unavailable, suitable for enterprise SLAs rather than a one-off demo.
+- The same capability serves several budget owners: operations, risk, financing, insurance and investment.
+- Every deal accumulates "document — risk — action — outcome" records, forming a data flywheel.
 
 ---
 
-### Slide 7｜产业资源：我们已经站在真实业务入口旁边
+### Slide 7 | Industry resources: we are already standing next to real business entry points
 
-**时间：3:50–4:35｜45 秒**
+**Time: 3:50–4:35 | 45 seconds**
 
-#### 屏幕内容
+#### Screen content
 
-不要只排列 Logo，要把每一项资源输入到产品的价值画出来：
+Don't just line up logos; draw the value each resource feeds into the product:
 
 ```text
-丽讯科技 / 物流数字化资源
-客户入口 · 货代/供应链场景 · 系统集成 · 业务流程
+Lixun Technology / logistics digitisation resources
+Customer access · forwarder/supply-chain scenarios · system integration · business processes
                          ↓
-ENI / 可信文件能力 → AgentBL → 银行、RWA 与跨境金融资源
-唯一性 · 控制权      AI 风险定价      资金与合规试点
-不可篡改 · 审计
+ENI / trusted-document capability → AgentBL → bank, RWA and cross-border finance resources
+Uniqueness · control      AI risk pricing      capital and compliance pilots
+Tamper-proof · audit
                          ↓
              Microsoft Azure + Injective
-             企业级 AI · 全球支付与结算
+             Enterprise AI · global payment and settlement
 ```
 
-中央标题：
+Central headline:
 
 ```text
-真实单据 + 真实物流场景 + 真实资金入口
+Real documents + real logistics scenarios + real capital entry points
 ```
 
-#### 口播
+#### Script
 
-> 贸易金融最难的不是写一个模型，而是同时拿到三样东西：真实文件、真实物流场景和真实资金入口。我们的产业资源正好覆盖这三端。
+> The hardest part of trade finance is not writing a model; it is getting three things at once: real documents, real logistics scenarios and real access to capital. Our industry resources cover exactly these three ends.
 
-> 丽讯科技一侧提供物流、货代和供应链企业的业务场景与系统集成能力；ENI 一侧提供 eBL 所需要的唯一性、控制权、完整性和审计能力；团队的银行、RWA 和跨境金融资源负责把风险判断带到真实资金试点。Microsoft Azure 让这套 AI 能力达到企业可评估、可追踪的标准，Injective 则承担全球机器支付和可编程结算。
+> On the Lixun Technology side, we get business scenarios and system-integration capability from logistics, freight-forwarding and supply-chain companies; on the ENI side, the uniqueness, control, integrity and audit capabilities an eBL needs; and the team's banking, RWA and cross-border finance resources carry the risk judgement into real capital pilots. Microsoft Azure brings this AI capability up to an enterprise standard that can be evaluated and traced, while Injective handles global machine payments and programmable settlement.
 
-> 所以我们的优势不是“比别人多一个模型”，而是更接近数据入口、客户入口和交易入口。
+> So our advantage is not "one more model than everyone else", but being closer to the data entry point, the customer entry point and the transaction entry point.
 
-#### 产业资源必须按证据等级表达
+#### Industry resources must be stated according to evidence level
 
-| 有什么证据 | PPT 可用说法 |
+| What evidence we have | Wording allowed on the slide |
 |---|---|
-| 已签合同 / LOI / Pilot | `合作伙伴 / 联合试点`，并写清范围 |
-| 已有 API schema / sandbox / 样例 ID | `技术对接中 / sandbox integration` |
-| 有明确联系人与共同方案，但未签署 | `产业资源 / co-design network / pilot pipeline` |
-| 只有目标名单 | `下一阶段目标伙伴`，不能放在伙伴 Logo 墙 |
+| Signed contract / LOI / pilot | `Partner / joint pilot`, with the scope spelled out |
+| Existing API schema / sandbox / sample ID | `Technical integration in progress / sandbox integration` |
+| A named contact and a joint plan, but nothing signed | `Industry resources / co-design network / pilot pipeline` |
+| Only a target list | `Next-stage target partners`; must not appear on the partner logo wall |
 
-当前仓库任务表仍把 `ENI / TradeGo / 丽讯` 的正式证据列为待补项。若路演前没有 LOI、API 或样例 document ID，本页标题用“**产业资源与共建路径**”，不要说“已经生产接入”。
+The current repo task list still marks formal evidence for `ENI / TradeGo / Lixun` as outstanding. If there is no LOI, API or sample document ID before the pitch, title this slide "**Industry resources and co-build path**" and do not say "already integrated in production".
 
-#### To B 落地路径
+#### To-B rollout path
 
 ```text
-第 1 步：风险报告 API
-在客户现有单据流程中验证速度、准确率和使用频次
+Step 1: Risk report API
+Validate speed, accuracy and usage frequency inside the customer's existing document flow
         ↓
-第 2 步：eBL + AI 预承销白标模块
-帮助物流/eBL 平台增加融资服务
+Step 2: eBL + AI pre-underwriting white-label module
+Help logistics/eBL platforms add financing services
         ↓
-第 3 步：许可型融资池
-持牌机构、KYC/AML、合格资金方共同参与
+Step 3: Permissioned financing pool
+Licensed institutions, KYC/AML and qualified capital providers participate together
         ↓
-第 4 步：跨航线风险情报网络
-用真实结算结果持续校准风险价格
+Step 4: Cross-route risk intelligence network
+Continuously calibrate risk prices with real settlement outcomes
 ```
 
-这条路径说明：先从低监管摩擦、价值清晰的 To B 软件切入，再逐步进入更高价值的金融交易。
+This path shows that we enter with low-regulatory-friction To-B software with clear value, then gradually move into higher-value financial transactions.
 
 ---
 
-### Slide 8｜从一批铜开始，成为全球贸易的 AI 风险层
+### Slide 8 | Starting from one copper shipment, becoming the AI risk layer of global trade
 
-**时间：4:35–5:00｜25 秒**
+**Time: 4:35–5:00 | 25 seconds**
 
-#### 屏幕内容
+#### Screen content
 
-左侧：未来 12 个月只放三个结果，不放功能清单。
+Left: only three outcomes for the next 12 months, no feature list.
 
 ```text
-1–2 个真实物流 / eBL pilot
-2–3 家机构风险数据客户
-1 个合规许可型融资 corridor
+1–2 real logistics / eBL pilots
+2–3 institutional risk-data customers
+1 compliant permissioned financing corridor
 ```
 
-右侧 Ask：
+Right, the Ask:
 
 ```text
 We are looking for:
-· 产业试点伙伴
-· 贸易数据与保险伙伴
-· 合规资金方
-· [融资金额] pre-seed / strategic round
+· Industry pilot partners
+· Trade data and insurance partners
+· Compliant capital providers
+· [Funding amount] pre-seed / strategic round
 ```
 
-底部收束句：
+Closing line at the bottom:
 
 ```text
 Today: AI prices one shipment.
 Tomorrow: AgentBL prices global trade risk.
 ```
 
-#### 口播
+#### Script
 
-> 我们从一批铜开始，但目标不是再做一个 RWA 市场，而是成为全球贸易的 AI 风险层。未来 12 个月，我们要完成真实 eBL 和物流试点、获得第一批机构数据客户，并在一个合规贸易走廊中验证许可型融资闭环。
+> We start with one copper shipment, but the goal is not to build yet another RWA marketplace; it is to become the AI risk layer of global trade. Over the next 12 months we will complete real eBL and logistics pilots, win our first institutional data customers, and validate a permissioned financing loop in one compliant trade corridor.
 
-> 我们正在寻找产业试点伙伴、贸易与保险数据伙伴、合规资金方，以及支持这三个里程碑的战略投资。AgentBL，让每一批在途货物都拥有一个实时、可信、可融资的风险价格。谢谢。
+> We are looking for industry pilot partners, trade and insurance data partners, compliant capital providers, and strategic investment to support these three milestones. AgentBL: giving every shipment in transit a real-time, trusted, financeable risk price. Thank you.
 
 ---
 
-## 4. Demo Day 操作剧本
+## 4. Demo Day operating script
 
-### 4.1 上台前状态
+### 4.1 State before going on stage
 
-1. 启动 `npm run dev`，确认页面可以在无外网情况下工作。
-2. 明确选择 **Demo Mode** 或 **Live Mode**，不能出现“页面写 Live、数据却是 offline fixture”的模糊状态。
-3. 中文界面；选中 `阴极铜 · 新加坡 → 上海`。
-4. 点击“重置演示”，确认价格回到 `$0.848`、风险 `350 bps`、状态“开放”。
-5. 预先滚动到 `提单上链 · 铸造 RWA` 页面顶部。
-6. 浏览器缩放、窗口位置和字体固定；关闭通知、钱包自动弹窗和无关标签页。
-7. 预打开一条最新 Injective 测试网交易作为备用，不在台上搜索地址。
-8. 准备 60–90 秒录屏作为断网兜底，画面必须与现场口播数字一致。
+1. Start `npm run dev` and confirm the page works without internet access.
+2. Explicitly choose **Demo Mode** or **Live Mode**; never leave an ambiguous state where "the page says Live but the data is an offline fixture".
+3. Use the Chinese UI (button names in this document are given as their English UI labels); select `Copper Cathode · Singapore → Shanghai`.
+4. Click `Reset demo` and confirm the price is back to `$0.848`, risk `350 bps`, status `OPEN`.
+5. Pre-scroll to the top of the `Pricing & Mint` page.
+6. Fix browser zoom, window position and font size; turn off notifications, wallet auto-popups and unrelated tabs.
+7. Pre-open a recent Injective testnet transaction as a backup; do not search for addresses on stage.
+8. Prepare a 60–90 second screen recording as an offline fallback; its numbers must match the live script.
 
-### 4.2 一镜到底点击表
+### 4.2 One-take click sheet
 
-| 时间 | 操作 | 必须出现的反馈 |
+| Time | Action | Feedback that must appear |
 |---:|---|---|
-| 0:40 | 已在 Mint 页 | 500 MT、$6.531M、$0.848 |
-| 1:05 | 指向 BALANCED | $3.30M cash、AI 推荐 |
-| 1:35 | 点击 `投资市场` | 第一张铜项目卡已选中 |
-| 1:52 | 点击 `模拟认购` | RWA 数量、目标兑付、不保本提示 |
-| 2:20 | 第一张铜卡点击 `追踪` | 航运详情弹窗 |
-| 2:35 | 点击 `⚔ 霍尔木兹冲突升级` | $0.792、1,100 bps、已暂停 |
-| 3:25 | 滚到 x402 报告区 | 三类 To B 报告 |
-| 3:35 | 可选：运行一次 Demo 报告购买 | 402 → 解锁报告 |
-| 3:50 | 切回产业资源 PPT | 开始讲 To B 落地 |
+| 0:40 | Already on the Mint page | 500 MT, $6.531M, $0.848 |
+| 1:05 | Point to BALANCED | $3.30M cash, AI recommended |
+| 1:35 | Click `Investment Marketplace` | First copper deal card selected |
+| 1:52 | Click `Simulate subscription` | RWA amount, target redemption, not-guaranteed notice |
+| 2:20 | Click `Track` on the first copper card | Voyage detail modal |
+| 2:35 | Click `⚔ Strait of Hormuz escalation` | $0.792, 1,100 bps, paused |
+| 3:25 | Scroll to the x402 report section | Three types of To-B reports |
+| 3:35 | Optional: run one demo report purchase | 402 → report unlocked |
+| 3:50 | Switch back to the industry-resources slide | Start the To-B rollout segment |
 
-### 4.3 Demo 中只说四个数字
+### 4.3 Say only four numbers during the demo
 
 ```text
-$6.531M   AI 核验抵押货值
-$3.300M   出口商希望现在拿到的现金
-$0.848    初始 AI 发行价
-1,100bps  冲突后风险分数，交易暂停
+$6.531M   AI-verified collateral value
+$3.300M   Cash the exporter wants now
+$0.848    Initial AI issue price
+1,100bps  Risk score after the conflict; deal paused
 ```
 
-`$0.792` 只作为画面变化点，不再讲收益公式。数字越少，故事越容易记住。
+`$0.792` is only a visual change point; don't explain the yield formula again. The fewer the numbers, the easier the story is to remember.
 
-### 4.4 现场不能踩的坑
+### 4.4 Pitfalls to avoid on stage
 
-- 首页的 `22 个项目 / $98.03M` 是 Demo 数据，不是实际 GMV 或客户 traction。
-- 当前虚拟航运日期与现实日期不同，必须说“虚拟时间”。
-- offline / mock 来源必须在屏幕和口播中如实表达。
-- 不现场连接陌生钱包、不进行不可控 Live 支付。
-- 不在 5 分钟里展示 Mystery Voyage、MCP 工具列表、合约 ABI 或全部测试日志。
-- 不把“x402 付费报告”和“投资 RWA”说成同一笔交易。
-- 不说“绕过各国法规”；改为“全球分发与支付，同时保留机构 KYC/AML 和司法辖区要求”。
+- The home page figures `22 deals / $98.03M` are demo data, not actual GMV or customer traction.
+- The current virtual voyage date differs from the real date; always say "virtual time".
+- Offline / mock sources must be stated truthfully on screen and in the script.
+- Do not connect an unfamiliar wallet live or make uncontrollable Live payments.
+- Do not show Mystery Voyage, the MCP tool list, contract ABIs or full test logs within the 5 minutes.
+- Do not describe "the x402 paid report" and "investing in the RWA" as the same transaction.
+- Do not say "bypassing each country's regulations"; say instead "global distribution and payment, while keeping institutional KYC/AML and jurisdictional requirements".
 
 ---
 
-## 5. To B 价值表达
+## 5. Expressing To-B value
 
-### 5.1 不要卖功能，卖可衡量的业务结果
+### 5.1 Don't sell features; sell measurable business outcomes
 
-| 不建议说 | 推荐说 |
+| Avoid saying | Say instead |
 |---|---|
-| 我们有文档解析 | 把一票多单据人工预审变成可追踪的结构化判断 |
-| 我们有风险评分 | 每个风险变化都映射到价格、额度或暂停动作 |
-| 我们有链上合约 | 客户和审计方可以复核哪份证据触发了什么动作 |
-| 我们支持 x402 | 企业和 Agent 可以无需账号，按次采购风险情报 |
-| 我们有 MCP | 其他企业 Agent 可以把 AgentBL 当成标准工具调用 |
-| 我们有很多案例 | 同一套产品可以覆盖海运货物和仓单等多种贸易资产 |
+| We have document parsing | We turn manual pre-review of a multi-document shipment into a traceable structured judgement |
+| We have a risk score | Every risk change maps to a price, limit or pause action |
+| We have on-chain contracts | Customers and auditors can check which piece of evidence triggered which action |
+| We support x402 | Businesses and agents can buy risk intelligence per call, without an account |
+| We have MCP | Other companies' agents can call AgentBL as a standard tool |
+| We have lots of cases | One product can cover multiple trade assets such as seaborne cargo and warehouse receipts |
 
-### 5.2 Pilot 要验证的 KPI
+### 5.2 KPIs the pilots should validate
 
-不要在没有数据时虚构“降低 80% 成本”。第一批试点应共同测量：
-
-```text
-Quote turnaround time        从提交单据到得到可融资报价的时间
-Manual review workload       每票需要人工复核的字段与分钟数
-Document exception recall    保险缺口、数量不一致、重复质押等发现率
-Decision explainability      风控人员能否复核风险来源与动作
-Monitoring response time     风险事件出现到改价/暂停的时间
-Report purchase conversion   机构是否愿意为风险情报付费
-Financing conversion         合格报价进入真实融资的比例
-Outcome calibration          预测风险与实际结算/回收结果的一致性
-```
-
-### 5.3 To B 护城河
+Do not invent "80% cost reduction" without data. The first pilots should jointly measure:
 
 ```text
-行业入口
-物流 / eBL 平台带来企业客户和业务流程
-    ↓
-专有数据
-单据、航线、保单、异常、结算和回收结果
-    ↓
-决策模型
-同类货物和航线的价格、额度和动作越来越准确
-    ↓
-更强产品
-更快预审、更低人工成本、更可信融资
-    ↓
-更多行业入口
+Quote turnaround time        Time from document submission to a financeable quote
+Manual review workload       Fields and minutes of manual review needed per shipment
+Document exception recall    Detection rate for insurance gaps, quantity mismatches, double pledging, etc.
+Decision explainability      Whether risk staff can verify the risk sources and the action
+Monitoring response time     Time from a risk event appearing to repricing/pausing
+Report purchase conversion   Whether institutions are willing to pay for risk intelligence
+Financing conversion         Share of qualified quotes that turn into real financing
+Outcome calibration          Agreement between predicted risk and actual settlement/recovery outcomes
 ```
 
-竞争者可以复制一个界面或合约，但很难同时复制产业分发、可信单据、结果数据和金融机构工作流。
-
----
-
-## 6. Microsoft Azure 与 Injective 怎么讲
-
-### 6.1 Microsoft Azure：讲企业可信度，不讲模型品牌
-
-主舞台只说一句：
-
-> Microsoft Azure 为 AgentBL 提供企业级 AI 推理、评估与调用链追踪，让每一次风险判断都能被测量、回放和治理。
-
-现场证据建议：
-
-- 本次 Demo 实际使用 Azure provider；
-- 一张简洁 trace 截图：`document → risk → valuation → pricing → action`；
-- 一组评估结果：Task Completion、Tool Success、Groundedness；
-- 不展示密钥、复杂控制台或模型参数。
-
-如果本次运行没有真实 Azure 配置，只能说“已支持 Azure provider 和评估/追踪接口”，不能说“本场由 Azure 驱动”。
-
-### 6.2 Injective：讲全球业务能力，不讲链上术语
-
-主舞台只说：
-
-> Injective 让机构、投资者和其他 AI Agent 在同一套全球基础设施上完成机器支付、风险证据验证和可编程结算。
-
-对应业务价值：
-
-- 全球客户可使用统一的 USDC / 钱包支付通道；
-- AI 风险报告可被其他 Agent 按次购买；
-- 关键报价、支付和状态可由多方共同验证；
-- 企业仍可在准入层保留 KYC/AML、合格投资者和地区限制。
-
-不要说“区块链可以绕过各国法规”。投资人会把这句话理解为不可持续的监管风险。
-
----
-
-## 7. 产业资源页需要团队补齐的材料
-
-产业资源是这版 Pitch 的核心，但必须可验证。路演前至少准备以下三类材料中的两类：
-
-1. **一页合作证明**：LOI、会议纪要确认、联合试点范围或对方可公开联系人。
-2. **一条技术证明**：ENI / TradeGo / 丽讯的 API schema、sandbox 截图、样例 document ID 或脱敏数据流。
-3. **一条客户证明**：明确的试点企业类型、业务量级、痛点和愿意验证的 KPI。
-
-每个 Logo 下只写一个真实贡献：
+### 5.3 To-B moat
 
 ```text
-丽讯科技：物流客户场景与系统集成
-ENI：eBL 可信文件与国际标准能力
-团队金融资源：银行 / RWA / 跨境资金试点
-Microsoft Azure：企业级 AI 评估与可观测性
-Injective：全球机器支付与可编程结算
+Industry access
+Logistics / eBL platforms bring business customers and workflows
+    ↓
+Proprietary data
+Documents, routes, policies, exceptions, settlement and recovery outcomes
+    ↓
+Decision model
+Prices, limits and actions for similar cargo and routes become ever more accurate
+    ↓
+Stronger product
+Faster pre-review, lower manual cost, more trusted financing
+    ↓
+More industry access
 ```
 
-若没有公开授权，不放对方 Logo，改用文字“产业资源 / 试点沟通中”。
+Competitors can copy an interface or a contract, but it is hard to copy industry distribution, trusted documents, outcome data and financial-institution workflows all at once.
 
 ---
 
-## 8. 15 秒问答
+## 6. How to talk about Microsoft Azure and Injective
 
-### 为什么企业不自己做？
+### 6.1 Microsoft Azure: talk about enterprise trust, not model brands
 
-> 企业可以自己接一个模型，但很难同时完成贸易单据语义、动态定价、在途监控、审计证据和跨境支付。AgentBL 以 API 和白标模块嵌入现有系统，客户保留业务入口，我们提供持续更新的风险决策层。
+On the main stage, say just one sentence:
 
-### To B 销售周期很长，你们如何启动？
+> Microsoft Azure gives AgentBL enterprise-grade AI inference, evaluation and call-chain tracing, so every risk judgement can be measured, replayed and governed.
 
-> 先从不触碰真实资金的风险报告和 AI 预审切入，用明确 KPI 证明价值；再扩展到持续监控和 eBL 融资模块；只有在持牌伙伴、KYC/AML 和合格资金方到位后，才进入许可型融资池。
+Suggested on-stage evidence:
 
-### 你们和物流 SaaS 的关系？
+- The demo actually runs on the Azure provider;
+- One clean trace screenshot: `document → risk → valuation → pricing → action`;
+- One set of evaluation results: Task Completion, Tool Success, Groundedness;
+- Do not show keys, complex consoles or model parameters.
 
-> 我们不替代物流 SaaS。物流平台掌握客户、运单和流程；AgentBL 帮它从“看见货物在哪里”升级到“知道这批货现在值多少钱、能不能融资、风险变化后该做什么”。
+If this run has no real Azure configuration, you may only say "supports an Azure provider and evaluation/tracing interfaces", not "this session is powered by Azure".
 
-### 你们和银行是竞争还是合作？
+### 6.2 Injective: talk about global business capability, not on-chain jargon
 
-> 在产品愿景上，我们降低对传统人工信用审批的依赖；在落地路径上，银行、保理和持牌机构可以成为资金、合规和分销伙伴。To B 版本优先帮助机构更快预审和持续监控，而不是声称一开始就取代所有银行。
+On the main stage, say only:
 
-### Web3 为什么必要？
+> Injective lets institutions, investors and other AI agents complete machine payments, risk-evidence verification and programmable settlement on one shared global infrastructure.
 
-> 因为风险报告的买方、融资的资金方和贸易参与方可能来自不同系统与地区。Injective 提供统一支付、共享证据和可编程结算，让多方无需依赖同一个中心化数据库，但准入和合规仍由机构规则控制。
+Corresponding business value:
 
-### 产业合作已经落地了吗？
+- Global customers can use a single USDC / wallet payment channel;
+- AI risk reports can be bought per call by other agents;
+- Key quotes, payments and status can be jointly verified by multiple parties;
+- Businesses can still keep KYC/AML, qualified-investor and regional restrictions in the access layer.
 
-> 按实际证据回答。若尚未签署：我们已经形成明确的共建方案和资源组合，当前目标是用 sandbox/API/LOI 固化为 1–2 个真实 pilot；不会把沟通和方案说成生产上线。
+Do not say "blockchain can bypass each country's regulations". Investors will hear that as an unsustainable regulatory risk.
 
 ---
 
-## 9. 最后一遍自检
+## 7. Material the team must supply for the industry-resources slide
 
-- [ ] 前 3 分钟都围绕同一批铜，没有跳到第二个故事。
-- [ ] Demo 能连续完成“报价 → 认购 → 风险升级 → 暂停”。
-- [ ] 页面模式、数据来源和口播一致。
-- [ ] Azure 是实际运行还是仅支持，表达准确。
-- [ ] 产业伙伴按证据等级标注，没有把方案写成已签合作。
-- [ ] To B 页讲的是客户结果，不是 API/合约功能清单。
-- [ ] 没有把 Demo GMV、项目数或潜在收益说成真实 traction。
-- [ ] 没有使用“绕过监管、稳赚、保本、所有银行都能被取代”。
-- [ ] 结尾提出了明确的产业合作和融资 Ask。
-- [ ] 全程控制在 5 分钟，并准备 90 秒录屏兜底。
+Industry resources are the core of this version of the pitch, but they must be verifiable. Before the pitch, prepare at least two of the following three types of material:
+
+1. **One proof of partnership**: an LOI, confirmed meeting minutes, a joint pilot scope, or a contact at the partner who can be named publicly.
+2. **One technical proof**: an ENI / TradeGo / Lixun API schema, sandbox screenshot, sample document ID or anonymised data flow.
+3. **One customer proof**: a clear pilot company type, business volume, pain point and the KPIs they are willing to validate.
+
+Under each logo, write only one real contribution:
+
+```text
+Lixun Technology: logistics customer scenarios and system integration
+ENI: eBL trusted documents and international-standard capability
+Team financial resources: bank / RWA / cross-border capital pilots
+Microsoft Azure: enterprise AI evaluation and observability
+Injective: global machine payments and programmable settlement
+```
+
+Without public authorisation, do not show the partner's logo; use the text "Industry resources / pilot discussions in progress" instead.
+
+---
+
+## 8. 15-second Q&A
+
+### Why wouldn't a company build this itself?
+
+> A company can plug in a model itself, but it is hard to cover trade-document semantics, dynamic pricing, in-transit monitoring, audit evidence and cross-border payment all at once. AgentBL embeds into existing systems as an API and white-label module; the customer keeps the business entry point, and we provide a continuously updated risk-decision layer.
+
+### To-B sales cycles are long; how do you get started?
+
+> We start with risk reports and AI pre-screening that don't touch real money, and prove value with clear KPIs; then expand to continuous monitoring and the eBL financing module; and only move into the permissioned financing pool once licensed partners, KYC/AML and qualified capital providers are in place.
+
+### What is your relationship with logistics SaaS?
+
+> We don't replace logistics SaaS. Logistics platforms own the customers, waybills and workflows; AgentBL helps them upgrade from "seeing where the cargo is" to "knowing what this shipment is worth right now, whether it can be financed, and what to do when risk changes".
+
+### Do you compete or cooperate with banks?
+
+> In our product vision, we reduce dependence on traditional manual credit approval; on the rollout path, banks, factoring firms and licensed institutions can be capital, compliance and distribution partners. The To-B version first helps institutions pre-screen faster and monitor continuously, rather than claiming to replace every bank from the start.
+
+### Why is Web3 necessary?
+
+> Because the buyers of risk reports, the providers of financing and the trade participants may come from different systems and regions. Injective provides unified payment, shared evidence and programmable settlement, so multiple parties don't have to rely on one centralised database, while access and compliance are still governed by institutional rules.
+
+### Have the industry partnerships actually landed?
+
+> Answer according to the actual evidence. If nothing is signed yet: we already have a clear co-build plan and resource mix, and the current goal is to firm this up into 1–2 real pilots through sandbox/API/LOI; we will not describe conversations and plans as production launches.
+
+---
+
+## 9. Final self-check
+
+- [ ] The first 3 minutes all revolve around the same copper shipment, with no jump to a second story.
+- [ ] The demo runs continuously through "quote → subscribe → risk escalation → pause".
+- [ ] Page mode, data sources and script are consistent.
+- [ ] Whether Azure is actually running or only supported is stated accurately.
+- [ ] Industry partners are labelled by evidence level; no plan is presented as a signed partnership.
+- [ ] The To-B slide talks about customer outcomes, not a list of API/contract features.
+- [ ] Demo GMV, deal count or implied returns are not presented as real traction.
+- [ ] None of these were used: "bypassing regulation", "guaranteed profit", "principal-protected", "every bank can be replaced".
+- [ ] The close makes a clear industry-partnership and funding Ask.
+- [ ] The whole pitch stays within 5 minutes, with a 90-second screen recording as a fallback.
 

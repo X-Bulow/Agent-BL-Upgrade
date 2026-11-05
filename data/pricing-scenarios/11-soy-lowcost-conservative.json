@@ -1,6 +1,6 @@
 {
   "name": "soy-lowcost-conservative",
-  "description": "大豆 eBL 海运 - LOW_COST 保守放款：大宗散货 + 海运风险 + CBOT 波动，走最低成本路线。",
+  "description": "Soybean eBL ocean shipment - LOW_COST payout: bulk commodity cargo + ocean shipping risk + CBOT volatility, so it takes the lowest-cost route.",
   "base_case": "data/cases/soybean-sh-sg.case.json",
   "overrides": { "financing": { "payout_speed": "LOW_COST" } },
   "pricing_expectations": {

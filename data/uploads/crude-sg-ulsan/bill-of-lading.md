@@ -1,13 +1,13 @@
 # NEGOTIABLE ELECTRONIC BILL OF LADING (TANKER eBL)
 
-> 拟真样例数据，用于 AgentBL demo。所有公司、人名、船名、单号、终端、地址均为**虚构**，不指向真实货运。
+> Simulated sample data for the AgentBL demo. All companies, people, vessels, document numbers, terminals and addresses are **fictional** and do not refer to any real shipment.
 > Issued as a sole electronic original on an MLETR-compliant eBL platform.
 
 | | |
 |---|---|
 | **Carrier / Shipowner** | Meridian Tankers Ltd. (on behalf of Master, MT Strait Voyager) |
 | **B/L No.** | EET-CRUDE-2026-0091 |
-| **B/L Type** | Negotiable — "To Order" (货权可转让) |
+| **B/L Type** | Negotiable — "To Order" (transferable document of title) |
 | **eBL Platform** | essDOCS CargoDocs / TradeTrust (UK ETDA 2023 + MLETR) |
 | **eBL Title Ref** | TT-EBL-CRUDE-0091-AE73 |
 | **Charter Party** | Voyage C/P dated 2026-05-22 (ASBATANKVOY form) |
@@ -84,5 +84,5 @@ Attn: Crude Procurement / Mr. Park Jae-won | BRN: 610-81-#### (demo)
 
 ---
 
-> 说明（给团队）：对应商业发票 `commercial-invoice.md` 与结构化案例 `data/cases/crude-sg-ulsan.case.json`。
-> 油轮提单按"桶"计量、用 API 度/含硫量定义品质，定价基准是 Platts Dated Brent + 升贴水，和铜的 LME 计价机制完全不同——这正好展示 AI 估值工具要适配不同大宗品类。
+> Note (for the team): this matches the commercial invoice `commercial-invoice.md` and the structured case `data/cases/crude-sg-ulsan.case.json`.
+> A tanker bill of lading measures in "barrels" and defines quality by API gravity / sulphur content, and its pricing benchmark is Platts Dated Brent + a differential — completely different from copper's LME pricing mechanism. This shows exactly why the AI valuation tool has to adapt to different commodity classes.

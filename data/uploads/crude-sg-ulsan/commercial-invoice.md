@@ -1,6 +1,6 @@
 # COMMERCIAL INVOICE
 
-> 拟真样例数据，用于 AgentBL demo。所有公司、人名、单号、银行信息均为**虚构**。
+> Simulated sample data for the AgentBL demo. All companies, people, document numbers and bank details are **fictional**.
 
 **EQUATOR ENERGY TRADING PTE. LTD.**
 80 Raffles Place, #45-01 UOB Plaza 1, Singapore 048624
@@ -34,7 +34,7 @@ Provisional payment under L/C (90%): **USD 52,110,000.00**. Balance on final QP 
 
 ---
 
-## Pricing Basis (原油计价条款)
+## Pricing Basis (Crude Oil Pricing Clauses)
 
 ```
 Unit Price = Platts Dated Brent (QP mean)  +  grade differential
@@ -70,5 +70,5 @@ Authorized Signatory: R. Menon (Head of Crude Trading)
 
 ---
 
-> 成交价 (transaction price) = **USD 57,900,000.00 CIF Ulsan**（600,000 桶 × 96.50 USD/桶）。
-> 注意单位是"桶"，定价基准是 Dated Brent + 升贴水，与铜的 LME + 区域溢价机制不同——AI 估值工具需要按品类切换行情源和单位换算（桶 ↔ 吨）。
+> Transaction price = **USD 57,900,000.00 CIF Ulsan** (600,000 bbl × 96.50 USD/bbl).
+> Note that the unit is the "barrel" and the pricing benchmark is Dated Brent + a differential, unlike copper's LME + regional premium mechanism — the AI valuation tool has to switch market data sources and convert units (barrels ↔ tonnes) by commodity.
